@@ -46,6 +46,50 @@ app.post("/api/checkpass", (req, res) => {
 });
 
 
+// --- EXPIRATION AUTOMATIQUE ---
+
+/**
+ * Marque comme "expiré" toute réservation (en attente ou validé)
+ * dont la séance est passée depuis plus de 10 minutes.
+ * Retourne true si au moins une réservation a été modifiée.
+ */
+function applyExpirations(data) {
+    const now = DateTime.now().setZone("Europe/Paris");
+    let changed = false;
+
+    data.forEach(r => {
+        if (r.status === "expiré" || r.status === "refusé") return;
+        if (!r.sessionDate || !r.sessionTime) return;
+
+        const sessionDateTime = DateTime.fromFormat(
+            `${r.sessionDate} ${r.sessionTime}`,
+            "yyyy-MM-dd HH:mm",
+            { zone: "Europe/Paris" }
+        );
+
+        if (sessionDateTime.isValid && now >= sessionDateTime.plus({ minutes: 10 })) {
+            r.status = "expiré";
+            r.expiredAt = new Date();
+            changed = true;
+        }
+    });
+
+    return changed;
+}
+
+// Vérification automatique toutes les minutes
+setInterval(() => {
+    try {
+        const data = JSON.parse(fs.readFileSync(FILE));
+        if (applyExpirations(data)) {
+            fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+            console.log(`[${new Date().toISOString()}] Réservations expirées mises à jour.`);
+        }
+    } catch (err) {
+        console.error("Erreur lors de la vérification des expirations :", err);
+    }
+}, 60 * 1000);
+
 // --- ROUTES ---
 
 app.get("/", (req, res) => {
@@ -88,26 +132,10 @@ app.post("/api/reserver", (req, res) => {
 
 // 🖥️ Voir réservations (Admin)
 app.get("/api/admin", (req, res) => {
-    let data = JSON.parse(fs.readFileSync(FILE));
-    const now = DateTime.now().setZone("Europe/Paris");
-    let changed = false;
-
-    data = data.map(r => {
-        if (r.status === "en attente" && r.sessionDate && r.sessionTime) {
-            const sessionDateTime = DateTime.fromFormat(
-                `${r.sessionDate} ${r.sessionTime}`,
-                "yyyy-MM-dd HH:mm",
-                { zone: "Europe/Paris" }
-            );
-            if (sessionDateTime.isValid && sessionDateTime < now) {
-                changed = true;
-                return { ...r, status: "refusé", refusedAt: new Date(), autoRefused: true };
-            }
-        }
-        return r;
-    });
-
-    if (changed) fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+    const data = JSON.parse(fs.readFileSync(FILE));
+    if (applyExpirations(data)) {
+        fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+    }
     res.json(data);
 });
 // Check résa client 
@@ -156,7 +184,7 @@ app.post("/api/valider", async (req, res) => {
 
         if (!resa) return res.status(404).send("Réservation introuvable");
 
-        // Vérification que la séance n'est pas déjà passée
+        // Vérification que la séance n'est pas expirée (10 min après)
         if (resa.sessionDate && resa.sessionTime) {
             const sessionDateTime = DateTime.fromFormat(
                 `${resa.sessionDate} ${resa.sessionTime}`,
@@ -164,12 +192,11 @@ app.post("/api/valider", async (req, res) => {
                 { zone: "Europe/Paris" }
             );
             const now = DateTime.now().setZone("Europe/Paris");
-            if (sessionDateTime.isValid && sessionDateTime < now) {
-                resa.status = "refusé";
-                resa.refusedAt = new Date();
-                resa.autoRefused = true;
+            if (sessionDateTime.isValid && now >= sessionDateTime.plus({ minutes: 10 })) {
+                resa.status = "expiré";
+                resa.expiredAt = new Date();
                 fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
-                return res.status(400).send("La séance est déjà passée. Validation impossible.");
+                return res.status(400).send("La séance est expirée. Validation impossible.");
             }
         }
 
