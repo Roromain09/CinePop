@@ -175,6 +175,47 @@ app.post("/api/supprimer", (req, res) => {
 });
 
 
+// 🛠️ Créer réservation depuis l'admin (ID personnalisé)
+app.post("/api/admin/creer", (req, res) => {
+    const { id, clientName, email, filmTitle, roomNumber, sessionDate, sessionTime, peopleNumber } = req.body;
+
+    if (!id || !clientName || !filmTitle || !sessionDate || !sessionTime || !peopleNumber) {
+        return res.status(400).send("Champs obligatoires manquants (id, clientName, filmTitle, sessionDate, sessionTime, peopleNumber).");
+    }
+
+    if (String(id).trim() === "") {
+        return res.status(400).send("L'ID ne peut pas être vide.");
+    }
+
+    if (parseInt(peopleNumber) > 10) {
+        return res.status(400).send("Le nombre de personnes est limité à 10 par réservation.");
+    }
+
+    const data = JSON.parse(fs.readFileSync(FILE));
+
+    const exists = data.find(r => r.id === String(id).trim());
+    if (exists) {
+        return res.status(409).send("Un ID identique existe déjà. Choisissez un autre ID.");
+    }
+
+    const newResa = {
+        id: String(id).trim(),
+        status: "en attente",
+        clientName,
+        email: email || "",
+        filmTitle,
+        roomNumber: roomNumber || "",
+        sessionDate,
+        sessionTime,
+        peopleNumber,
+        createdByAdmin: true
+    };
+
+    data.push(newResa);
+    fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+    res.json({ ok: true, message: "Réservation créée avec succès." });
+});
+
 // 📩 Valider + Télécharger PDF (remplace l'envoi email)
 app.post("/api/valider", async (req, res) => {
     try {
