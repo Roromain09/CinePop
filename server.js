@@ -327,7 +327,7 @@ app.get("/verify", (req, res) => {
         const startWindow = new Date(sessionDateTime);
         startWindow.setMinutes(startWindow.getMinutes() - 30);
         const endWindow = new Date(sessionDateTime);
-        endWindow.setMinutes(endWindow.getMinutes() + 5);
+        endWindow.setMinutes(endWindow.getMinutes() + 10);
 
         if (now < startWindow || now > endWindow) {
             return res.json({ status: "invalid", reason: "Hors délai" });
