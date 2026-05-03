@@ -209,7 +209,7 @@ async function load() {
         <p><b>Date :</b> ${r.sessionDate}</p>
         <p><b>Heure :</b> ${r.sessionTime}</p>
         <p><b>Statut :</b> ${r.status}</p>
-		<p><b>ID:</b> ${r.id}</p>
+        <p><b>ID:</b> ${r.id}</p>
 
        ${
   r.status === "en attente"
@@ -223,12 +223,15 @@ async function load() {
     <span style="color:red;">❌ Refusé</span>
     <button onclick="supprimer('${r.id}')" style="background:#ff4d4d;color:white;margin-left:10px;">🗑 Supprimer</button>
   `
+  : r.status === "expiré"
+  ? `
+    <span style="color:#ff8800;">⏱ Expiré</span>
+    <button onclick="supprimer('${r.id}')" style="background:#ff4d4d;color:white;margin-left:10px;">🗑 Supprimer</button>
+  `
   : `
     <span style="color:green;">✔ Validé</span>
     <button onclick="supprimer('${r.id}')" style="background:#ff4d4d;color:white;margin-left:10px;">🗑 Supprimer</button>
   `
-
-
         }
       </div>
     `).join("");
