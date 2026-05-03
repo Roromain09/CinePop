@@ -158,28 +158,54 @@ span[style*="red"] { color: #ff4d4d !important; }
 
 <h1>🎬 Réservations</h1>
 
-<!-- ➕ Formulaire création admin -->
-<div style="
+<!-- ➕ Bouton discret bas-droite -->
+<button onclick="toggleForm()" id="fab" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #1e3a5f;
+  color: #f5b700;
+  border: 1px solid #f5b70044;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+">➕</button>
+
+<!-- Panneau formulaire caché -->
+<div id="creer-panel" style="
+  display: none;
+  position: fixed;
+  bottom: 75px;
+  right: 20px;
   background: #112240;
   border-radius: 12px;
   padding: 20px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  width: 300px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  z-index: 100;
+  border: 1px solid #1e3a5f;
 ">
-  <h2 style="color:#f5b700; margin-bottom:15px;">➕ Créer une réservation</h2>
-  <div style="display:flex; flex-direction:column; gap:10px; max-width:400px;">
-    <input id="f-id"           type="text"   placeholder="ID personnalisé *"       style="padding:9px; border-radius:8px; border:none; background:#0a192f; color:#fff;">
-    <input id="f-clientName"   type="text"   placeholder="Nom du client *"         style="padding:9px; border-radius:8px; border:none; background:#0a192f; color:#fff;">
-    <input id="f-email"        type="email"  placeholder="Email"                   style="padding:9px; border-radius:8px; border:none; background:#0a192f; color:#fff;">
-    <input id="f-filmTitle"    type="text"   placeholder="Titre du film *"         style="padding:9px; border-radius:8px; border:none; background:#0a192f; color:#fff;">
-    <input id="f-roomNumber"   type="text"   placeholder="Numéro de salle"         style="padding:9px; border-radius:8px; border:none; background:#0a192f; color:#fff;">
-    <input id="f-sessionDate"  type="date"                                         style="padding:9px; border-radius:8px; border:none; background:#0a192f; color:#fff;">
-    <input id="f-sessionTime"  type="time"                                         style="padding:9px; border-radius:8px; border:none; background:#0a192f; color:#fff;">
-    <input id="f-peopleNumber" type="number" placeholder="Nombre de personnes *" min="1" max="10" style="padding:9px; border-radius:8px; border:none; background:#0a192f; color:#fff;">
-    <button onclick="creer()" style="background:#f5b700; color:#0a192f; padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; margin-top:5px;">
-      Créer la réservation
+  <h3 style="color:#f5b700; margin-bottom:12px; font-size:1em;">Créer une réservation</h3>
+  <div style="display:flex; flex-direction:column; gap:8px;">
+    <input id="f-id"           type="text"   placeholder="ID personnalisé *"      style="padding:8px; border-radius:8px; border:none; background:#0a192f; color:#fff; font-size:0.85em;">
+    <input id="f-clientName"   type="text"   placeholder="Nom du client *"        style="padding:8px; border-radius:8px; border:none; background:#0a192f; color:#fff; font-size:0.85em;">
+    <input id="f-email"        type="email"  placeholder="Email"                  style="padding:8px; border-radius:8px; border:none; background:#0a192f; color:#fff; font-size:0.85em;">
+    <input id="f-filmTitle"    type="text"   placeholder="Titre du film *"        style="padding:8px; border-radius:8px; border:none; background:#0a192f; color:#fff; font-size:0.85em;">
+    <input id="f-roomNumber"   type="text"   placeholder="Numéro de salle"        style="padding:8px; border-radius:8px; border:none; background:#0a192f; color:#fff; font-size:0.85em;">
+    <input id="f-sessionDate"  type="date"                                        style="padding:8px; border-radius:8px; border:none; background:#0a192f; color:#fff; font-size:0.85em;">
+    <input id="f-sessionTime"  type="time"                                        style="padding:8px; border-radius:8px; border:none; background:#0a192f; color:#fff; font-size:0.85em;">
+    <input id="f-peopleNumber" type="number" placeholder="Nombre de personnes *" min="1" max="10" style="padding:8px; border-radius:8px; border:none; background:#0a192f; color:#fff; font-size:0.85em;">
+    <button onclick="creer()" style="background:#f5b700; color:#0a192f; padding:9px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; margin-top:4px;">
+      Créer
     </button>
-    <p id="f-msg" style="margin:0; font-size:0.9em;"></p>
+    <p id="f-msg" style="margin:0; font-size:0.82em;"></p>
   </div>
 </div>
 
@@ -345,6 +371,15 @@ async function refuser(id) {
   load();
 }
 
+// ➕ Toggle formulaire
+function toggleForm() {
+  const panel = document.getElementById("creer-panel");
+  const fab = document.getElementById("fab");
+  const visible = panel.style.display !== "none";
+  panel.style.display = visible ? "none" : "block";
+  fab.textContent = visible ? "➕" : "✕";
+}
+
 // ➕ CRÉER (admin)
 async function creer() {
   const get = id => document.getElementById(id).value.trim();
@@ -363,7 +398,7 @@ async function creer() {
 
   if (!payload.id || !payload.clientName || !payload.filmTitle || !payload.sessionDate || !payload.sessionTime || !payload.peopleNumber) {
     msg.style.color = "#ff4d4d";
-    msg.textContent = "⚠ Veuillez remplir tous les champs obligatoires (*).";
+    msg.textContent = "⚠ Champs obligatoires manquants.";
     return;
   }
 
@@ -378,8 +413,7 @@ async function creer() {
     const text = await res.text();
     if (res.ok) {
       msg.style.color = "#4dff88";
-      msg.textContent = "✅ Réservation créée avec succès !";
-      // Vider le formulaire
+      msg.textContent = "✅ Réservation créée !";
       ["f-id","f-clientName","f-email","f-filmTitle","f-roomNumber","f-sessionDate","f-sessionTime","f-peopleNumber"]
         .forEach(id => document.getElementById(id).value = "");
     } else {
