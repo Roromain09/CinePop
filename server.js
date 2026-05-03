@@ -314,6 +314,7 @@ app.get("/verify", (req, res) => {
     if (check == "1") {
         if (!resa) return res.json({ status: "invalid", reason: "Identifiant inexistant" });
         if (resa.status == "refusé") return res.json({ status: "invalid", reason: "réservation refusée" });
+        if (resa.status == "expiré") return res.json({ status: "invalid", reason: "réservation expirée" });
         if (resa.status == "en attente") return res.json({ status: "invalid", reason: "réservation en attente" });
 
         const now = DateTime.now().setZone("Europe/Paris").toJSDate();
@@ -338,7 +339,8 @@ app.get("/verify", (req, res) => {
             film: resa.filmTitle,
             salle: resa.roomNumber,
             date: resa.sessionDate,
-            heure: resa.sessionTime
+            heure: resa.sessionTime,
+            places: resa.peopleNumber
         });
     }
 
@@ -462,7 +464,8 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
                 '<p><b>Film :</b> ' + data.film + '</p>' +
                 '<p><b>Salle :</b> ' + data.salle + '</p>' +
                 '<p><b>Date :</b> ' + data.date + '</p>' +
-                '<p><b>Heure :</b> ' + data.heure + '</p></div>';
+                '<p><b>Heure :</b> ' + data.heure + '</p>' +
+                '<p><b>Places :</b> ' + data.places + '</p></div>';
 
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const response = await fetch("/sounds/valid.mp3");
