@@ -207,12 +207,14 @@ h1 {
   font-weight: 700;
   transition: all 0.2s;
 }
-.btn-validate { background: var(--gold); color: var(--bg); }
-.btn-validate:hover { background: var(--gold-light); }
-.btn-refuse   { background: rgba(255,68,85,0.15); color: var(--red); border: 1px solid rgba(255,68,85,0.3); }
-.btn-refuse:hover { background: rgba(255,68,85,0.28); }
-.btn-delete   { background: rgba(255,68,85,0.1); color: var(--red); border: 1px solid rgba(255,68,85,0.2); }
-.btn-delete:hover { background: rgba(255,68,85,0.22); }
+.btn-validate  { background: var(--gold); color: var(--bg); }
+.btn-validate:hover  { background: var(--gold-light); }
+.btn-refuse    { background: rgba(255,68,85,0.15); color: var(--red); border: 1px solid rgba(255,68,85,0.3); }
+.btn-refuse:hover    { background: rgba(255,68,85,0.28); }
+.btn-delete    { background: rgba(255,68,85,0.1); color: var(--red); border: 1px solid rgba(255,68,85,0.2); }
+.btn-delete:hover    { background: rgba(255,68,85,0.22); }
+.btn-reprint   { background: rgba(77,166,255,0.15); color: var(--blue); border: 1px solid rgba(77,166,255,0.3); }
+.btn-reprint:hover   { background: rgba(77,166,255,0.28); }
 
 /* ─── EMPTY STATE ─── */
 .empty {
@@ -455,6 +457,13 @@ function switchTab(tab) {
   });
 }
 
+/* ── SORT HELPER ──
+   Builds a comparable string "YYYY-MM-DD HH:MM" from a reservation.
+   Falls back to empty string if fields are missing. */
+function sortKey(r) {
+  return `${r.sessionDate || ""} ${r.sessionTime || ""}`.trim();
+}
+
 /* ── CARD BUILDER ── */
 function buildCard(r) {
   const statusChip = {
@@ -464,12 +473,22 @@ function buildCard(r) {
     "en attente": ""
   }[r.status] || "";
 
-  const actions = r.status === "en attente"
-    ? `<button class="btn btn-validate" onclick="valider('${r.id}')">✅ Valider</button>
-       <button class="btn btn-refuse"   onclick="refuser('${r.id}')">❌ Refuser</button>
-       <button class="btn btn-delete"   onclick="supprimer('${r.id}')">🗑 Supprimer</button>`
-    : `${statusChip}
-       <button class="btn btn-delete" style="margin-left:auto;" onclick="supprimer('${r.id}')">🗑 Supprimer</button>`;
+  let actions;
+  if (r.status === "en attente") {
+    actions = `
+      <button class="btn btn-validate" onclick="valider('${r.id}')">✅ Valider</button>
+      <button class="btn btn-refuse"   onclick="refuser('${r.id}')">❌ Refuser</button>
+      <button class="btn btn-delete"   onclick="supprimer('${r.id}')">🗑 Supprimer</button>`;
+  } else if (r.status === "validé") {
+    actions = `
+      ${statusChip}
+      <button class="btn btn-reprint"  onclick="reimprimerTicket('${r.id}')">🎫 Obtenir de nouveau le ticket</button>
+      <button class="btn btn-delete"   style="margin-left:auto;" onclick="supprimer('${r.id}')">🗑 Supprimer</button>`;
+  } else {
+    actions = `
+      ${statusChip}
+      <button class="btn btn-delete"   style="margin-left:auto;" onclick="supprimer('${r.id}')">🗑 Supprimer</button>`;
+  }
 
   return `
     <div class="resa-card">
@@ -516,6 +535,14 @@ async function load() {
   const groups = { "en attente": [], "validé": [], "refusé": [], "expiré": [] };
   data.forEach(r => { if (groups[r.status]) groups[r.status].push(r); });
 
+  // ── Tri ──
+  // En attente : la plus ancienne en haut (ordre croissant)
+  groups["en attente"].sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+  // Autres sections : la plus récente en haut (ordre décroissant)
+  groups["validé"].sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+  groups["refusé"].sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+  groups["expiré"].sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+
   // Update counts
   document.getElementById("count-attente").textContent = groups["en attente"].length;
   document.getElementById("count-valide").textContent  = groups["validé"].length;
@@ -554,6 +581,25 @@ async function supprimer(id) {
 }
 
 async function valider(id) {
+  showLoader();
+  try {
+    const res = await fetch(`${API_URL}/api/valider`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id })
+    });
+    if (!res.ok) { alert("Erreur lors de la génération du PDF"); hideLoader(); return; }
+    const blob = await res.blob();
+    const url  = window.URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = `ticket-${id}.pdf`; a.click();
+    window.URL.revokeObjectURL(url);
+  } catch { alert("Erreur serveur !"); }
+  hideLoader(); load();
+}
+
+/* ── RÉIMPRESSION TICKET (résa déjà validée) ── */
+async function reimprimerTicket(id) {
   showLoader();
   try {
     const res = await fetch(`${API_URL}/api/valider`, {
