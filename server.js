@@ -520,14 +520,30 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
         const data = await res.json();
 
         if (data.status === "valid") {
-            box.innerHTML =
-                '<div class="card"><img src="/img/check.png" class="icon"><h1 style="color:#2ecc71;">Ticket VALIDE</h1>' +
-                '<p><b>Client :</b> ' + data.client + '</p>' +
-                '<p><b>Film :</b> ' + data.film + '</p>' +
-                '<p><b>Salle :</b> ' + data.salle + '</p>' +
-                '<p><b>Date :</b> ' + data.date + '</p>' +
-                '<p><b>Heure :</b> ' + data.heure + '</p>' +
-                '<p><b>Places :</b> ' + data.places + '</p></div>';
+    const alreadyScanned = data.scanCount > 1
+        ? `<div style="
+            background:#f39c12;
+            color:#000;
+            border-radius:8px;
+            padding:10px 14px;
+            margin-bottom:12px;
+            font-size:15px;
+            font-weight:bold;
+          ">⚠️ Ce ticket a déjà été scanné ${data.scanCount - 1} fois</div>`
+        : "";
+
+    box.innerHTML =
+        '<div class="card">' +
+        alreadyScanned +
+        '<img src="/img/check.png" class="icon"><h1 style="color:#2ecc71;">Ticket VALIDE</h1>' +
+        '<p><b>Client :</b> ' + data.client + '</p>' +
+        '<p><b>Film :</b> ' + data.film + '</p>' +
+        '<p><b>Salle :</b> ' + data.salle + '</p>' +
+        '<p><b>Date :</b> ' + data.date + '</p>' +
+        '<p><b>Heure :</b> ' + data.heure + '</p>' +
+        '<p><b>Places :</b> ' + data.places + '</p></div>';
+
+    // ... ton code son valid.mp3 reste inchangé
 
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const response = await fetch("/sounds/valid.mp3");
