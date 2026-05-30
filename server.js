@@ -521,7 +521,7 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
 
         if (data.status === "valid") {
     const alreadyScanned = data.scanCount > 1
-    ? '<div style="background:#f39c12;color:#000;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:15px;font-weight:bold;">⚠️ Ce ticket a déjà été scanné ' + (data.scanCount - 1) + ' fois</div>'
+    ? '<div style="background:#3498db;color:#000;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:15px;font-weight:bold;">❗ Ce ticket a déjà été scanné ' + (data.scanCount - 1) + ' fois</div>'
     : "";
 
     box.innerHTML =
@@ -534,8 +534,6 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
         '<p><b>Date :</b> ' + data.date + '</p>' +
         '<p><b>Heure :</b> ' + data.heure + '</p>' +
         '<p><b>Places :</b> ' + data.places + '</p></div>';
-
-    // ... ton code son valid.mp3 reste inchangé
 
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const response = await fetch("/sounds/valid.mp3");
