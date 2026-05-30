@@ -248,20 +248,36 @@ app.post("/api/valider", async (req, res) => {
         const qrBuffer = await QRCode.toBuffer(qrData);
         const qrBase64 = qrBuffer.toString("base64");
 
-        const html = `
+       const html = `
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <style>
-    body { font-family: Arial; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+        width: 300px;
+        height: 500px;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
     .ticket {
         width: 280px;
+        height: 490px;
         border: 2px dashed black;
-        padding: 20px;
+        padding: 12px 16px;
         text-align: center;
         margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
     }
+    h2 { font-size: 14px; }
+    hr { width: 100%; border: none; border-top: 1px solid #ccc; }
+    h1 { font-size: 15px; word-break: break-word; }
+    p { font-size: 12px; line-height: 1.4; }
+    .ticket-id { font-size: 9px; color: #555; }
 </style>
 </head>
 <body>
@@ -274,8 +290,8 @@ app.post("/api/valider", async (req, res) => {
         <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
         <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
         <p><b>Places :</b> ${escapeHtml(resa.peopleNumber)}</p>
-        <img src="data:image/png;base64,${qrBase64}" style="width:120px;" />
-        <p style="font-size:10px;">Ticket #${resa.id}</p>
+        <img src="data:image/png;base64,${qrBase64}" style="width:100px;" />
+        <p class="ticket-id">Ticket #${resa.id}</p>
     </div>
 </body>
 </html>
