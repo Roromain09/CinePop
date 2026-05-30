@@ -521,16 +521,8 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
 
         if (data.status === "valid") {
     const alreadyScanned = data.scanCount > 1
-        ? `<div style="
-            background:#f39c12;
-            color:#000;
-            border-radius:8px;
-            padding:10px 14px;
-            margin-bottom:12px;
-            font-size:15px;
-            font-weight:bold;
-          ">⚠️ Ce ticket a déjà été scanné ${data.scanCount - 1} fois</div>`
-        : "";
+    ? '<div style="background:#f39c12;color:#000;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:15px;font-weight:bold;">⚠️ Ce ticket a déjà été scanné ' + (data.scanCount - 1) + ' fois</div>'
+    : "";
 
     box.innerHTML =
         '<div class="card">' +
