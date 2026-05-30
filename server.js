@@ -390,15 +390,20 @@ app.get("/verify", (req, res) => {
             return res.json({ status: "invalid", reason: "Hors délai" });
         }
 
-        return res.json({
-            status: "valid",
-            client: resa.clientName,
-            film: resa.filmTitle,
-            salle: resa.roomNumber,
-            date: resa.sessionDate,
-            heure: resa.sessionTime,
-            places: resa.peopleNumber
-        });
+        // Remplace le return res.json({ status: "valid", ... }) final par :
+resa.scanCount = (resa.scanCount || 0) + 1;
+fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+
+return res.json({
+    status: "valid",
+    scanCount: resa.scanCount,
+    client: resa.clientName,
+    film: resa.filmTitle,
+    salle: resa.roomNumber,
+    date: resa.sessionDate,
+    heure: resa.sessionTime,
+    places: resa.peopleNumber
+});
     }
 
     // --- SINON → PAGE AVEC BOUTON CHECK (TON HTML ORIGINAL) ---
