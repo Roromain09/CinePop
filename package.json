@@ -1,0 +1,22 @@
+{
+  "name": "cinema-projet",
+  "version": "2.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@sparticuz/chromium": "^143.0.4",
+    "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "luxon": "^3.7.2",
+    "puppeteer-core": "^24.40.0",
+    "qrcode": "^1.5.4"
+  }
+}
