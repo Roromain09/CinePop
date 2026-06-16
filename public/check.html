@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mes réservations — CinéPop</title>
+<style>
+:root {
+  --jaune: #f5b700;
+}
+body {
+  background: #0a192f;
+  color: white;
+  font-family: Arial, sans-serif;
+  padding: 0 0 20px;
+  text-align: center;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: left;
+}
+.logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; color: white; }
+.logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+.nav-links { display:flex; gap:8px; }
+.nav-links a {
+  color: #a7b3d1; text-decoration:none; font-weight:600; font-size:0.92rem;
+  padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+}
+.nav-links a:hover, .nav-links a.active { color: white; background: rgba(255,255,255,0.07); }
+
+h1 {
+  color: var(--jaune);
+  margin-bottom: 20px;
+}
+
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  width: 250px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: var(--jaune);
+  color: #0a192f;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#result {
+  margin-top: 30px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
+}
+
+.card {
+  background: #112240;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <div class="nav-links">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html">Programme</a>
+    <a href="/check.html" class="active">Mes réservations</a>
+  </div>
+</nav>
+
+<h1>🔍 Consulter ma réservation</h1>
+
+<input id="name" type="text" placeholder="Entrez votre nom">
+<br>
+<button onclick="search()">Rechercher</button>
+
+<div id="result"></div>
+
+<script>
+async function search() {
+  const name = document.getElementById("name").value.trim();
+  const resultDiv = document.getElementById("result");
+
+  if (!name) {
+    resultDiv.innerHTML = "<p style='color:red;'>Veuillez entrer un nom.</p>";
+    return;
+  }
+
+  resultDiv.innerHTML = "<p>Recherche en cours...</p>";
+
+  const res = await fetch(`/api/reservation?name=${encodeURIComponent(name)}`);
+  const data = await res.json();
+
+  if (!data.ok) {
+    resultDiv.innerHTML = `<p style='color:red;'>${data.error}</p>`;
+    return;
+  }
+
+  resultDiv.innerHTML = data.reservations.map(r => `
+    <div class="card">
+      <p><b>Client :</b> ${r.clientName}</p>
+      <p><b>Nombre :</b> ${r.peopleNumber}</p>
+      <p><b>Film :</b> ${r.filmTitle}</p>
+      <p><b>Date :</b> ${r.sessionDate}</p>
+      <p><b>Heure :</b> ${r.sessionTime}</p>
+      <p><b>Statut :</b> ${r.status}</p>
+    </div>
+  `).join("");
+}
+</script>
+
+</body>
+</html>

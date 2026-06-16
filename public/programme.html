@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CinéPop — Programme</title>
+<style>
+  :root {
+    --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+    --jaune: #f5b700; --jaune-soft: #ffd84d;
+    --blanc: #ffffff; --gris: #a7b3d1;
+    --ombre: rgba(0, 0, 0, 0.45);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
+    color: var(--blanc);
+    background:
+      radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+      linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+    padding-bottom: 60px;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+  .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+  .nav-links { display:flex; gap:8px; }
+  .nav-links a {
+    color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+    padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
+
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 20px 24px; }
+  .page-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 8px; }
+  .page-subtitle { color: var(--gris); margin-bottom: 36px; }
+
+  .film-card {
+    background: rgba(17, 34, 64, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 26px;
+    margin-bottom: 24px;
+    box-shadow: 0 20px 50px var(--ombre);
+  }
+  .film-head { display:flex; gap:20px; align-items:flex-start; margin-bottom: 18px; flex-wrap: wrap; }
+  .film-poster {
+    width: 90px; height: 130px; border-radius: 14px; flex-shrink: 0;
+    background: linear-gradient(135deg, #132743, #08101d);
+    border: 1px solid rgba(255,255,255,0.08);
+    object-fit: cover;
+  }
+  .film-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+  .film-meta { color: var(--jaune-soft); font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; }
+  .film-synopsis { color: var(--gris); font-size: 0.92rem; line-height: 1.6; max-width: 65ch; }
+
+  .seances-list { display: flex; flex-direction: column; gap: 10px; }
+  .seance-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 12px 16px;
+  }
+  .seance-info { display:flex; gap: 18px; flex-wrap: wrap; font-size: 0.92rem; }
+  .seance-info span b { color: var(--blanc); }
+  .seance-info span { color: var(--gris); }
+  .remaining { font-weight: 700; }
+  .remaining.low { color: #ff8c66; }
+  .remaining.full { color: #ff6b6b; }
+
+  .btn-reserve {
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+    color: #111;
+    font-weight: 800;
+    font-size: 0.88rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-reserve.disabled {
+    background: rgba(255,255,255,0.08);
+    color: var(--gris);
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--gris);
+  }
+  .empty .icon { font-size: 2.5rem; margin-bottom: 14px; }
+
+  @media (max-width: 600px) {
+    nav { flex-direction: column; gap: 12px; }
+    .seance-row { flex-direction: column; align-items: flex-start; }
+    .btn-reserve { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <div class="nav-links">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html" class="active">Programme</a>
+    <a href="/check.html">Mes réservations</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="page-title">🎬 Programme</div>
+  <div class="page-subtitle">Choisissez une séance et réservez en quelques secondes.</div>
+  <div id="content"><div class="empty"><div class="icon">⏳</div>Chargement du programme…</div></div>
+</div>
+
+<script>
+function formatDate(d) {
+  const date = new Date(d + "T00:00:00");
+  return date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+}
+
+function buildFilmCard(film) {
+  const poster = film.posterUrl
+    ? `<img class="film-poster" src="${film.posterUrl}" alt="${film.title}">`
+    : `<div class="film-poster"></div>`;
+
+  const meta = [film.genre, film.durationMinutes ? `${film.durationMinutes} min` : null]
+    .filter(Boolean).join(" • ");
+
+  const seancesHtml = film.seances.map(s => {
+    const full = s.remaining <= 0;
+    const low = !full && s.remaining <= 5;
+    const remClass = full ? "full" : (low ? "low" : "");
+    const remText = full ? "Complet" : `${s.remaining} place(s) restante(s)`;
+    const btn = full
+      ? `<span class="btn-reserve disabled">Complet</span>`
+      : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
+    return `
+      <div class="seance-row">
+        <div class="seance-info">
+          <span><b>${formatDate(s.sessionDate)}</b></span>
+          <span>🕐 ${s.sessionTime}</span>
+          ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
+          <span class="remaining ${remClass}">${remText}</span>
+        </div>
+        ${btn}
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="film-card">
+      <div class="film-head">
+        ${poster}
+        <div>
+          <div class="film-title">${film.title}</div>
+          ${meta ? `<div class="film-meta">${meta}</div>` : ""}
+          ${film.synopsis ? `<div class="film-synopsis">${film.synopsis}</div>` : ""}
+        </div>
+      </div>
+      <div class="seances-list">${seancesHtml}</div>
+    </div>`;
+}
+
+async function load() {
+  const content = document.getElementById("content");
+  try {
+    const res = await fetch("/api/programme");
+    const data = await res.json();
+
+    if (!data.ok || data.films.length === 0) {
+      content.innerHTML = `<div class="empty"><div class="icon">🎞️</div>Aucune séance programmée pour le moment.</div>`;
+      return;
+    }
+
+    content.innerHTML = data.films.map(buildFilmCard).join("");
+  } catch (err) {
+    content.innerHTML = `<div class="empty"><div class="icon">⚠️</div>Impossible de charger le programme.</div>`;
+  }
+}
+
+load();
+</script>
+
+</body>
+</html>
