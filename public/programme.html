@@ -48,18 +48,76 @@
     background: rgba(17, 34, 64, 0.78);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 24px;
-    padding: 26px;
-    margin-bottom: 24px;
+    padding: 28px;
+    margin-bottom: 26px;
     box-shadow: 0 20px 50px var(--ombre);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
-  .film-head { display:flex; gap:20px; align-items:flex-start; margin-bottom: 18px; flex-wrap: wrap; }
+  .film-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 26px 64px var(--ombre);
+  }
+  .film-head { display:flex; gap:26px; align-items:flex-start; margin-bottom: 22px; }
+  .film-info { flex: 1 1 220px; min-width: 0; }
+
+  .poster-frame {
+    position: relative;
+    flex-shrink: 0;
+    width: 150px;
+  }
+  .poster-frame::before {
+    content: "";
+    position: absolute;
+    inset: -16px;
+    background: radial-gradient(circle, rgba(245,183,0,0.32), transparent 70%);
+    filter: blur(20px);
+    z-index: 0;
+  }
   .film-poster {
-    width: 90px; height: 130px; border-radius: 14px; flex-shrink: 0;
-    background: linear-gradient(135deg, #132743, #08101d);
-    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 16px;
+    background: linear-gradient(150deg, #1c3258 0%, #0c1830 60%, #08101d 100%);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55);
     object-fit: cover;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
   }
-  .film-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+  .film-card:hover .film-poster {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 24px 50px rgba(0,0,0,0.65);
+  }
+  .poster-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .poster-placeholder .placeholder-icon {
+    font-size: 2.2rem;
+    opacity: 0.55;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+  }
+  .poster-tag {
+    position: absolute;
+    z-index: 2;
+    top: 8px;
+    left: 8px;
+    background: rgba(7,17,31,0.75);
+    backdrop-filter: blur(6px);
+    color: var(--jaune-soft);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.14);
+  }
+
+  .film-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
   .film-meta { color: var(--jaune-soft); font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; }
   .film-synopsis { color: var(--gris); font-size: 0.92rem; line-height: 1.6; max-width: 65ch; }
 
@@ -110,6 +168,9 @@
 
   @media (max-width: 600px) {
     nav { flex-direction: column; gap: 12px; }
+    .film-head { flex-direction: column; align-items: center; text-align: center; }
+    .poster-frame { width: 170px; }
+    .film-synopsis { text-align: left; margin: 0 auto; }
     .seance-row { flex-direction: column; align-items: flex-start; }
     .btn-reserve { width: 100%; text-align: center; }
   }
@@ -140,8 +201,8 @@ function formatDate(d) {
 
 function buildFilmCard(film) {
   const poster = film.posterUrl
-    ? `<img class="film-poster" src="${film.posterUrl}" alt="${film.title}">`
-    : `<div class="film-poster"></div>`;
+    ? `<img class="film-poster" src="${film.posterUrl}" alt="${film.title}" loading="lazy">`
+    : `<div class="film-poster poster-placeholder"><span class="placeholder-icon">🎬</span></div>`;
 
   const meta = [film.genre, film.durationMinutes ? `${film.durationMinutes} min` : null]
     .filter(Boolean).join(" • ");
@@ -169,8 +230,11 @@ function buildFilmCard(film) {
   return `
     <div class="film-card">
       <div class="film-head">
-        ${poster}
-        <div>
+        <div class="poster-frame">
+          ${film.genre ? `<span class="poster-tag">${film.genre}</span>` : ""}
+          ${poster}
+        </div>
+        <div class="film-info">
           <div class="film-title">${film.title}</div>
           ${meta ? `<div class="film-meta">${meta}</div>` : ""}
           ${film.synopsis ? `<div class="film-synopsis">${film.synopsis}</div>` : ""}
