@@ -57,7 +57,32 @@
       box-shadow: 0 24px 70px var(--ombre);
       position: relative;
       overflow: hidden;
+      min-height: 440px;
+      display: flex;
+      flex-direction: column;
     }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .hero-bg.show { opacity: 1; }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        radial-gradient(circle at top, rgba(245,183,0,0.16), transparent 45%),
+        linear-gradient(180deg, rgba(7,17,31,0.55) 0%, rgba(7,17,31,0.82) 55%, rgba(7,17,31,0.95) 100%);
+    }
+
+    .hero-content { position: relative; z-index: 2; }
 
     .brand { display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px;
       background: rgba(245,183,0,0.12); color: var(--jaune-soft); font-weight:700;
@@ -69,43 +94,16 @@
 
     .selected-seance {
       margin-top: 26px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
       border-radius: 18px;
       padding: 18px;
       display: none;
+      backdrop-filter: blur(6px);
     }
     .selected-seance.show { display: block; }
     .selected-seance .row { display:flex; justify-content:space-between; font-size:0.92rem; padding: 6px 0; color: var(--gris); }
     .selected-seance .row b { color: var(--blanc); }
-
-    .poster {
-      margin-top: 30px;
-      border-radius: 24px;
-      min-height: 320px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
-        radial-gradient(circle at 20% 20%, rgba(245,183,0,0.22), transparent 30%),
-        linear-gradient(135deg, #132743, #08101d);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .poster img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .poster-placeholder-icon {
-      position: relative;
-      font-size: 2.6rem;
-      opacity: 0.4;
-    }
 
     .form-card {
       background: rgba(17, 34, 64, 0.78);
@@ -135,6 +133,10 @@
       transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
     select { color-scheme: dark; }
+    select option {
+      background: var(--bleu2);
+      color: var(--blanc);
+    }
     input::placeholder { color: rgba(255, 255, 255, 0.45); }
     input:focus, select:focus {
       border-color: var(--jaune); background: rgba(255, 255, 255, 0.08);
@@ -204,6 +206,7 @@
     }
     @media (max-width: 540px) {
       .hero, .form-card { padding: 22px; border-radius: 22px; }
+      .hero { min-height: 360px; }
       .ticket-row { grid-template-columns: 1fr; gap: 4px; }
     }
   </style>
@@ -221,21 +224,21 @@
 
 <div class="page">
   <section class="hero">
-    <div class="brand"><span class="dot"></span> CINEPOP — Réservation</div>
-    <h1>Réserve ton billet en quelques clics.</h1>
-    <p class="subtitle">Choisis ta séance, indique tes informations, et c'est réservé.</p>
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
 
-    <div class="selected-seance" id="selectedSeanceBox">
-      <div class="row"><span>Film</span><b id="ssFilm"></b></div>
-      <div class="row"><span>Date</span><b id="ssDate"></b></div>
-      <div class="row"><span>Heure</span><b id="ssTime"></b></div>
-      <div class="row"><span>Salle</span><b id="ssRoom"></b></div>
-      <div class="row"><span>Places restantes</span><b id="ssRemaining"></b></div>
-    </div>
+    <div class="hero-content">
+      <div class="brand"><span class="dot"></span> CINEPOP — Réservation</div>
+      <h1>Réserve ton billet en quelques clics.</h1>
+      <p class="subtitle">Choisis ta séance, indique tes informations, et c'est réservé.</p>
 
-    <div class="poster" id="posterBox">
-      <img id="posterImg" alt="" style="display:none;">
-      <span class="poster-placeholder-icon" id="posterPlaceholder">🎬</span>
+      <div class="selected-seance" id="selectedSeanceBox">
+        <div class="row"><span>Film</span><b id="ssFilm"></b></div>
+        <div class="row"><span>Date</span><b id="ssDate"></b></div>
+        <div class="row"><span>Heure</span><b id="ssTime"></b></div>
+        <div class="row"><span>Salle</span><b id="ssRoom"></b></div>
+        <div class="row"><span>Places restantes</span><b id="ssRemaining"></b></div>
+      </div>
     </div>
   </section>
 
@@ -335,16 +338,13 @@
   }
 
   function updatePoster(seance) {
-    const img = document.getElementById("posterImg");
-    const placeholder = document.getElementById("posterPlaceholder");
+    const bg = document.getElementById("heroBg");
     if (seance && seance.posterUrl) {
-      img.src = seance.posterUrl;
-      img.alt = seance.filmTitle;
-      img.style.display = "block";
-      placeholder.style.display = "none";
+      bg.style.backgroundImage = `url('${seance.posterUrl}')`;
+      bg.classList.add("show");
     } else {
-      img.style.display = "none";
-      placeholder.style.display = "block";
+      bg.classList.remove("show");
+      bg.style.backgroundImage = "";
     }
   }
 
