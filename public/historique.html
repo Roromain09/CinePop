@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CinéPop — Historique</title>
+<style>
+  :root {
+    --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+    --jaune: #f5b700; --jaune-soft: #ffd84d;
+    --blanc: #ffffff; --gris: #a7b3d1;
+    --ombre: rgba(0, 0, 0, 0.45);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
+    color: var(--blanc);
+    background:
+      radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+      linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+    padding-bottom: 60px;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+  .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+  .nav-links { display:flex; gap:8px; }
+  .nav-links a {
+    color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+    padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+  .page-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 8px; }
+  .page-subtitle { color: var(--gris); margin-bottom: 36px; }
+
+  .film-card {
+    background: rgba(17, 34, 64, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 20px 50px var(--ombre);
+  }
+  .film-head { display:flex; gap:28px; align-items:center; }
+  .film-info { flex: 1 1 220px; min-width: 0; }
+
+  .poster-frame {
+    position: relative;
+    flex-shrink: 0;
+    width: clamp(110px, 14vw, 140px);
+  }
+  .poster-frame::before {
+    content: "";
+    position: absolute;
+    inset: -14px;
+    background: radial-gradient(circle, rgba(245,183,0,0.22), transparent 70%);
+    filter: blur(20px);
+    z-index: 0;
+  }
+  .film-poster {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 14px;
+    background: linear-gradient(150deg, #1c3258 0%, #0c1830 60%, #08101d 100%);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+    object-fit: cover;
+  }
+  .poster-placeholder { display:flex; align-items:center; justify-content:center; }
+  .poster-placeholder .placeholder-icon { font-size: 2.2rem; opacity: 0.5; }
+
+  .film-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+  .film-meta { color: var(--jaune-soft); font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; }
+
+  .seance-info { display:flex; gap: 18px; flex-wrap: wrap; font-size: 0.9rem; }
+  .seance-info span b { color: var(--blanc); }
+  .seance-info span { color: var(--gris); }
+
+  .occupancy {
+    margin-left: auto;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .occupancy .count { font-weight: 800; font-size: 1rem; }
+  .occupancy .label { color: var(--gris); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--gris);
+  }
+  .empty .icon { font-size: 2.5rem; margin-bottom: 14px; }
+
+  @media (max-width: 600px) {
+    nav { flex-direction: column; gap: 12px; }
+    .film-head { flex-direction: column; align-items: flex-start; }
+    .poster-frame { width: 100px; }
+    .occupancy { margin-left: 0; text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <div class="nav-links">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html">Programme</a>
+    <a href="/check.html">Mes réservations</a>
+    <a href="/historique.html" class="active">Historique</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="page-title">🕓 Historique</div>
+  <div class="page-subtitle">Toutes les séances des 30 derniers jours, de la plus récente à la plus ancienne.</div>
+  <div id="content"><div class="empty"><div class="icon">⏳</div>Chargement de l'historique…</div></div>
+</div>
+
+<script>
+function formatDate(d) {
+  const date = new Date(d + "T00:00:00");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((date - today) / 86400000);
+  if (diffDays === 0) return "Aujourd'hui";
+  if (diffDays === -1) return "Hier";
+  return date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long" });
+}
+
+function buildRow(s) {
+  const poster = s.posterUrl
+    ? `<img class="film-poster" src="${s.posterUrl}" alt="${s.filmTitle}" loading="lazy">`
+    : `<div class="film-poster poster-placeholder"><span class="placeholder-icon">🎬</span></div>`;
+
+  return `
+    <div class="film-card">
+      <div class="film-head">
+        <div class="poster-frame">${poster}</div>
+        <div class="film-info">
+          <div class="film-title">${s.filmTitle}</div>
+          ${s.genre ? `<div class="film-meta">${s.genre}</div>` : ""}
+          <div class="seance-info">
+            <span><b>${formatDate(s.sessionDate)}</b></span>
+            <span>🕐 ${s.sessionTime}</span>
+            ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
+          </div>
+        </div>
+        <div class="occupancy">
+          <div class="count">${s.occupied}/${s.capacity}</div>
+          <div class="label">places occupées</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function load() {
+  const content = document.getElementById("content");
+  try {
+    const res = await fetch("/api/historique");
+    const data = await res.json();
+
+    if (!data.ok || data.seances.length === 0) {
+      content.innerHTML = `<div class="empty"><div class="icon">🎞️</div>Aucune séance dans les 30 derniers jours.</div>`;
+      return;
+    }
+
+    content.innerHTML = data.seances.map(buildRow).join("");
+  } catch (err) {
+    content.innerHTML = `<div class="empty"><div class="icon">⚠️</div>Impossible de charger l'historique.</div>`;
+  }
+}
+
+load();
+</script>
+
+</body>
+</html>
