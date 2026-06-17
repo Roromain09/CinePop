@@ -38,13 +38,47 @@ body {
 /* ─── HEADER ─── */
 h1 {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.4rem;
-  letter-spacing: 3px;
+  font-size: 1.6rem;
+  letter-spacing: 2px;
   color: var(--gold);
-  text-align: center;
-  margin-bottom: 28px;
-  text-shadow: 0 0 30px rgba(245,183,0,0.25);
+  margin-bottom: 22px;
 }
+
+.admin-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.1rem; letter-spacing:0.5px; }
+.logo .dot { width:9px; height:9px; border-radius:50%; background: var(--gold); box-shadow: 0 0 14px rgba(245,183,0,0.7); }
+.admin-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  background: rgba(245,183,0,0.14);
+  color: var(--gold);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.back-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 999px;
+  transition: all 0.2s;
+}
+.back-link:hover { color: var(--text); background: rgba(255,255,255,0.06); }
 
 /* ─── TABS ─── */
 .tabs {
@@ -333,6 +367,13 @@ h1 {
 .inline-form button {
   grid-column: 1 / -1;
 }
+.inline-form .form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.inline-form .form-actions .btn { flex: 1; min-width: 140px; }
 .film-row, .seance-row {
   display: flex;
   justify-content: space-between;
@@ -398,7 +439,7 @@ h1 {
   border: 1px solid var(--border);
   background: var(--surface2);
   color: var(--text);
-  width: 220px;
+  width: min(240px, 80vw);
   text-align: center;
   font-family: 'DM Sans', sans-serif;
   font-size: 0.95rem;
@@ -407,10 +448,16 @@ h1 {
 #admin-pass:focus { border-color: var(--gold); }
 
 @media (max-width: 600px) {
+  body { padding: 14px; }
+  h1 { font-size: 1.35rem; }
+  .admin-topbar { flex-direction: column; align-items: flex-start; gap: 8px; }
   .card-grid { grid-template-columns: 1fr; }
   .card-actions { flex-direction: column; }
   .card-actions .btn { width: 100%; text-align: center; }
   #creer-panel { width: calc(100vw - 32px); right: 16px; }
+  .film-row, .seance-row { flex-direction: column; align-items: stretch; }
+  .row-actions { width: 100%; }
+  .row-actions .btn { flex: 1; }
 }
 </style>
 </head>
@@ -429,8 +476,13 @@ h1 {
   </p>
 </div>
 
-<h1>🎬 Administration CinéPop</h1>
+<div class="admin-container">
+  <div class="admin-topbar">
+    <div class="logo"><span class="dot"></span> CINÉPOP <span class="admin-tag">Admin</span></div>
+    <a href="/index.html" class="back-link">← Retour au site</a>
+  </div>
 
+  <h1>🎬 Administration</h1>
 <!-- TABS -->
 <div class="tabs">
   <button class="tab-btn active-attente" id="tab-attente" onclick="switchTab('attente')">
@@ -466,12 +518,13 @@ h1 {
   <input id="film-duration" type="number" placeholder="Durée (min)">
   <input id="film-poster" type="text" placeholder="URL affiche (facultatif)">
   <input id="film-synopsis" type="text" placeholder="Synopsis (facultatif)">
+  <div class="form-actions">
   <button id="film-submit-btn" class="btn btn-validate" onclick="creerFilm()">➕ Ajouter le film</button>
   <button id="film-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditFilm()">✖ Annuler</button>
 </div>
+</div>
     <div id="films-list"></div>
   </div>
-
   <div class="programme-section">
     <h2>🗓 Séances</h2>
     <div class="inline-form">
@@ -480,13 +533,15 @@ h1 {
   <input id="seance-date" type="date">
   <input id="seance-time" type="time">
   <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
+  <div class="form-actions">
   <button id="seance-submit-btn" class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
   <button id="seance-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
+</div>
 </div>
     <div id="seances-list"></div>
   </div>
 </div>
-
+</div>
 <!-- FAB -->
 <button onclick="toggleForm()" id="fab">➕</button>
 
