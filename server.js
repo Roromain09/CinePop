@@ -341,6 +341,7 @@ app.post("/api/admin/creer", async (req, res) => {
 });
 
 // Valider + générer le PDF du ticket
+// Valider une réservation (statut uniquement, sans génération de PDF)
 app.post("/api/admin/valider", async (req, res) => {
     try {
         const { id } = req.body;
@@ -354,7 +355,6 @@ app.post("/api/admin/valider", async (req, res) => {
         if (error || !resa) return res.status(404).send("Réservation introuvable");
 
         const seance = resa.seances || {};
-        const film = seance.films || {};
         const sessionTimeShort = (seance.session_time || "").slice(0, 5);
 
         if (seance.session_date && sessionTimeShort) {
@@ -366,6 +366,38 @@ app.post("/api/admin/valider", async (req, res) => {
                 return res.status(400).send("La séance est expirée. Validation impossible.");
             }
         }
+
+        const { error: updateError } = await supabase.from("reservations")
+            .update({ status: "validé", validated_at: new Date().toISOString() })
+            .eq("id", id);
+
+        if (updateError) throw updateError;
+
+        res.json({ ok: true, message: "Réservation validée." });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erreur lors de la validation");
+    }
+});
+
+// Générer / régénérer le PDF du ticket (réservation déjà validée)
+app.post("/api/admin/ticket", async (req, res) => {
+    try {
+        const { id } = req.body;
+
+        const { data: resa, error } = await supabase
+            .from("reservations")
+            .select(RESA_SELECT)
+            .eq("id", id)
+            .single();
+
+        if (error || !resa) return res.status(404).send("Réservation introuvable");
+        if (resa.status !== "validé") return res.status(400).send("Cette réservation n'est pas validée.");
+
+        const seance = resa.seances || {};
+        const film = seance.films || {};
+        const sessionTimeShort = (seance.session_time || "").slice(0, 5);
 
         const BASE_URL = process.env.BASE_URL || "https://reservation-cinepop.onrender.com";
         const qrData = `${BASE_URL}/verify?id=${resa.id}`;
@@ -447,17 +479,13 @@ app.post("/api/admin/valider", async (req, res) => {
 
         await browser.close();
 
-        await supabase.from("reservations")
-            .update({ status: "validé", validated_at: new Date().toISOString() })
-            .eq("id", id);
-
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="ticket-Cinepop-${resa.client_name}.pdf"`);
         res.send(buffer);
 
     } catch (err) {
         console.error(err);
-        res.status(500).send("Erreur lors de la validation");
+        res.status(500).send("Erreur lors de la génération du ticket");
     }
 });
 
