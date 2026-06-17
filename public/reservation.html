@@ -385,6 +385,10 @@
         });
       });
 
+      seancesFlat.sort((a, b) =>
+        `${a.sessionDate} ${a.sessionTime}`.localeCompare(`${b.sessionDate} ${b.sessionTime}`)
+      );
+
       if (seancesFlat.length === 0) {
         seanceSelect.innerHTML = `<option value="">Aucune séance disponible</option>`;
         return;
