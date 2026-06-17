@@ -193,9 +193,11 @@
 
 <div class="wrap">
   <div class="page-title">🎬 Programme</div>
-  <div class="page-subtitle">Les séances les plus proches en premier — choisissez et réservez en quelques secondes.</div>
+  <div class="page-subtitle">Nous vous avons préparé un prgramme de qualité pour des clients de qualité !</div>
   <div id="content"><div class="empty"><div class="icon">⏳</div>Chargement du programme…</div></div>
 </div>
+<div class="end">
+  <p>C'est tout pour le moment ! Si vous avez des suggestions, n'hésitez pas à nous en faire part !</p>
 
 <script>
 function formatDate(d) {
@@ -205,7 +207,7 @@ function formatDate(d) {
   const diffDays = Math.round((date - today) / 86400000);
   if (diffDays === 0) return "Aujourd'hui";
   if (diffDays === 1) return "Demain";
-  return date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+  return date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long" });
 }
 
 function buildFilmCard(film) {
