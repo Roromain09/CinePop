@@ -661,7 +661,32 @@ app.post("/api/admin/seances/supprimer", async (req, res) => {
     if (error) return res.status(500).send(error.message);
     res.send("Séance supprimée");
 });
+app.get("/api/admin/support", async (req, res) => {
+    const { data, error } = await supabase
+        .from("support_messages")
+        .select("*")
+        .order("created_at", { ascending: false });
+    if (error) return res.status(500).json({ ok: false, error: error.message });
+    res.json({ ok: true, messages: data });
+});
 
+app.post("/api/admin/support/traiter", async (req, res) => {
+    const { id } = req.body;
+    if (!id) return res.status(400).send("ID manquant");
+    const { error } = await supabase.from("support_messages")
+        .update({ status: "traité" })
+        .eq("id", id);
+    if (error) return res.status(500).send(error.message);
+    res.send("Message marqué comme traité");
+});
+
+app.post("/api/admin/support/supprimer", async (req, res) => {
+    const { id } = req.body;
+    if (!id) return res.status(400).send("ID manquant");
+    const { error } = await supabase.from("support_messages").delete().eq("id", id);
+    if (error) return res.status(500).send(error.message);
+    res.send("Message supprimé");
+});
 // ============================================
 //  VÉRIFICATION QR CODE
 // ============================================
