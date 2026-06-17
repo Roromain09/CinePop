@@ -186,6 +186,51 @@ app.get("/api/programme", async (req, res) => {
 
     res.json({ ok: true, films });
 });
+// ============================================
+//  HISTORIQUE (public) — séances passées (30 derniers jours)
+// ============================================
+app.get("/api/historique", async (req, res) => {
+    const nowTime = now();
+    const limitDate = nowTime.minus({ days: 30 });
+
+    const { data, error } = await supabase
+        .from("seances")
+        .select(`
+            id, room_number, session_date, session_time, capacity,
+            films ( title, poster_url, genre ),
+            reservations ( people_number, status )
+        `);
+
+    if (error) {
+        console.error(error);
+        return res.status(500).json({ ok: false, error: "Erreur lors du chargement de l'historique" });
+    }
+
+    const seances = (data || [])
+        .map(s => {
+            const dt = sessionDateTimeOf(s.session_date, (s.session_time || "").slice(0, 5));
+            const occupied = (s.reservations || [])
+                .filter(r => r.status !== "refusé")
+                .reduce((sum, r) => sum + (r.people_number || 0), 0);
+            return {
+                id: s.id,
+                filmTitle: s.films?.title || "",
+                posterUrl: s.films?.poster_url || null,
+                genre: s.films?.genre || null,
+                roomNumber: s.room_number,
+                sessionDate: s.session_date,
+                sessionTime: (s.session_time || "").slice(0, 5),
+                capacity: s.capacity,
+                occupied,
+                dt
+            };
+        })
+        .filter(s => s.dt.isValid && s.dt < nowTime && s.dt >= limitDate)
+        .sort((a, b) => b.dt.toMillis() - a.dt.toMillis())
+        .map(({ dt, ...rest }) => rest);
+
+    res.json({ ok: true, seances });
+});
 
 // ============================================
 //  RÉSERVATION CLIENT
