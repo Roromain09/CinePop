@@ -461,26 +461,28 @@ h1 {
   <div class="programme-section">
     <h2>🎬 Films</h2>
     <div class="inline-form">
-      <input id="film-title" type="text" placeholder="Titre *">
-      <input id="film-genre" type="text" placeholder="Genre">
-      <input id="film-duration" type="number" placeholder="Durée (min)">
-      <input id="film-poster" type="text" placeholder="URL affiche (facultatif)">
-      <input id="film-synopsis" type="text" placeholder="Synopsis (facultatif)">
-      <button class="btn btn-validate" onclick="creerFilm()">➕ Ajouter le film</button>
-    </div>
+  <input id="film-title" type="text" placeholder="Titre *">
+  <input id="film-genre" type="text" placeholder="Genre">
+  <input id="film-duration" type="number" placeholder="Durée (min)">
+  <input id="film-poster" type="text" placeholder="URL affiche (facultatif)">
+  <input id="film-synopsis" type="text" placeholder="Synopsis (facultatif)">
+  <button id="film-submit-btn" class="btn btn-validate" onclick="creerFilm()">➕ Ajouter le film</button>
+  <button id="film-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditFilm()">✖ Annuler</button>
+</div>
     <div id="films-list"></div>
   </div>
 
   <div class="programme-section">
     <h2>🗓 Séances</h2>
     <div class="inline-form">
-      <select id="seance-film"></select>
-      <input id="seance-room" type="text" placeholder="Salle">
-      <input id="seance-date" type="date">
-      <input id="seance-time" type="time">
-      <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
-      <button class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
-    </div>
+  <select id="seance-film"></select>
+  <input id="seance-room" type="text" placeholder="Salle">
+  <input id="seance-date" type="date">
+  <input id="seance-time" type="time">
+  <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
+  <button id="seance-submit-btn" class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
+  <button id="seance-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
+</div>
     <div id="seances-list"></div>
   </div>
 </div>
@@ -576,7 +578,7 @@ function buildCard(r) {
   } else if (r.status === "validé") {
     actions = `
       ${statusChip}
-      <button class="btn btn-reprint"  onclick="reimprimerTicket('${r.id}')">🎫 Obtenir de nouveau le ticket</button>
+      <button class="btn btn-reprint"  onclick="reimprimerTicket('${r.id}')">🎫 Obtenir le ticket</button>
       <button class="btn btn-delete"   style="margin-left:auto;" onclick="supprimer('${r.id}')">🗑 Supprimer</button>`;
   } else {
     actions = `
@@ -672,23 +674,18 @@ async function valider(id) {
     const res = await fetch(`/api/admin/valider`, {
       method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
     });
-    if (!res.ok) { alert("Erreur lors de la génération du PDF"); hideLoader(); return; }
-    const blob = await res.blob();
-    const url  = window.URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href = url; a.download = `ticket-${id}.pdf`; a.click();
-    window.URL.revokeObjectURL(url);
-  } catch { alert("Erreur serveur !"); }
+    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
+  } catch { alert("Erreur serveur !"); hideLoader(); return; }
   hideLoader(); load();
 }
 
 async function reimprimerTicket(id) {
   showLoader();
   try {
-    const res = await fetch(`/api/admin/valider`, {
+    const res = await fetch(`/api/admin/ticket`, {
       method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
     });
-    if (!res.ok) { alert("Erreur lors de la génération du PDF"); hideLoader(); return; }
+    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
     const blob = await res.blob();
     const url  = window.URL.createObjectURL(blob);
     const a    = document.createElement("a");
@@ -765,6 +762,8 @@ async function creer() {
 }
 
 /* ── PROGRAMME : FILMS ── */
+let editingFilmId = null;
+
 function buildFilmRow(f) {
   const meta = [f.genre, f.duration_minutes ? `${f.duration_minutes} min` : null].filter(Boolean).join(" • ");
   return `
@@ -774,9 +773,54 @@ function buildFilmRow(f) {
         <div class="meta">${meta || "—"}</div>
       </div>
       <div class="row-actions">
+        <button class="btn btn-edit" onclick="editFilm('${f.id}')">✏️ Modifier</button>
         <button class="btn btn-delete" onclick="supprimerFilm('${f.id}')">🗑 Supprimer</button>
       </div>
     </div>`;
+}
+
+function editFilm(id) {
+  const f = filmsCache.find(x => x.id === id);
+  if (!f) return;
+  editingFilmId = id;
+  document.getElementById("film-title").value = f.title || "";
+  document.getElementById("film-genre").value = f.genre || "";
+  document.getElementById("film-duration").value = f.duration_minutes || "";
+  document.getElementById("film-poster").value = f.poster_url || "";
+  document.getElementById("film-synopsis").value = f.synopsis || "";
+  document.getElementById("film-submit-btn").textContent = "💾 Enregistrer les modifications";
+  document.getElementById("film-cancel-btn").style.display = "inline-block";
+  document.getElementById("film-title").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function cancelEditFilm() {
+  editingFilmId = null;
+  ["film-title","film-genre","film-duration","film-poster","film-synopsis"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("film-submit-btn").textContent = "➕ Ajouter le film";
+  document.getElementById("film-cancel-btn").style.display = "none";
+}
+
+async function creerFilm() {
+  const title = document.getElementById("film-title").value.trim();
+  if (!title) { alert("Le titre est obligatoire."); return; }
+  const payload = {
+    title,
+    genre: document.getElementById("film-genre").value.trim(),
+    durationMinutes: document.getElementById("film-duration").value.trim(),
+    posterUrl: document.getElementById("film-poster").value.trim(),
+    synopsis: document.getElementById("film-synopsis").value.trim()
+  };
+  const isEdit = !!editingFilmId;
+  if (isEdit) payload.id = editingFilmId;
+  showLoader();
+  try {
+    const res = await fetch(isEdit ? `/api/admin/films/modifier` : `/api/admin/films/creer`, {
+      method: "POST", headers: adminHeaders(), body: JSON.stringify(payload)
+    });
+    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
+    cancelEditFilm();
+  } catch { alert("Erreur serveur !"); }
+  hideLoader(); loadProgramme();
 }
 
 async function loadFilms() {
@@ -793,26 +837,6 @@ async function loadFilms() {
     : `<option value="">Crée d'abord un film</option>`;
 }
 
-async function creerFilm() {
-  const title = document.getElementById("film-title").value.trim();
-  if (!title) { alert("Le titre est obligatoire."); return; }
-  showLoader();
-  try {
-    const res = await fetch(`/api/admin/films/creer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({
-        title,
-        genre: document.getElementById("film-genre").value.trim(),
-        durationMinutes: document.getElementById("film-duration").value.trim(),
-        posterUrl: document.getElementById("film-poster").value.trim(),
-        synopsis: document.getElementById("film-synopsis").value.trim()
-      })
-    });
-    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
-    ["film-title","film-genre","film-duration","film-poster","film-synopsis"].forEach(id => document.getElementById(id).value = "");
-  } catch { alert("Erreur serveur !"); }
-  hideLoader(); loadProgramme();
-}
-
 async function supprimerFilm(id) {
   if (!confirm("Supprimer ce film ? Ses séances seront aussi supprimées.")) return;
   showLoader();
@@ -826,6 +850,8 @@ async function supprimerFilm(id) {
 }
 
 /* ── PROGRAMME : SÉANCES ── */
+let editingSeanceId = null;
+
 function buildSeanceRow(s) {
   return `
     <div class="seance-row">
@@ -834,11 +860,59 @@ function buildSeanceRow(s) {
         <div class="meta">${s.room_number || "Salle non précisée"} • Capacité ${s.capacity}</div>
       </div>
       <div class="row-actions">
+        <button class="btn btn-edit" onclick="editSeance('${s.id}')">✏️ Modifier</button>
         <button class="btn btn-delete" onclick="supprimerSeance('${s.id}')">🗑 Supprimer</button>
       </div>
     </div>`;
 }
 
+function editSeance(id) {
+  const s = seancesCache.find(x => x.id === id);
+  if (!s) return;
+  editingSeanceId = id;
+  document.getElementById("seance-film").value = s.film_id;
+  document.getElementById("seance-room").value = s.room_number || "";
+  document.getElementById("seance-date").value = s.session_date || "";
+  document.getElementById("seance-time").value = (s.session_time || "").slice(0,5);
+  document.getElementById("seance-capacity").value = s.capacity || 50;
+  document.getElementById("seance-submit-btn").textContent = "💾 Enregistrer les modifications";
+  document.getElementById("seance-cancel-btn").style.display = "inline-block";
+  document.getElementById("seance-film").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function cancelEditSeance() {
+  editingSeanceId = null;
+  document.getElementById("seance-room").value = "";
+  document.getElementById("seance-date").value = "";
+  document.getElementById("seance-time").value = "";
+  document.getElementById("seance-capacity").value = 50;
+  document.getElementById("seance-submit-btn").textContent = "➕ Ajouter la séance";
+  document.getElementById("seance-cancel-btn").style.display = "none";
+}
+
+async function creerSeance() {
+  const filmId = document.getElementById("seance-film").value;
+  const sessionDate = document.getElementById("seance-date").value;
+  const sessionTime = document.getElementById("seance-time").value;
+  if (!filmId || !sessionDate || !sessionTime) { alert("Film, date et heure sont obligatoires."); return; }
+  const payload = {
+    filmId,
+    roomNumber: document.getElementById("seance-room").value.trim(),
+    sessionDate, sessionTime,
+    capacity: document.getElementById("seance-capacity").value.trim()
+  };
+  const isEdit = !!editingSeanceId;
+  if (isEdit) payload.id = editingSeanceId;
+  showLoader();
+  try {
+    const res = await fetch(isEdit ? `/api/admin/seances/modifier` : `/api/admin/seances/creer`, {
+      method: "POST", headers: adminHeaders(), body: JSON.stringify(payload)
+    });
+    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
+    cancelEditSeance();
+  } catch { alert("Erreur serveur !"); }
+  hideLoader(); loadSeances();
+}
 async function loadSeances() {
   const res = await fetch(`/api/admin/seances`, { headers: adminHeaders() });
   const data = await res.json();
@@ -848,29 +922,6 @@ async function loadSeances() {
     : emptyState("🗓", "Aucune séance programmée.");
 
   fillSeanceSelect(document.getElementById("f-seanceId"));
-}
-
-async function creerSeance() {
-  const filmId = document.getElementById("seance-film").value;
-  const sessionDate = document.getElementById("seance-date").value;
-  const sessionTime = document.getElementById("seance-time").value;
-  if (!filmId || !sessionDate || !sessionTime) { alert("Film, date et heure sont obligatoires."); return; }
-  showLoader();
-  try {
-    const res = await fetch(`/api/admin/seances/creer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({
-        filmId,
-        roomNumber: document.getElementById("seance-room").value.trim(),
-        sessionDate, sessionTime,
-        capacity: document.getElementById("seance-capacity").value.trim()
-      })
-    });
-    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
-    document.getElementById("seance-room").value = "";
-    document.getElementById("seance-date").value = "";
-    document.getElementById("seance-time").value = "";
-  } catch { alert("Erreur serveur !"); }
-  hideLoader(); loadSeances();
 }
 
 async function supprimerSeance(id) {
