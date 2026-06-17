@@ -243,6 +243,7 @@ app.post("/api/reserver", async (req, res) => {
 });
 
 // Consulter ses réservations par nom (public, utilisé par check.html)
+// Correspondance EXACTE (insensible à la casse) sur le nom du client.
 app.get("/api/reservation", async (req, res) => {
     const name = (req.query.name || "").trim().toLowerCase();
     if (!name) {
@@ -252,7 +253,7 @@ app.get("/api/reservation", async (req, res) => {
     const { data, error } = await supabase
         .from("reservations")
         .select(RESA_SELECT)
-        .ilike("client_name", `%${name}%`);
+        .ilike("client_name", name);
 
     if (error) {
         console.error(error);
