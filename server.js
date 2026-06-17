@@ -311,7 +311,20 @@ app.get("/api/reservation", async (req, res) => {
 
     res.json({ ok: true, reservations: data.map(flattenReservation) });
 });
-
+app.post("/api/support", async (req, res) => {
+    const { email, subject, message } = req.body;
+    if (!email || !subject || !message) {
+        return res.status(400).send("Champs obligatoires manquants.");
+    }
+    const { error } = await supabase.from("support_messages").insert({
+        email, subject, message
+    });
+    if (error) {
+        console.error(error);
+        return res.status(500).send("Erreur lors de l'envoi du message.");
+    }
+    res.send("Message envoyé");
+});
 // ============================================
 //  ADMIN — RÉSERVATIONS  (protégé par requireAdmin)
 // ============================================
