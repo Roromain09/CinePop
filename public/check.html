@@ -5,76 +5,150 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mes réservations — CinéPop</title>
 <style>
-:root {
-  --jaune: #f5b700;
-}
-body {
-  background: #0a192f;
-  color: white;
-  font-family: Arial, sans-serif;
-  padding: 0 0 20px;
-  text-align: center;
-}
+  :root {
+    --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+    --jaune: #f5b700; --jaune-soft: #ffd84d;
+    --blanc: #ffffff; --gris: #a7b3d1;
+    --vert: #39d98a; --rouge: #ff6b6b; --orange: #ff8c66;
+    --ombre: rgba(0, 0, 0, 0.45);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
+    color: var(--blanc);
+    background:
+      radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+      linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+    padding-bottom: 60px;
+  }
 
-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 22px 32px;
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: left;
-}
-.logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; color: white; }
-.logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
-.nav-links { display:flex; gap:8px; }
-.nav-links a {
-  color: #a7b3d1; text-decoration:none; font-weight:600; font-size:0.92rem;
-  padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
-}
-.nav-links a:hover, .nav-links a.active { color: white; background: rgba(255,255,255,0.07); }
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+  .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+  .nav-links { display:flex; gap:8px; }
+  .nav-links a {
+    color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+    padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
 
-h1 {
-  color: var(--jaune);
-  margin-bottom: 20px;
-}
+  .wrap { max-width: 720px; margin: 0 auto; padding: 10px 24px; }
 
-input {
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  width: 250px;
-  text-align: center;
-  margin-top: 10px;
-}
+  .search-card {
+    background: rgba(17, 34, 64, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 36px;
+    box-shadow: 0 24px 70px var(--ombre);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .search-card::before {
+    content: ""; position: absolute; top:0; left:0; right:0; height: 5px;
+    background: linear-gradient(90deg, var(--jaune), var(--jaune-soft));
+  }
 
-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  background: var(--jaune);
-  color: #0a192f;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
+  .brand-pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 999px;
+    background: rgba(245, 183, 0, 0.12); color: var(--jaune-soft);
+    font-weight: 700; border: 1px solid rgba(245, 183, 0, 0.22);
+    margin-bottom: 20px;
+  }
+  .brand-pill .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
 
-#result {
-  margin-top: 30px;
-  text-align: left;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 20px;
-}
+  h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); font-weight: 900; margin-bottom: 10px; }
+  .page-subtitle { color: var(--gris); margin-bottom: 26px; line-height: 1.6; }
 
-.card {
-  background: #112240;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
+  .search-row { display: flex; gap: 10px; }
+  input {
+    flex: 1; padding: 15px 16px; border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.05); color: var(--blanc);
+    font-size: 1rem; outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  }
+  input::placeholder { color: rgba(255, 255, 255, 0.45); }
+  input:focus {
+    border-color: var(--jaune); background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(245, 183, 0, 0.14); transform: translateY(-1px);
+  }
+  button {
+    padding: 15px 26px; border: none; border-radius: 14px;
+    background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
+    font-size: 1rem; font-weight: 900; letter-spacing: 0.3px; cursor: pointer;
+    box-shadow: 0 12px 28px rgba(245, 183, 0, 0.24);
+    transition: transform 0.2s ease;
+  }
+  button:hover { transform: translateY(-2px); }
+
+  #result { display: flex; flex-direction: column; gap: 14px; }
+
+  .resa-card {
+    background: rgba(17, 34, 64, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 20px 22px;
+    box-shadow: 0 14px 36px var(--ombre);
+    text-align: left;
+  }
+  .card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .film-name { font-size: 1.05rem; font-weight: 800; }
+
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 999px;
+    font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
+  }
+  .chip-attente { background: rgba(245,183,0,0.14); color: var(--jaune-soft); }
+  .chip-valide  { background: rgba(57,217,138,0.14); color: var(--vert); }
+  .chip-refuse  { background: rgba(255,107,107,0.14); color: var(--rouge); }
+  .chip-expire  { background: rgba(255,140,102,0.14); color: var(--orange); }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 18px;
+  }
+  .card-field { display: flex; flex-direction: column; gap: 2px; }
+  .field-label {
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--gris);
+  }
+  .field-value { font-size: 0.92rem; color: var(--blanc); }
+
+  .empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--gris);
+  }
+  .empty-icon { font-size: 2.2rem; margin-bottom: 12px; }
+
+  .error-card {
+    padding: 14px 16px; border-radius: 14px;
+    background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3);
+    color: #ffd6d6; font-size: 0.92rem; text-align: center;
+  }
+
+  @media (max-width: 540px) {
+    .search-row { flex-direction: column; }
+    .search-card { padding: 28px 22px; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 
@@ -89,44 +163,86 @@ button {
   </div>
 </nav>
 
-<h1>🔍 Consulter ma réservation</h1>
+<div class="wrap">
+  <div class="search-card">
+    <div class="brand-pill"><span class="dot"></span> CINÉPOP — Suivi</div>
+    <h1>🔍 Mes réservations</h1>
+    <p class="page-subtitle">Entre le nom utilisé lors de ta réservation pour retrouver son statut.</p>
+    <div class="search-row">
+      <input id="name" type="text" placeholder="Nom Prénom" onkeydown="if(event.key==='Enter') search()">
+      <button onclick="search()">Rechercher</button>
+    </div>
+  </div>
 
-<input id="name" type="text" placeholder="Entrez votre nom">
-<br>
-<button onclick="search()">Rechercher</button>
-
-<div id="result"></div>
+  <div id="result"></div>
+</div>
 
 <script>
+const resultDiv = document.getElementById("result");
+const nameInput = document.getElementById("name");
+
+const STATUS = {
+  "en attente": { icon: "⏳", label: "En attente", chip: "chip-attente" },
+  "validé":     { icon: "✅", label: "Validé",     chip: "chip-valide" },
+  "refusé":     { icon: "❌", label: "Refusé",     chip: "chip-refuse" },
+  "expiré":     { icon: "⏱", label: "Expiré",     chip: "chip-expire" }
+};
+
+function formatDate(d) {
+  const date = new Date(d + "T00:00:00");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((date - today) / 86400000);
+  if (diffDays === 0) return "Aujourd'hui";
+  if (diffDays === 1) return "Demain";
+  return date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+}
+
+function emptyState(icon, msg) {
+  return `<div class="empty"><div class="empty-icon">${icon}</div>${msg}</div>`;
+}
+
+function buildCard(r) {
+  const st = STATUS[r.status] || { icon: "•", label: r.status, chip: "" };
+  return `
+    <div class="resa-card">
+      <div class="card-header">
+        <span class="film-name">🎬 ${r.filmTitle}</span>
+        <span class="status-chip ${st.chip}">${st.icon} ${st.label}</span>
+      </div>
+      <div class="card-grid">
+        <div class="card-field"><span class="field-label">Client</span><span class="field-value">${r.clientName}</span></div>
+        <div class="card-field"><span class="field-label">Personnes</span><span class="field-value">🎟 ${r.peopleNumber}</span></div>
+        <div class="card-field"><span class="field-label">Date</span><span class="field-value">📅 ${formatDate(r.sessionDate)}</span></div>
+        <div class="card-field"><span class="field-label">Heure</span><span class="field-value">🕐 ${r.sessionTime}</span></div>
+        ${r.roomNumber ? `<div class="card-field"><span class="field-label">Salle</span><span class="field-value">🏛 ${r.roomNumber}</span></div>` : ""}
+      </div>
+    </div>`;
+}
+
 async function search() {
-  const name = document.getElementById("name").value.trim();
-  const resultDiv = document.getElementById("result");
+  const name = nameInput.value.trim();
 
   if (!name) {
-    resultDiv.innerHTML = "<p style='color:red;'>Veuillez entrer un nom.</p>";
+    resultDiv.innerHTML = `<div class="error-card">⚠ Merci d'entrer un nom.</div>`;
     return;
   }
 
-  resultDiv.innerHTML = "<p>Recherche en cours...</p>";
+  resultDiv.innerHTML = emptyState("⏳", "Recherche en cours…");
 
-  const res = await fetch(`/api/reservation?name=${encodeURIComponent(name)}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`/api/reservation?name=${encodeURIComponent(name)}`);
+    const data = await res.json();
 
-  if (!data.ok) {
-    resultDiv.innerHTML = `<p style='color:red;'>${data.error}</p>`;
-    return;
+    if (!data.ok) {
+      resultDiv.innerHTML = emptyState("🔍", data.error || "Aucune réservation trouvée.");
+      return;
+    }
+
+    resultDiv.innerHTML = data.reservations.map(buildCard).join("");
+  } catch {
+    resultDiv.innerHTML = `<div class="error-card">Erreur lors de la recherche. Réessaie.</div>`;
   }
-
-  resultDiv.innerHTML = data.reservations.map(r => `
-    <div class="card">
-      <p><b>Client :</b> ${r.clientName}</p>
-      <p><b>Nombre :</b> ${r.peopleNumber}</p>
-      <p><b>Film :</b> ${r.filmTitle}</p>
-      <p><b>Date :</b> ${r.sessionDate}</p>
-      <p><b>Heure :</b> ${r.sessionTime}</p>
-      <p><b>Statut :</b> ${r.status}</p>
-    </div>
-  `).join("");
 }
 </script>
 
