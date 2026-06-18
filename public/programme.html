@@ -539,6 +539,9 @@ async function load() {
     const res = await fetch("/api/programme");
     const data = await res.json();
 
+    programmeFilms = data.ok ? data.films : [];
+    if (currentView === "calendar") renderCalendar();
+
     if (!data.ok || data.films.length === 0) {
       content.innerHTML = `<div class="empty"><div class="icon">🎞️</div>Aucune séance programmée pour le moment.</div>`;
       return;
