@@ -23,6 +23,7 @@
   --green: #00e896;
   --orange: #ff8c00;
   --blue: #4da6ff;
+  --purple: #b388ff;
   --text: #e8eaf0;
   --text-muted: #7b8ba0;
   --border: rgba(245,183,0,0.12);
@@ -129,12 +130,15 @@ h1 {
 .tab-btn.active-refuse   { background: rgba(255,68,85,0.13);  color: var(--red);    }
 .tab-btn.active-expire   { background: rgba(255,140,0,0.13);  color: var(--orange); }
 .tab-btn.active-programme{ background: rgba(77,166,255,0.13); color: var(--blue);   }
+.tab-btn.active-support { background: rgba(179,136,255,0.15); color: var(--purple); }
+.tab-btn.active-support .badge { background: var(--purple); color: var(--bg); }
 
 .tab-btn.active-attente  .badge { background: var(--gold);   color: var(--bg); }
 .tab-btn.active-valide   .badge { background: var(--green);  color: var(--bg); }
 .tab-btn.active-refuse   .badge { background: var(--red);    color: #fff; }
 .tab-btn.active-expire   .badge { background: var(--orange); color: #fff; }
 .tab-btn.active-programme.badge { background: var(--blue);   color: #fff; }
+
 
 /* ─── PANELS ─── */
 .tab-panel { display: none; flex-direction: column; gap: 14px; }
@@ -211,6 +215,16 @@ h1 {
   font-family: monospace;
   margin-bottom: 14px;
 }
+.support-message {
+  font-size: 0.86rem;
+  color: var(--text);
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 12px 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
 .card-actions {
   display: flex;
@@ -231,6 +245,8 @@ h1 {
 .chip-valide  { background: rgba(0,232,150,0.12); color: var(--green); }
 .chip-refuse  { background: rgba(255,68,85,0.12);  color: var(--red); }
 .chip-expire  { background: rgba(255,140,0,0.12);  color: var(--orange); }
+.chip-nouveau { background: rgba(245,183,0,0.12); color: var(--gold); }
+.chip-traite  { background: rgba(0,232,150,0.12); color: var(--green); }
 
 /* ─── BUTTONS ─── */
 .btn {
@@ -500,6 +516,9 @@ h1 {
   <button class="tab-btn" id="tab-programme" onclick="switchTab('programme')">
     🎞 Programme
   </button>
+  <button class="tab-btn" id="tab-support" onclick="switchTab('support')">
+    📩 Support <span class="badge" id="count-support">0</span>
+  </button>
 </div>
 
 <!-- PANELS -->
@@ -541,6 +560,7 @@ h1 {
     <div id="seances-list"></div>
   </div>
 </div>
+  <div class="tab-panel" id="panel-support"></div>
 </div>
 <!-- FAB -->
 <button onclick="toggleForm()" id="fab">➕</button>
@@ -585,6 +605,7 @@ async function checkPassword() {
     document.getElementById("login-screen").style.display = "none";
     load();
     loadProgramme();
+    loadSupport();
   } else {
     document.getElementById("error-msg").style.display = "block";
   }
@@ -601,13 +622,13 @@ function hideLoader() { document.getElementById("loader").style.display = "none"
 /* ── TABS ── */
 function switchTab(tab) {
   currentTab = tab;
-  ["attente","valide","refuse","expire","programme"].forEach(t => {
+  ["attente","valide","refuse","expire","programme","support"].forEach(t => {
     document.getElementById(`panel-${t}`).classList.toggle("visible", t === tab);
     const btn = document.getElementById(`tab-${t}`);
     btn.className = "tab-btn";
     if (t === tab) btn.classList.add(`active-${t}`);
   });
-  document.getElementById("fab").style.display = (tab === "programme") ? "none" : "flex";
+  document.getElementById("fab").style.display = (tab === "programme" || tab === "support") ? "none" : "flex";
 }
 
 /* ── SORT HELPER ── */
@@ -815,7 +836,72 @@ async function creer() {
   }
   hideLoader(); load();
 }
+/* ── SUPPORT ── */
+function buildSupportCard(m) {
+  const isNouveau = m.status === "nouveau";
+  const chip = isNouveau
+    ? `<span class="status-chip chip-nouveau">🆕 Nouveau</span>`
+    : `<span class="status-chip chip-traite">✅ Traité</span>`;
+  const date = new Date(m.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
+  return `
+    <div class="resa-card">
+      <div class="card-header">
+        <span class="client-name">✉️ ${m.email}</span>
+        ${chip}
+      </div>
+      <div class="card-grid">
+        <div class="card-field">
+          <span class="field-label">Objet</span>
+          <span class="field-value">${m.subject}</span>
+        </div>
+        <div class="card-field">
+          <span class="field-label">Reçu le</span>
+          <span class="field-value">🕐 ${date}</span>
+        </div>
+      </div>
+      <div class="support-message">${m.message}</div>
+      <div class="card-actions" style="margin-top:14px;">
+        ${isNouveau ? `<button class="btn btn-validate" onclick="marquerTraite('${m.id}')">✅ Marquer traité</button>` : ""}
+        <button class="btn btn-delete" onclick="supprimerSupport('${m.id}')">🗑 Supprimer</button>
+      </div>
+    </div>`;
+}
+
+async function loadSupport() {
+  const res = await fetch(`/api/admin/support`, { headers: adminHeaders() });
+  const data = await res.json();
+  const messages = data.messages || [];
+
+  document.getElementById("count-support").textContent = messages.filter(m => m.status === "nouveau").length;
+
+  document.getElementById("panel-support").innerHTML = messages.length
+    ? messages.map(buildSupportCard).join("")
+    : emptyState("📩", "Aucun message de support.");
+}
+
+async function marquerTraite(id) {
+  showLoader();
+  try {
+    const res = await fetch(`/api/admin/support/traiter`, {
+      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
+    });
+    if (!res.ok) alert(await res.text());
+  } catch { alert("Erreur serveur !"); }
+  hideLoader(); loadSupport();
+}
+
+async function supprimerSupport(id) {
+  if (!confirm("Supprimer définitivement ce message ?")) return;
+  showLoader();
+  try {
+    const res = await fetch(`/api/admin/support/supprimer`, {
+      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
+    });
+    if (!res.ok) alert(await res.text());
+  } catch { alert("Erreur serveur !"); }
+  hideLoader(); loadSupport();
+}
 /* ── PROGRAMME : FILMS ── */
 let editingFilmId = null;
 
@@ -997,7 +1083,7 @@ async function loadProgramme() {
 }
 
 /* ── AUTO REFRESH ── */
-setInterval(() => { if (ADMIN_PASS) load(); }, 5000);
+setInterval(() => { if (ADMIN_PASS) { load(); loadSupport(); } }, 5000);
 </script>
 </body>
 </html>
