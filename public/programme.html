@@ -221,13 +221,153 @@
 <div class="wrap">
   <div class="page-title">🎬 Programme</div>
   <div class="page-subtitle">Nous vous avons préparé un prgramme de qualité pour des clients de qualité !</div>
+
+  <div class="view-toggle">
+    <button id="viewListBtn" class="view-btn active" onclick="setView('list')">📋 Vue liste</button>
+    <button id="viewCalendarBtn" class="view-btn" onclick="setView('calendar')">📅 Vue calendrier</button>
+  </div>
+
   <div id="content"><div class="empty"><div class="icon">⏳</div>Chargement du programme…</div></div>
+
+  <div id="calendarView" class="calendar-view" style="display:none;">
+    <div class="calendar-card">
+      <div class="calendar-header">
+        <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+        <div class="calendar-month-label" id="calendarMonthLabel"></div>
+        <button class="cal-nav" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="calendar-grid" id="calendarWeekdays"></div>
+      <div class="calendar-grid" id="calendarDays"></div>
+    </div>
+  </div>
+
   <div class="page-subtitle">C'est tout pour le moment ! Si vous avez des suggestions, n'hésitez pas à nous en faire part !</div>
 
+</div>
+
+<div id="dayModalOverlay" class="day-modal-overlay" onclick="closeDayModal(event)">
+  <div class="day-modal" onclick="event.stopPropagation()">
+    <div class="day-modal-header">
+      <div class="day-modal-title" id="dayModalTitle"></div>
+      <button class="day-modal-close" onclick="closeDayModal()">✕</button>
+    </div>
+    <div class="day-modal-body" id="dayModalBody"></div>
+  </div>
 </div>
   
 
 <script>
+  let programmeFilms = [];
+let currentView = "list";
+const calToday = new Date();
+let calendarYear = calToday.getFullYear();
+let calendarMonth = calToday.getMonth();
+const MONTH_NAMES = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+const WEEKDAYS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+
+function setView(view) {
+  currentView = view;
+  document.getElementById("viewListBtn").classList.toggle("active", view === "list");
+  document.getElementById("viewCalendarBtn").classList.toggle("active", view === "calendar");
+  document.getElementById("content").style.display = view === "list" ? "" : "none";
+  document.getElementById("calendarView").style.display = view === "calendar" ? "" : "none";
+  if (view === "calendar") renderCalendar();
+}
+
+function changeMonth(delta) {
+  calendarMonth += delta;
+  if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+  if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+  renderCalendar();
+}
+
+function flattenSeances(films) {
+  const list = [];
+  films.forEach(film => {
+    film.seances.forEach(s => {
+      list.push({
+        id: s.id,
+        filmTitle: film.title,
+        roomNumber: s.roomNumber,
+        sessionDate: s.sessionDate,
+        sessionTime: s.sessionTime,
+        remaining: s.remaining
+      });
+    });
+  });
+  return list;
+}
+
+function renderCalendar() {
+  document.getElementById("calendarMonthLabel").textContent = `${MONTH_NAMES[calendarMonth]} ${calendarYear}`;
+  document.getElementById("calendarWeekdays").innerHTML = WEEKDAYS.map(w => `<div class="calendar-weekday">${w}</div>`).join("");
+
+  const seancesByDate = {};
+  flattenSeances(programmeFilms).forEach(s => {
+    (seancesByDate[s.sessionDate] = seancesByDate[s.sessionDate] || []).push(s);
+  });
+
+  const pad = n => String(n).padStart(2, "0");
+  const firstOfMonth = new Date(calendarYear, calendarMonth, 1);
+  const startOffset = (firstOfMonth.getDay() + 6) % 7;
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+  let html = "";
+  for (let i = 0; i < startOffset; i++) html += `<div class="calendar-day empty"></div>`;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateKey = `${calendarYear}-${pad(calendarMonth + 1)}-${pad(d)}`;
+    const daySeances = seancesByDate[dateKey] || [];
+    const hasSeances = daySeances.length > 0;
+    const isToday = dateKey === todayKey;
+    html += `
+      <div class="calendar-day ${hasSeances ? "has-seances" : ""} ${isToday ? "today" : ""}" ${hasSeances ? `onclick="openDayModal('${dateKey}')"` : ""}>
+        <span class="day-number">${d}</span>
+        ${hasSeances ? `<span class="day-count">${daySeances.length}</span>` : ""}
+      </div>`;
+  }
+
+  document.getElementById("calendarDays").innerHTML = html;
+}
+
+function openDayModal(dateKey) {
+  const seances = flattenSeances(programmeFilms)
+    .filter(s => s.sessionDate === dateKey)
+    .sort((a, b) => a.sessionTime.localeCompare(b.sessionTime));
+
+  const dateObj = new Date(dateKey + "T00:00:00");
+  document.getElementById("dayModalTitle").textContent =
+    dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+
+  document.getElementById("dayModalBody").innerHTML = seances.map(s => {
+    const full = s.remaining <= 0;
+    const low = !full && s.remaining <= 5;
+    const remClass = full ? "full" : (low ? "low" : "");
+    const remText = full ? "Complet" : `${s.remaining} place(s) restante(s)`;
+    const btn = full
+      ? `<span class="btn-reserve disabled">Complet</span>`
+      : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
+    return `
+      <div class="day-seance-item">
+        <div class="day-seance-film">${s.filmTitle}</div>
+        <div class="day-seance-meta">
+          <span>🕐 <b>${s.sessionTime}</b></span>
+          ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
+          <span class="remaining ${remClass}">${remText}</span>
+        </div>
+        ${btn}
+      </div>`;
+  }).join("");
+
+  document.getElementById("dayModalOverlay").classList.add("show");
+}
+
+function closeDayModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById("dayModalOverlay").classList.remove("show");
+}
 function formatDate(d) {
   const date = new Date(d + "T00:00:00");
   const today = new Date();
