@@ -999,11 +999,16 @@ async function supprimerFilm(id) {
 /* ── PROGRAMME : SÉANCES ── */
 let editingSeanceId = null;
 
+function formatDateFr(dateStr) {
+  const [y, m, d] = dateStr.split("-");
+  return `${d}/${m}/${y}`;
+}
+
 function buildSeanceRow(s) {
   return `
     <div class="seance-row">
       <div>
-        <div class="title">${s.films?.title || "?"} — ${s.session_date} ${s.session_time?.slice(0,5)}</div>
+        <div class="title">${s.films?.title || "?"} — ${formatDateFr(s.session_date)} ${s.session_time?.slice(0,5)}</div>
         <div class="meta">${s.room_number || "Salle non précisée"} • Capacité ${s.capacity}</div>
       </div>
       <div class="row-actions">
