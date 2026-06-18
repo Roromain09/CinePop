@@ -114,13 +114,39 @@
     @media (max-width: 540px) {
       .form-card { padding: 24px; border-radius: 22px; }
     }
+    .nav-toggle {
+  display: none;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--blanc);
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 8px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  nav { flex-wrap: wrap; }
+  .nav-toggle { display: block; }
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { text-align: center; padding: 12px 16px; }
+}
   </style>
 </head>
 <body>
 
 <nav>
   <div class="logo"><span class="dot"></span> CINÉPOP</div>
-  <div class="nav-links">
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
     <a href="/index.html">Accueil</a>
     <a href="/programme.html">Programme</a>
     <a href="/check.html">Mes réservations</a>
@@ -212,6 +238,9 @@
       submitBtn.textContent = "Envoyer le message";
     }
   });
+  document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("navLinks").classList.toggle("open");
+});
 </script>
 
 </body>
