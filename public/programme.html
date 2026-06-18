@@ -234,6 +234,8 @@
   transition: background 0.2s ease;
 }
 .cal-nav:hover { background: rgba(255,255,255,0.12); }
+.cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+.cal-nav:disabled:hover { background: rgba(255,255,255,0.05); }
 
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
 .calendar-weekday {
@@ -335,9 +337,9 @@
   <div id="calendarView" class="calendar-view" style="display:none;">
     <div class="calendar-card">
       <div class="calendar-header">
-        <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
-        <div class="calendar-month-label" id="calendarMonthLabel"></div>
-        <button class="cal-nav" onclick="changeMonth(1)">›</button>
+        <button class="cal-nav" id="calPrevBtn" onclick="changeMonth(-1)">‹</button>
+<div class="calendar-month-label" id="calendarMonthLabel"></div>
+<button class="cal-nav" id="calNextBtn" onclick="changeMonth(1)">›</button>
       </div>
       <div class="calendar-grid" id="calendarWeekdays"></div>
       <div class="calendar-grid" id="calendarDays"></div>
@@ -360,11 +362,13 @@
   
 
 <script>
-  let programmeFilms = [];
+let programmeFilms = [];
 let currentView = "list";
 const calToday = new Date();
 let calendarYear = calToday.getFullYear();
 let calendarMonth = calToday.getMonth();
+const MIN_MONTH_INDEX = calendarYear * 12 + calendarMonth;
+const MAX_MONTH_INDEX = MIN_MONTH_INDEX + 2;
 const MONTH_NAMES = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 const WEEKDAYS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
 
@@ -378,12 +382,12 @@ function setView(view) {
 }
 
 function changeMonth(delta) {
-  calendarMonth += delta;
-  if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
-  if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+  const index = calendarYear * 12 + calendarMonth + delta;
+  if (index < MIN_MONTH_INDEX || index > MAX_MONTH_INDEX) return;
+  calendarYear = Math.floor(index / 12);
+  calendarMonth = index % 12;
   renderCalendar();
 }
-
 function flattenSeances(films) {
   const list = [];
   films.forEach(film => {
@@ -433,6 +437,9 @@ function renderCalendar() {
   }
 
   document.getElementById("calendarDays").innerHTML = html;
+  const currentIndex = calendarYear * 12 + calendarMonth;
+  document.getElementById("calPrevBtn").disabled = currentIndex <= MIN_MONTH_INDEX;
+  document.getElementById("calNextBtn").disabled = currentIndex >= MAX_MONTH_INDEX;
 }
 
 function openDayModal(dateKey) {
