@@ -149,6 +149,31 @@
     .search-card { padding: 28px 22px; }
     .card-grid { grid-template-columns: 1fr; }
   }
+  .nav-toggle {
+  display: none;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--blanc);
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 8px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  nav { flex-wrap: wrap; }
+  .nav-toggle { display: block; }
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { text-align: center; padding: 12px 16px; }
+}
 </style>
 </head>
 
@@ -156,10 +181,11 @@
 
 <nav>
   <div class="logo"><span class="dot"></span> CINÉPOP</div>
- <div class="nav-links">
-    <a href="/index.html" class="active">Accueil</a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/index.html">Accueil</a>
     <a href="/programme.html">Programme</a>
-    <a href="/check.html">Mes réservations</a>
+    <a href="/check.html" class="active">Mes réservations</a>
     <a href="/historique.html">Historique</a>
     <a href="/support.html">Support</a>
   </div>
@@ -246,6 +272,9 @@ async function search() {
     resultDiv.innerHTML = `<div class="error-card">Erreur lors de la recherche. Réessaie.</div>`;
   }
 }
+  document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("navLinks").classList.toggle("open");
+});
 </script>
 
 </body>
