@@ -237,7 +237,12 @@
 .cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
 .cal-nav:disabled:hover { background: rgba(255,255,255,0.05); }
 
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
 .calendar-weekday {
   text-align: center; color: var(--gris); font-size: 0.76rem;
   font-weight: 700; text-transform: uppercase; padding-bottom: 8px;
@@ -435,7 +440,12 @@ function renderCalendar() {
         ${hasSeances ? `<span class="day-count">${daySeances.length}</span>` : ""}
       </div>`;
   }
+const totalCells = startOffset + daysInMonth;
+const remainingCells = (7 - (totalCells % 7)) % 7;
 
+for (let i = 0; i < remainingCells; i++) {
+  html += `<div class="calendar-day empty"></div>`;
+}
   document.getElementById("calendarDays").innerHTML = html;
   const currentIndex = calendarYear * 12 + calendarMonth;
   document.getElementById("calPrevBtn").disabled = currentIndex <= MIN_MONTH_INDEX;
