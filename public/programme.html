@@ -313,6 +313,39 @@
   .calendar-month-label { font-size: 1.05rem; }
   .cal-nav { width: 34px; height: 34px; font-size: 1.1rem; }
 }
+  .seance-cancelled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.seance-badge-annule {
+  display: inline-block;
+  background: rgba(255,68,85,0.18);
+  color: #ff6b6b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(77, 166, 255, 0.12);
+  border: 1px solid rgba(77, 166, 255, 0.3);
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin-top: 8px;
+  color: #9ecfff;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.info-banner .info-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  margin-top: 1px;
+}
 </style>
 </head>
 <body>
@@ -463,22 +496,26 @@ function openDayModal(dateKey) {
     dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
 
   document.getElementById("dayModalBody").innerHTML = seances.map(s => {
-    const full = s.remaining <= 0;
+    const full = s.remaining <= 0 || s.cancelled;
     const low = !full && s.remaining <= 5;
     const remClass = full ? "full" : (low ? "low" : "");
-    const remText = full ? "Complet" : `${s.remaining} place(s) restante(s)`;
+    const remText = s.cancelled ? "Annulée" : (full ? "Complet" : `${s.remaining} place(s) restante(s)`);
     const btn = full
-      ? `<span class="btn-reserve disabled">Complet</span>`
+      ? `<span class="btn-reserve disabled">${s.cancelled ? "Annulée" : "Complet"}</span>`
       : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
+    const infoBanner = s.infoMessage
+      ? `<div class="info-banner"><span class="info-icon">ℹ️</span><span>${s.infoMessage}</span></div>`
+      : "";
     return `
-      <div class="day-seance-item">
-        <div class="day-seance-film">${s.filmTitle}</div>
+      <div class="day-seance-item ${s.cancelled ? "seance-cancelled" : ""}">
+        <div class="day-seance-film">${s.filmTitle}${s.cancelled ? `<span class="seance-badge-annule">ANNULÉE</span>` : ""}</div>
         <div class="day-seance-meta">
           <span>🕐 <b>${s.sessionTime}</b></span>
           ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
           <span class="remaining ${remClass}">${remText}</span>
         </div>
         ${btn}
+        ${infoBanner}
       </div>`;
   }).join("");
 
@@ -507,23 +544,27 @@ function buildFilmCard(film) {
   const meta = [film.genre, film.durationMinutes ? `${film.durationMinutes} min` : null]
     .filter(Boolean).join(" • ");
 
-  const seancesHtml = film.seances.map((s, i) => {
-    const full = s.remaining <= 0;
+ const seancesHtml = film.seances.map((s, i) => {
+    const full = s.remaining <= 0 || s.cancelled;
     const low = !full && s.remaining <= 5;
     const remClass = full ? "full" : (low ? "low" : "");
-    const remText = full ? "Complet" : `${s.remaining} place(s) restante(s)`;
+    const remText = s.cancelled ? "Annulée" : (full ? "Complet" : `${s.remaining} place(s) restante(s)`);
     const btn = full
-      ? `<span class="btn-reserve disabled">Complet</span>`
+      ? `<span class="btn-reserve disabled">${s.cancelled ? "Annulée" : "Complet"}</span>`
       : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
+    const infoBanner = s.infoMessage
+      ? `<div class="info-banner"><span class="info-icon">ℹ️</span><span>${s.infoMessage}</span></div>`
+      : "";
     return `
-      <div class="seance-row ${i === 0 ? "next" : ""}">
+      <div class="seance-row ${i === 0 && !s.cancelled ? "next" : ""} ${s.cancelled ? "seance-cancelled" : ""}">
         <div class="seance-info">
-          <span><b>${formatDate(s.sessionDate)}</b></span>
+          <span><b>${formatDate(s.sessionDate)}</b>${s.cancelled ? `<span class="seance-badge-annule">ANNULÉE</span>` : ""}</span>
           <span>🕐 ${s.sessionTime}</span>
           ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
           <span class="remaining ${remClass}">${remText}</span>
         </div>
         ${btn}
+        ${infoBanner}
       </div>`;
   }).join("");
 
