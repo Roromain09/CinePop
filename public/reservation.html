@@ -236,6 +236,20 @@
   .nav-links.open { display: flex; }
   .nav-links a { text-align: center; padding: 12px 16px; }
 }
+    .info-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(77, 166, 255, 0.12);
+    border: 1px solid rgba(77, 166, 255, 0.3);
+    border-radius: 12px;
+    padding: 11px 14px;
+    margin-top: 10px;
+    color: #9ecfff;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+.info-banner .info-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
   </style>
 </head>
 <body>
@@ -388,7 +402,17 @@
     document.getElementById("ssTime").textContent = seance.sessionTime;
     document.getElementById("ssRoom").textContent = seance.roomNumber || "—";
     document.getElementById("ssRemaining").textContent = seance.remaining + " place(s)";
-    box.classList.add("show");
+  box.classList.add("show");
+
+// Bandeau info
+const existingBanner = box.querySelector(".info-banner");
+if (existingBanner) existingBanner.remove();
+if (seance.infoMessage) {
+    const banner = document.createElement("div");
+    banner.className = "info-banner";
+    banner.innerHTML = `<span class="info-icon">ℹ️</span><span>${seance.infoMessage}</span>`;
+    box.appendChild(banner);
+}
 
     const peopleInput = document.getElementById("peopleNumber");
     peopleInput.max = Math.min(10, seance.remaining);
@@ -404,14 +428,16 @@
       data.films.forEach(film => {
         film.seances.forEach(s => {
           seancesFlat.push({
-            id: s.id,
-            filmTitle: film.title,
-            roomNumber: s.roomNumber,
-            sessionDate: s.sessionDate,
-            sessionTime: s.sessionTime,
-            remaining: s.remaining,
-            posterUrl: film.posterUrl
-          });
+    id: s.id,
+    filmTitle: film.title,
+    roomNumber: s.roomNumber,
+    sessionDate: s.sessionDate,
+    sessionTime: s.sessionTime,
+    remaining: s.remaining,
+    posterUrl: film.posterUrl,
+    cancelled: s.cancelled || false,
+    infoMessage: s.infoMessage || null
+});
         });
       });
 
@@ -424,12 +450,11 @@
         return;
       }
 
-      seanceSelect.innerHTML = seancesFlat.map(s => {
-        const full = s.remaining <= 0;
-        const label = `${s.filmTitle} — ${formatDate(s.sessionDate)} à ${s.sessionTime}${s.roomNumber ? " (" + s.roomNumber + ")" : ""}${full ? " — complet" : ""}`;
-        return `<option value="${s.id}" ${full ? "disabled" : ""}>${label}</option>`;
-      }).join("");
-
+     seanceSelect.innerHTML = seancesFlat.map(s => {
+    const unavailable = s.remaining <= 0 || s.cancelled;
+    const label = `${s.filmTitle} — ${formatDate(s.sessionDate)} à ${s.sessionTime}${s.roomNumber ? " (" + s.roomNumber + ")" : ""}${s.cancelled ? " — annulée" : (s.remaining <= 0 ? " — complet" : "")}`;
+    return `<option value="${s.id}" ${unavailable ? "disabled" : ""}>${label}</option>`;
+}).join("");
       const params = new URLSearchParams(window.location.search);
       const preselect = params.get("seance");
       if (preselect && seancesFlat.some(s => s.id === preselect)) {
@@ -473,6 +498,10 @@
       showError("⛔ Merci de choisir une séance.");
       return;
     }
+    if (seance && seance.cancelled) {
+    showError("⛔ Cette séance a été annulée.");
+    return;
+}
     if (parseInt(data.peopleNumber) > 10 || parseInt(data.peopleNumber) < 1) {
       showError("⛔ Le nombre de personnes doit être entre 1 et 10.");
       return;
