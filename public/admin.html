@@ -599,6 +599,7 @@ h1 {
   <input id="seance-date" type="date">
   <input id="seance-time" type="time">
   <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
+  <input id="seance-info" type="text" placeholder="Message info (facultatif)">
   <div class="form-actions">
   <button id="seance-submit-btn" class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
   <button id="seance-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
@@ -1130,14 +1131,21 @@ function formatDateFr(dateStr) {
 }
 
 function buildSeanceRow(s) {
+  const isCancelled = s.cancelled;
   return `
-    <div class="seance-row">
+    <div class="seance-row" style="${isCancelled ? 'opacity:0.6;' : ''}">
       <div>
-        <div class="title">${s.films?.title || "?"} — ${formatDateFr(s.session_date)} ${s.session_time?.slice(0,5)}</div>
-        <div class="meta">${s.room_number || "Salle non précisée"} • Capacité ${s.capacity}</div>
+        <div class="title">${s.films?.title || "?"} — ${formatDateFr(s.session_date)} ${s.session_time?.slice(0,5)}
+          ${isCancelled ? `<span style="background:rgba(255,68,85,0.18);color:#ff4455;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:8px;">ANNULÉE</span>` : ""}
+        </div>
+        <div class="meta">${s.room_number || "Salle non précisée"} • Capacité ${s.capacity}${s.info_message ? ` • ℹ️ ${s.info_message}` : ""}</div>
       </div>
       <div class="row-actions">
-        <button class="btn btn-edit" onclick="editSeance('${s.id}')">✏️ Modifier</button>
+        ${isCancelled
+          ? `<button class="btn btn-edit" onclick="restaurerSeance('${s.id}')">↩️ Restaurer</button>`
+          : `<button class="btn btn-refuse" onclick="annulerSeance('${s.id}')">🚫 Annuler</button>
+             <button class="btn btn-edit" onclick="editSeance('${s.id}')">✏️ Modifier</button>`
+        }
         <button class="btn btn-delete" onclick="supprimerSeance('${s.id}')">🗑 Supprimer</button>
       </div>
     </div>`;
@@ -1155,6 +1163,7 @@ function editSeance(id) {
   document.getElementById("seance-submit-btn").textContent = "💾 Enregistrer les modifications";
   document.getElementById("seance-cancel-btn").style.display = "inline-block";
   document.getElementById("seance-film").scrollIntoView({ behavior: "smooth", block: "center" });
+  document.getElementById("seance-info").value = s.info_message || "";
 }
 
 function cancelEditSeance() {
@@ -1165,6 +1174,7 @@ function cancelEditSeance() {
   document.getElementById("seance-capacity").value = 50;
   document.getElementById("seance-submit-btn").textContent = "➕ Ajouter la séance";
   document.getElementById("seance-cancel-btn").style.display = "none";
+  document.getElementById("seance-info").value = "";
 }
 
 async function creerSeance() {
@@ -1176,8 +1186,9 @@ async function creerSeance() {
     filmId,
     roomNumber: document.getElementById("seance-room").value.trim(),
     sessionDate, sessionTime,
-    capacity: document.getElementById("seance-capacity").value.trim()
-  };
+    capacity: document.getElementById("seance-capacity").value.trim(),
+    infoMessage: document.getElementById("seance-info").value.trim()
+};
   const isEdit = !!editingSeanceId;
   if (isEdit) payload.id = editingSeanceId;
   showLoader();
@@ -1216,6 +1227,28 @@ async function supprimerSeance(id) {
 async function loadProgramme() {
   await loadFilms();
   await loadSeances();
+}
+async function annulerSeance(id) {
+  if (!confirm("Annuler cette séance ? Les réservations en attente et validées seront refusées.")) return;
+  showLoader();
+  try {
+    const res = await fetch(`/api/admin/seances/annuler`, {
+      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
+    });
+    if (!res.ok) alert(await res.text());
+  } catch { alert("Erreur serveur !"); }
+  hideLoader(); loadSeances(); load();
+}
+
+async function restaurerSeance(id) {
+  showLoader();
+  try {
+    const res = await fetch(`/api/admin/seances/restaurer`, {
+      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
+    });
+    if (!res.ok) alert(await res.text());
+  } catch { alert("Erreur serveur !"); }
+  hideLoader(); loadSeances();
 }
 </script>
 </body>
