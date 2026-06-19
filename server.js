@@ -140,8 +140,8 @@ app.get("/api/programme", async (req, res) => {
         .from("films")
         .select(`
             id, title, poster_url, synopsis, duration_minutes, genre,
-            seances ( id, room_number, session_date, session_time, capacity,
-                reservations ( people_number, status ) )
+            seances ( id, room_number, session_date, session_time, capacity, cancelled, info_message,
+    reservations ( people_number, status ) )
         `)
         .order("title", { ascending: true });
 
@@ -162,6 +162,8 @@ app.get("/api/programme", async (req, res) => {
                 const taken = (s.reservations || [])
                     .filter(r => r.status === "en attente" || r.status === "validé")
                     .reduce((sum, r) => sum + (r.people_number || 0), 0);
+                    cancelled: s.cancelled || false,
+                    infoMessage: s.info_message || null,
                 return {
                     id: s.id,
                     roomNumber: s.room_number,
@@ -615,7 +617,7 @@ app.post("/api/admin/films/supprimer", async (req, res) => {
 app.get("/api/admin/seances", async (req, res) => {
     const { data, error } = await supabase
         .from("seances")
-        .select("*, films(title)")
+        .select("*, films(title), cancelled, info_message")
         .order("session_date", { ascending: true })
         .order("session_time", { ascending: true });
     if (error) return res.status(500).json({ ok: false, error: error.message });
@@ -639,17 +641,18 @@ app.post("/api/admin/seances/creer", async (req, res) => {
 });
 
 app.post("/api/admin/seances/modifier", async (req, res) => {
-    const { id, filmId, roomNumber, sessionDate, sessionTime, capacity } = req.body;
+    const { id, filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage } = req.body;
     if (!id || !filmId || !sessionDate || !sessionTime) {
         return res.status(400).send("Champs obligatoires manquants.");
     }
     const { error } = await supabase.from("seances").update({
-        film_id: filmId,
-        room_number: roomNumber || null,
-        session_date: sessionDate,
-        session_time: sessionTime,
-        capacity: capacity ? parseInt(capacity) : 50
-    }).eq("id", id);
+    film_id: filmId,
+    room_number: roomNumber || null,
+    session_date: sessionDate,
+    session_time: sessionTime,
+    capacity: capacity ? parseInt(capacity) : 50,
+    info_message: infoMessage || null
+}).eq("id", id);
     if (error) return res.status(500).send(error.message);
     res.json({ ok: true });
 });
@@ -660,6 +663,35 @@ app.post("/api/admin/seances/supprimer", async (req, res) => {
     const { error } = await supabase.from("seances").delete().eq("id", id);
     if (error) return res.status(500).send(error.message);
     res.send("Séance supprimée");
+});
+app.post("/api/admin/seances/annuler", async (req, res) => {
+    const { id } = req.body;
+    if (!id) return res.status(400).send("ID manquant");
+
+    // Annuler la séance
+    const { error } = await supabase.from("seances")
+        .update({ cancelled: true })
+        .eq("id", id);
+    if (error) return res.status(500).send(error.message);
+
+    // Refuser toutes les réservations liées en attente ou validées
+    const { error: rezaError } = await supabase.from("reservations")
+        .update({ status: "refusé", refused_at: new Date().toISOString() })
+        .eq("seance_id", id)
+        .in("status", ["en attente", "validé"]);
+    if (rezaError) return res.status(500).send(rezaError.message);
+
+    res.json({ ok: true });
+});
+
+app.post("/api/admin/seances/restaurer", async (req, res) => {
+    const { id } = req.body;
+    if (!id) return res.status(400).send("ID manquant");
+    const { error } = await supabase.from("seances")
+        .update({ cancelled: false })
+        .eq("id", id);
+    if (error) return res.status(500).send(error.message);
+    res.json({ ok: true });
 });
 app.get("/api/admin/support", async (req, res) => {
     const { data, error } = await supabase
