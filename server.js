@@ -159,20 +159,20 @@ app.get("/api/programme", async (req, res) => {
                 return !dt.isValid || dt >= nowTime;
             })
             .map(s => {
-                const taken = (s.reservations || [])
-                    .filter(r => r.status === "en attente" || r.status === "validé")
-                    .reduce((sum, r) => sum + (r.people_number || 0), 0);
-                    cancelled: s.cancelled || false,
-                    infoMessage: s.info_message || null,
-                return {
-                    id: s.id,
-                    roomNumber: s.room_number,
-                    sessionDate: s.session_date,
-                    sessionTime: (s.session_time || "").slice(0, 5),
-                    capacity: s.capacity,
-                    remaining: Math.max(0, s.capacity - taken)
-                };
-            })
+    const taken = (s.reservations || [])
+        .filter(r => r.status === "en attente" || r.status === "validé")
+        .reduce((sum, r) => sum + (r.people_number || 0), 0);
+    return {
+        id: s.id,
+        roomNumber: s.room_number,
+        sessionDate: s.session_date,
+        sessionTime: (s.session_time || "").slice(0, 5),
+        capacity: s.capacity,
+        remaining: Math.max(0, s.capacity - taken),
+        cancelled: s.cancelled || false,
+        infoMessage: s.info_message || null
+    };
+})
             .sort((a, b) => `${a.sessionDate} ${a.sessionTime}`.localeCompare(`${b.sessionDate} ${b.sessionTime}`));
 
         return {
