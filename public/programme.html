@@ -171,31 +171,31 @@
   }
   .empty .icon { font-size: 2.5rem; margin-bottom: 14px; }
 
- .nav-toggle {
-  display: none;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: var(--blanc);
-  font-size: 1.3rem;
-  line-height: 1;
-  padding: 8px 14px;
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-@media (max-width: 680px) {
-  nav { flex-wrap: wrap; }
-  .nav-toggle { display: block; }
-  .nav-links {
+  .nav-toggle {
     display: none;
-    width: 100%;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--blanc);
+    font-size: 1.3rem;
+    line-height: 1;
+    padding: 8px 14px;
+    border-radius: 12px;
+    cursor: pointer;
   }
-  .nav-links.open { display: flex; }
-  .nav-links a { text-align: center; padding: 12px 16px; }
-}
+
+  @media (max-width: 680px) {
+    nav { flex-wrap: wrap; }
+    .nav-toggle { display: block; }
+    .nav-links {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 14px;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { text-align: center; padding: 12px 16px; }
+  }
   @media (max-width: 600px) {
     .film-head { flex-direction: column; align-items: center; text-align: center; }
     .poster-frame { width: min(75vw, 280px); }
@@ -203,149 +203,121 @@
     .seance-row { flex-direction: column; align-items: flex-start; }
     .btn-reserve { width: 100%; text-align: center; }
   }
+
   /* ===== VUE CALENDRIER ===== */
-.view-toggle { display: flex; gap: 8px; margin-bottom: 24px; }
-.view-btn {
-  padding: 10px 18px; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04); color: var(--gris);
-  font-weight: 700; font-size: 0.88rem; cursor: pointer;
-  transition: all 0.2s ease;
-}
-.view-btn.active {
-  background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
-  color: #111; border-color: transparent;
-  box-shadow: 0 8px 20px rgba(245,183,0,0.22);
-}
+  .view-toggle { display: flex; gap: 8px; margin-bottom: 24px; }
+  .view-btn {
+    padding: 10px 18px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04); color: var(--gris);
+    font-weight: 700; font-size: 0.88rem; cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .view-btn.active {
+    background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+    color: #111; border-color: transparent;
+    box-shadow: 0 8px 20px rgba(245,183,0,0.22);
+  }
 
-.calendar-card {
-  background: rgba(17, 34, 64, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px; padding: 28px;
-  box-shadow: 0 20px 50px var(--ombre);
-}
-.calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.calendar-month-label { font-size: 1.3rem; font-weight: 800; text-transform: capitalize; }
-.cal-nav {
-  width: 40px; height: 40px; border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.05); color: var(--blanc);
-  font-size: 1.3rem; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s ease;
-}
-.cal-nav:hover { background: rgba(255,255,255,0.12); }
-.cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
-.cal-nav:disabled:hover { background: rgba(255,255,255,0.05); }
+  .calendar-card {
+    background: rgba(17, 34, 64, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px; padding: 28px;
+    box-shadow: 0 20px 50px var(--ombre);
+  }
+  .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .calendar-month-label { font-size: 1.3rem; font-weight: 800; text-transform: capitalize; }
+  .cal-nav {
+    width: 40px; height: 40px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05); color: var(--blanc);
+    font-size: 1.3rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s ease;
+  }
+  .cal-nav:hover { background: rgba(255,255,255,0.12); }
+  .cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+  .cal-nav:disabled:hover { background: rgba(255,255,255,0.05); }
 
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 8px;
-  width: 100%;
-}
-.calendar-weekday {
-  text-align: center; color: var(--gris); font-size: 0.76rem;
-  font-weight: 700; text-transform: uppercase; padding-bottom: 8px;
-}
-.calendar-day {
-  position: relative; aspect-ratio: 1 / 1; border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  color: var(--gris); font-size: 0.85rem;
-}
-.calendar-day.empty { background: transparent; border: none; }
-.calendar-day .day-number {
-  position: absolute; top: 6px; left: 8px;
-  font-size: 0.72rem; color: var(--gris);
-}
-.calendar-day.has-seances {
-  background: rgba(57,217,138,0.16);
-  border-color: rgba(57,217,138,0.4);
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-.calendar-day.has-seances:hover { background: rgba(57,217,138,0.3); transform: translateY(-2px); }
-.calendar-day.has-seances .day-count { font-size: 1.3rem; font-weight: 900; color: #39d98a; }
-.calendar-day.today { box-shadow: inset 0 0 0 2px var(--jaune); }
+  /* Une seule grille pour weekdays + jours */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+  .calendar-weekday {
+    text-align: center; color: var(--gris); font-size: 0.76rem;
+    font-weight: 700; text-transform: uppercase; padding-bottom: 8px;
+  }
+  .calendar-day {
+    position: relative; aspect-ratio: 1 / 1; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--gris); font-size: 0.85rem;
+  }
+  .calendar-day.empty { background: transparent; border: none; }
+  .calendar-day .day-number {
+    position: absolute; top: 6px; left: 8px;
+    font-size: 0.72rem; color: var(--gris);
+  }
+  .calendar-day.has-seances {
+    background: rgba(57,217,138,0.16);
+    border-color: rgba(57,217,138,0.4);
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .calendar-day.has-seances:hover { background: rgba(57,217,138,0.3); transform: translateY(-2px); }
+  .calendar-day.has-seances .day-count { font-size: 1.3rem; font-weight: 900; color: #39d98a; }
+  .calendar-day.today { box-shadow: inset 0 0 0 2px var(--jaune); }
 
-.day-modal-overlay {
-  position: fixed; inset: 0; background: rgba(7,17,31,0.75);
-  display: none; align-items: center; justify-content: center;
-  z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
-}
-.day-modal-overlay.show { display: flex; }
-.day-modal {
-  background: rgba(17,34,64,0.97);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 24px; padding: 26px;
-  max-width: 480px; width: 100%; max-height: 80vh;
-  overflow-y: auto; box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-}
-.day-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.day-modal-title { font-size: 1.15rem; font-weight: 800; text-transform: capitalize; }
-.day-modal-close {
-  width: 34px; height: 34px; border-radius: 50%; border: none;
-  background: rgba(255,255,255,0.08); color: var(--blanc);
-  font-size: 1rem; cursor: pointer; flex-shrink: 0;
-}
-.day-modal-close:hover { background: rgba(255,255,255,0.16); }
-.day-seance-item {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 16px; padding: 14px 16px; margin-bottom: 10px;
-}
-.day-seance-item:last-child { margin-bottom: 0; }
-.day-seance-film { font-weight: 800; font-size: 0.96rem; margin-bottom: 8px; }
-.day-seance-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.85rem; margin-bottom: 12px; }
-.day-seance-meta span b { color: var(--blanc); }
-.day-seance-meta span { color: var(--gris); }
+  /* ===== MODAL ===== */
+  .day-modal-overlay {
+    position: fixed; inset: 0; background: rgba(7,17,31,0.75);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
+    box-sizing: border-box;
+  }
+  .day-modal-overlay.show { display: flex; }
+  .day-modal {
+    background: rgba(17,34,64,0.97);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px; padding: 26px;
+    width: 100%; max-width: 480px; max-height: 80vh;
+    overflow-y: auto; box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    box-sizing: border-box;
+  }
+  .day-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 12px; }
+  .day-modal-title { font-size: 1.15rem; font-weight: 800; text-transform: capitalize; }
+  .day-modal-close {
+    width: 34px; height: 34px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.08); color: var(--blanc);
+    font-size: 1rem; cursor: pointer; flex-shrink: 0;
+  }
+  .day-modal-close:hover { background: rgba(255,255,255,0.16); }
+  .day-seance-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 14px 16px; margin-bottom: 10px;
+  }
+  .day-seance-item:last-child { margin-bottom: 0; }
+  .day-seance-film { font-weight: 800; font-size: 0.96rem; margin-bottom: 8px; }
+  .day-seance-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.85rem; margin-bottom: 12px; }
+  .day-seance-meta span b { color: var(--blanc); }
+  .day-seance-meta span { color: var(--gris); }
 
-@media (max-width: 600px) {
-  .view-toggle { flex-wrap: wrap; }
-  .view-btn { flex: 1; text-align: center; }
-  .calendar-card { padding: 18px; }
-  .calendar-grid { gap: 5px; }
-  .calendar-day { font-size: 0.7rem; border-radius: 10px; }
-  .calendar-day .day-number { font-size: 0.62rem; top: 4px; left: 5px; }
-  .calendar-day.has-seances .day-count { font-size: 1.05rem; }
-  .calendar-month-label { font-size: 1.05rem; }
-  .cal-nav { width: 34px; height: 34px; font-size: 1.1rem; }
-}
-  .seance-cancelled {
-  opacity: 0.55;
-  pointer-events: none;
-}
-.seance-badge-annule {
-  display: inline-block;
-  background: rgba(255,68,85,0.18);
-  color: #ff6b6b;
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 3px 10px;
-  border-radius: 999px;
-  margin-left: 8px;
-  vertical-align: middle;
-}
-.info-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background: rgba(77, 166, 255, 0.12);
-  border: 1px solid rgba(77, 166, 255, 0.3);
-  border-radius: 12px;
-  padding: 11px 14px;
-  margin-top: 8px;
-  color: #9ecfff;
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-.info-banner .info-icon {
-  flex-shrink: 0;
-  font-size: 1rem;
-  margin-top: 1px;
-}
+  @media (max-width: 600px) {
+    .view-toggle { flex-wrap: wrap; }
+    .view-btn { flex: 1; text-align: center; }
+    .calendar-card { padding: 18px; }
+    .calendar-grid { gap: 5px; }
+    .calendar-day { font-size: 0.7rem; border-radius: 10px; }
+    .calendar-day .day-number { font-size: 0.62rem; top: 4px; left: 5px; }
+    .calendar-day.has-seances .day-count { font-size: 1.05rem; }
+    .calendar-month-label { font-size: 1.05rem; }
+    .cal-nav { width: 34px; height: 34px; font-size: 1.1rem; }
+  }
 </style>
 </head>
 <body>
@@ -364,7 +336,7 @@
 
 <div class="wrap">
   <div class="page-title">🎬 Programme</div>
-  <div class="page-subtitle">Nous vous avons préparé un prgramme de qualité pour des clients de qualité !</div>
+  <div class="page-subtitle">Nous vous avons préparé un programme de qualité pour des clients de qualité !</div>
 
   <div class="view-toggle">
     <button id="viewListBtn" class="view-btn active" onclick="setView('list')">📋 Vue liste</button>
@@ -377,16 +349,15 @@
     <div class="calendar-card">
       <div class="calendar-header">
         <button class="cal-nav" id="calPrevBtn" onclick="changeMonth(-1)">‹</button>
-<div class="calendar-month-label" id="calendarMonthLabel"></div>
-<button class="cal-nav" id="calNextBtn" onclick="changeMonth(1)">›</button>
+        <div class="calendar-month-label" id="calendarMonthLabel"></div>
+        <button class="cal-nav" id="calNextBtn" onclick="changeMonth(1)">›</button>
       </div>
-      <div class="calendar-grid" id="calendarWeekdays"></div>
-      <div class="calendar-grid" id="calendarDays"></div>
+      <!-- Une seule grille : weekdays + jours ensemble -->
+      <div class="calendar-grid" id="calendarGrid"></div>
     </div>
   </div>
 
   <div class="page-subtitle">C'est tout pour le moment ! Si vous avez des suggestions, n'hésitez pas à nous en faire part !</div>
-
 </div>
 
 <div id="dayModalOverlay" class="day-modal-overlay" onclick="closeDayModal(event)">
@@ -398,7 +369,6 @@
     <div class="day-modal-body" id="dayModalBody"></div>
   </div>
 </div>
-  
 
 <script>
 let programmeFilms = [];
@@ -427,6 +397,7 @@ function changeMonth(delta) {
   calendarMonth = index % 12;
   renderCalendar();
 }
+
 function flattenSeances(films) {
   const list = [];
   films.forEach(film => {
@@ -446,7 +417,6 @@ function flattenSeances(films) {
 
 function renderCalendar() {
   document.getElementById("calendarMonthLabel").textContent = `${MONTH_NAMES[calendarMonth]} ${calendarYear}`;
-  document.getElementById("calendarWeekdays").innerHTML = WEEKDAYS.map(w => `<div class="calendar-weekday">${w}</div>`).join("");
 
   const seancesByDate = {};
   flattenSeances(programmeFilms).forEach(s => {
@@ -455,14 +425,18 @@ function renderCalendar() {
 
   const pad = n => String(n).padStart(2, "0");
   const firstOfMonth = new Date(calendarYear, calendarMonth, 1);
-  const startOffset = (firstOfMonth.getDay() + 6) % 7;
+  const startOffset = (firstOfMonth.getDay() + 6) % 7; // lundi = 0
   const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
   const now = new Date();
   const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
-  let html = "";
+  // En-têtes des jours dans la même grille
+  let html = WEEKDAYS.map(w => `<div class="calendar-weekday">${w}</div>`).join("");
+
+  // Cellules vides avant le 1er
   for (let i = 0; i < startOffset; i++) html += `<div class="calendar-day empty"></div>`;
 
+  // Jours du mois
   for (let d = 1; d <= daysInMonth; d++) {
     const dateKey = `${calendarYear}-${pad(calendarMonth + 1)}-${pad(d)}`;
     const daySeances = seancesByDate[dateKey] || [];
@@ -474,13 +448,14 @@ function renderCalendar() {
         ${hasSeances ? `<span class="day-count">${daySeances.length}</span>` : ""}
       </div>`;
   }
-const totalCells = startOffset + daysInMonth;
-const remainingCells = (7 - (totalCells % 7)) % 7;
 
-for (let i = 0; i < remainingCells; i++) {
-  html += `<div class="calendar-day empty"></div>`;
-}
-  document.getElementById("calendarDays").innerHTML = html;
+  // Cellules vides après le dernier jour
+  const totalCells = startOffset + daysInMonth;
+  const remainingCells = (7 - (totalCells % 7)) % 7;
+  for (let i = 0; i < remainingCells; i++) html += `<div class="calendar-day empty"></div>`;
+
+  document.getElementById("calendarGrid").innerHTML = html;
+
   const currentIndex = calendarYear * 12 + calendarMonth;
   document.getElementById("calPrevBtn").disabled = currentIndex <= MIN_MONTH_INDEX;
   document.getElementById("calNextBtn").disabled = currentIndex >= MAX_MONTH_INDEX;
@@ -496,26 +471,22 @@ function openDayModal(dateKey) {
     dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
 
   document.getElementById("dayModalBody").innerHTML = seances.map(s => {
-    const full = s.remaining <= 0 || s.cancelled;
+    const full = s.remaining <= 0;
     const low = !full && s.remaining <= 5;
     const remClass = full ? "full" : (low ? "low" : "");
-    const remText = s.cancelled ? "Annulée" : (full ? "Complet" : `${s.remaining} place(s) restante(s)`);
+    const remText = full ? "Complet" : `${s.remaining} place(s) restante(s)`;
     const btn = full
-      ? `<span class="btn-reserve disabled">${s.cancelled ? "Annulée" : "Complet"}</span>`
+      ? `<span class="btn-reserve disabled">Complet</span>`
       : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
-    const infoBanner = s.infoMessage
-      ? `<div class="info-banner"><span class="info-icon">ℹ️</span><span>${s.infoMessage}</span></div>`
-      : "";
     return `
-      <div class="day-seance-item ${s.cancelled ? "seance-cancelled" : ""}">
-        <div class="day-seance-film">${s.filmTitle}${s.cancelled ? `<span class="seance-badge-annule">ANNULÉE</span>` : ""}</div>
+      <div class="day-seance-item">
+        <div class="day-seance-film">${s.filmTitle}</div>
         <div class="day-seance-meta">
           <span>🕐 <b>${s.sessionTime}</b></span>
           ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
           <span class="remaining ${remClass}">${remText}</span>
         </div>
         ${btn}
-        ${infoBanner}
       </div>`;
   }).join("");
 
@@ -526,6 +497,7 @@ function closeDayModal(e) {
   if (e && e.target !== e.currentTarget) return;
   document.getElementById("dayModalOverlay").classList.remove("show");
 }
+
 function formatDate(d) {
   const date = new Date(d + "T00:00:00");
   const today = new Date();
@@ -544,27 +516,23 @@ function buildFilmCard(film) {
   const meta = [film.genre, film.durationMinutes ? `${film.durationMinutes} min` : null]
     .filter(Boolean).join(" • ");
 
- const seancesHtml = film.seances.map((s, i) => {
-    const full = s.remaining <= 0 || s.cancelled;
+  const seancesHtml = film.seances.map((s, i) => {
+    const full = s.remaining <= 0;
     const low = !full && s.remaining <= 5;
     const remClass = full ? "full" : (low ? "low" : "");
-    const remText = s.cancelled ? "Annulée" : (full ? "Complet" : `${s.remaining} place(s) restante(s)`);
+    const remText = full ? "Complet" : `${s.remaining} place(s) restante(s)`;
     const btn = full
-      ? `<span class="btn-reserve disabled">${s.cancelled ? "Annulée" : "Complet"}</span>`
+      ? `<span class="btn-reserve disabled">Complet</span>`
       : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
-    const infoBanner = s.infoMessage
-      ? `<div class="info-banner"><span class="info-icon">ℹ️</span><span>${s.infoMessage}</span></div>`
-      : "";
     return `
-      <div class="seance-row ${i === 0 && !s.cancelled ? "next" : ""} ${s.cancelled ? "seance-cancelled" : ""}">
+      <div class="seance-row ${i === 0 ? "next" : ""}">
         <div class="seance-info">
-          <span><b>${formatDate(s.sessionDate)}</b>${s.cancelled ? `<span class="seance-badge-annule">ANNULÉE</span>` : ""}</span>
+          <span><b>${formatDate(s.sessionDate)}</b></span>
           <span>🕐 ${s.sessionTime}</span>
           ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
           <span class="remaining ${remClass}">${remText}</span>
         </div>
         ${btn}
-        ${infoBanner}
       </div>`;
   }).join("");
 
@@ -585,8 +553,6 @@ function buildFilmCard(film) {
     </div>`;
 }
 
-// Les séances de chaque film arrivent déjà triées chronologiquement par le serveur ;
-// on trie ici les films selon leur toute première séance à venir.
 function nextSeanceKey(film) {
   const s = film.seances[0];
   return s ? `${s.sessionDate} ${s.sessionTime}` : "9999-12-31 23:59";
@@ -612,9 +578,11 @@ async function load() {
     content.innerHTML = `<div class="empty"><div class="icon">⚠️</div>Impossible de charger le programme.</div>`;
   }
 }
+
 document.getElementById("navToggle").addEventListener("click", () => {
   document.getElementById("navLinks").classList.toggle("open");
 });
+
 load();
 </script>
 
