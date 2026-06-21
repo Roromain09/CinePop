@@ -593,18 +593,32 @@ h1 {
   </div>
   <div class="programme-section">
     <h2>🗓 Séances</h2>
+
+    <!-- Toggle mode -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button id="mode-single-btn" class="btn btn-validate" onclick="setSeanceMode('single')" style="font-size:0.8rem;padding:7px 14px;">📅 Date unique</button>
+      <button id="mode-period-btn" class="btn btn-edit" onclick="setSeanceMode('period')" style="font-size:0.8rem;padding:7px 14px;">📆 Période</button>
+    </div>
+
     <div class="inline-form">
-  <select id="seance-film"></select>
-  <input id="seance-room" type="text" placeholder="Salle">
-  <input id="seance-date" type="date">
-  <input id="seance-time" type="time">
-  <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
-  <input id="seance-info" type="text" placeholder="Message info (facultatif)">
-  <div class="form-actions">
-  <button id="seance-submit-btn" class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
-  <button id="seance-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
-</div>
-</div>
+      <select id="seance-film"></select>
+      <input id="seance-room" type="text" placeholder="Salle">
+
+      <!-- Mode date unique -->
+      <input id="seance-date" type="date" style="display:block;">
+
+      <!-- Mode période -->
+      <input id="seance-date-from" type="date" placeholder="Du…" style="display:none;">
+      <input id="seance-date-to"   type="date" placeholder="Au…" style="display:none;">
+
+      <input id="seance-time" type="time">
+      <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
+      <input id="seance-info" type="text" placeholder="Message info (facultatif)">
+      <div class="form-actions">
+        <button id="seance-submit-btn" class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
+        <button id="seance-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
+      </div>
+    </div>
     <div id="seances-list"></div>
   </div>
 </div>
@@ -1166,10 +1180,30 @@ function editSeance(id) {
   document.getElementById("seance-info").value = s.info_message || "";
 }
 
+/* ── MODE SÉANCE ── */
+let seanceMode = "single"; // "single" | "period"
+
+function setSeanceMode(mode) {
+  seanceMode = mode;
+  document.getElementById("mode-single-btn").className = mode === "single" ? "btn btn-validate" : "btn btn-edit";
+  document.getElementById("mode-period-btn").className = mode === "period" ? "btn btn-validate" : "btn btn-edit";
+  document.getElementById("mode-single-btn").style.fontSize = "0.8rem";
+  document.getElementById("mode-single-btn").style.padding = "7px 14px";
+  document.getElementById("mode-period-btn").style.fontSize = "0.8rem";
+  document.getElementById("mode-period-btn").style.padding = "7px 14px";
+  document.getElementById("seance-date").style.display      = mode === "single" ? "block" : "none";
+  document.getElementById("seance-date-from").style.display = mode === "period" ? "block" : "none";
+  document.getElementById("seance-date-to").style.display   = mode === "period" ? "block" : "none";
+  // Le mode période est incompatible avec l'édition
+  if (mode === "period") cancelEditSeance();
+}
+
 function cancelEditSeance() {
   editingSeanceId = null;
   document.getElementById("seance-room").value = "";
   document.getElementById("seance-date").value = "";
+  document.getElementById("seance-date-from").value = "";
+  document.getElementById("seance-date-to").value = "";
   document.getElementById("seance-time").value = "";
   document.getElementById("seance-capacity").value = 50;
   document.getElementById("seance-submit-btn").textContent = "➕ Ajouter la séance";
@@ -1178,17 +1212,83 @@ function cancelEditSeance() {
 }
 
 async function creerSeance() {
-  const filmId = document.getElementById("seance-film").value;
-  const sessionDate = document.getElementById("seance-date").value;
+  const filmId      = document.getElementById("seance-film").value;
   const sessionTime = document.getElementById("seance-time").value;
-  if (!filmId || !sessionDate || !sessionTime) { alert("Film, date et heure sont obligatoires."); return; }
-  const payload = {
-    filmId,
-    roomNumber: document.getElementById("seance-room").value.trim(),
-    sessionDate, sessionTime,
-    capacity: document.getElementById("seance-capacity").value.trim(),
-    infoMessage: document.getElementById("seance-info").value.trim()
-};
+  if (!filmId || !sessionTime) { alert("Film et heure sont obligatoires."); return; }
+
+  const isEdit = !!editingSeanceId;
+
+  /* ── MODE DATE UNIQUE (ou édition) ── */
+  if (seanceMode === "single" || isEdit) {
+    const sessionDate = document.getElementById("seance-date").value;
+    if (!sessionDate) { alert("La date est obligatoire."); return; }
+
+    const payload = {
+      filmId,
+      roomNumber:   document.getElementById("seance-room").value.trim(),
+      sessionDate, sessionTime,
+      capacity:     document.getElementById("seance-capacity").value.trim(),
+      infoMessage:  document.getElementById("seance-info").value.trim()
+    };
+    if (isEdit) payload.id = editingSeanceId;
+
+    showLoader();
+    try {
+      const res = await fetch(isEdit ? `/api/admin/seances/modifier` : `/api/admin/seances/creer`, {
+        method: "POST", headers: adminHeaders(), body: JSON.stringify(payload)
+      });
+      if (!res.ok) { alert(await res.text()); hideLoader(); return; }
+      cancelEditSeance();
+    } catch { alert("Erreur serveur !"); }
+    hideLoader(); loadSeances();
+    return;
+  }
+
+  /* ── MODE PÉRIODE ── */
+  const from = document.getElementById("seance-date-from").value;
+  const to   = document.getElementById("seance-date-to").value;
+  if (!from || !to) { alert("Merci de renseigner les dates de début et de fin."); return; }
+  if (from > to) { alert("La date de début doit être antérieure ou égale à la date de fin."); return; }
+
+  // Construire la liste de dates
+  const dates = [];
+  const cur = new Date(from + "T00:00:00");
+  const end = new Date(to   + "T00:00:00");
+  while (cur <= end) {
+    const y = cur.getFullYear();
+    const m = String(cur.getMonth() + 1).padStart(2, "0");
+    const d = String(cur.getDate()).padStart(2, "0");
+    dates.push(`${y}-${m}-${d}`);
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  if (dates.length > 60) { alert("La période ne peut pas dépasser 60 jours."); return; }
+
+  const roomNumber  = document.getElementById("seance-room").value.trim();
+  const capacity    = document.getElementById("seance-capacity").value.trim();
+  const infoMessage = document.getElementById("seance-info").value.trim();
+
+  showLoader();
+  let errors = 0;
+  for (const sessionDate of dates) {
+    try {
+      const res = await fetch(`/api/admin/seances/creer`, {
+        method: "POST", headers: adminHeaders(),
+        body: JSON.stringify({ filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage })
+      });
+      if (!res.ok) errors++;
+    } catch { errors++; }
+  }
+  hideLoader();
+
+  if (errors > 0) {
+    alert(`${dates.length - errors} séance(s) créée(s), ${errors} erreur(s).`);
+  } else {
+    alert(`✅ ${dates.length} séance(s) créée(s) avec succès !`);
+  }
+  cancelEditSeance();
+  loadSeances();
+}
   const isEdit = !!editingSeanceId;
   if (isEdit) payload.id = editingSeanceId;
   showLoader();
