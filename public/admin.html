@@ -1289,18 +1289,7 @@ async function creerSeance() {
   cancelEditSeance();
   loadSeances();
 }
-  const isEdit = !!editingSeanceId;
-  if (isEdit) payload.id = editingSeanceId;
-  showLoader();
-  try {
-    const res = await fetch(isEdit ? `/api/admin/seances/modifier` : `/api/admin/seances/creer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify(payload)
-    });
-    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
-    cancelEditSeance();
-  } catch { alert("Erreur serveur !"); }
-  hideLoader(); loadSeances();
-}
+
 async function loadSeances() {
   const res = await fetch(`/api/admin/seances`, { headers: adminHeaders() });
   const data = await res.json();
