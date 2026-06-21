@@ -257,13 +257,17 @@
     font-weight: 700; text-transform: uppercase; padding-bottom: 8px;
   }
   .calendar-day {
-    position: relative; aspect-ratio: 1 / 1; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    color: var(--gris); font-size: 0.85rem;
-  }
-  .calendar-day.empty { background: transparent; border: none; }
+  position: relative; aspect-ratio: 1 / 1; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--gris); font-size: 0.85rem;
+}
+.calendar-day.empty {
+  background: transparent;
+  border: none;
+  aspect-ratio: 1 / 1;
+}
   .calendar-day .day-number {
     position: absolute; top: 6px; left: 8px;
     font-size: 0.72rem; color: var(--gris);
