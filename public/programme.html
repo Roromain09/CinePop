@@ -241,11 +241,17 @@
 
   /* Une seule grille pour weekdays + jours */
   .calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 8px;
-    width: 100%;
-  }
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  align-items: start;
+}
+.calendar-day.empty {
+  background: transparent;
+  border: none;
+  aspect-ratio: 1 / 1; /* ← ajouter ici aussi */
+}
   .calendar-weekday {
     text-align: center; color: var(--gris); font-size: 0.76rem;
     font-weight: 700; text-transform: uppercase; padding-bottom: 8px;
