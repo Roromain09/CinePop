@@ -193,7 +193,6 @@ app.get("/api/programme", async (req, res) => {
 // ============================================
 app.get("/api/historique", async (req, res) => {
     const nowTime = now();
-    const limitDate = nowTime.minus({ days: 30 });
 
     const { data, error } = await supabase
         .from("seances")
@@ -227,7 +226,7 @@ app.get("/api/historique", async (req, res) => {
                 dt
             };
         })
-        .filter(s => s.dt.isValid && s.dt < nowTime && s.dt >= limitDate)
+        .filter(s => s.dt.isValid && s.dt < nowTime)
         .sort((a, b) => b.dt.toMillis() - a.dt.toMillis())
         .map(({ dt, ...rest }) => rest);
 
