@@ -521,6 +521,68 @@ h1 {
 }
 .seance-group-body .resa-card:last-child { border-bottom: none; border-radius: 0 0 14px 14px; }
 .seance-group-body .resa-card:hover { transform: none; }
+/* ─── SOUS-ONGLETS GESTION ─── */
+.sub-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sub-tabs::-webkit-scrollbar { display: none; }
+.sub-tab-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.sub-tab-btn.active-programme { background: rgba(77,166,255,0.13); color: var(--blue); }
+.sub-tab-btn.active-support   { background: rgba(179,136,255,0.15); color: var(--purple); }
+.sub-tab-btn.active-info      { background: rgba(0,232,150,0.12); color: var(--green); }
+
+.info-editor {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.info-editor textarea {
+  width: 100%;
+  min-height: 220px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: 'DM Sans', sans-serif;
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+  transition: border 0.2s;
+}
+.info-editor textarea:focus { border-color: var(--gold); }
+.info-editor .save-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.info-save-msg { font-size: 0.82rem; }
 </style>
 </head>
 
@@ -560,11 +622,8 @@ h1 {
   <button class="tab-btn" id="tab-expire" onclick="switchTab('expire')">
     ⏱ Expirées <span class="badge" id="count-expire">0</span>
   </button>
-  <button class="tab-btn" id="tab-programme" onclick="switchTab('programme')">
-    🎞 Programme
-  </button>
-  <button class="tab-btn" id="tab-support" onclick="switchTab('support')">
-    📩 Support <span class="badge" id="count-support">0</span>
+  <button class="tab-btn" id="tab-gestion" onclick="switchTab('gestion')">
+    ⚙️ Gestion <span class="badge" id="count-support">0</span>
   </button>
 </div>
 
@@ -575,54 +634,65 @@ h1 {
 <div class="tab-panel" id="panel-expire"></div>
 
 <!-- PROGRAMME PANEL -->
-<div class="tab-panel" id="panel-programme">
-  <div class="programme-section">
-    <h2>🎬 Films</h2>
-    <div class="inline-form">
-  <input id="film-title" type="text" placeholder="Titre *">
-  <input id="film-genre" type="text" placeholder="Genre">
-  <input id="film-duration" type="number" placeholder="Durée (min)">
-  <input id="film-poster" type="text" placeholder="URL affiche (facultatif)">
-  <input id="film-synopsis" type="text" placeholder="Synopsis (facultatif)">
-  <div class="form-actions">
-  <button id="film-submit-btn" class="btn btn-validate" onclick="creerFilm()">➕ Ajouter le film</button>
-  <button id="film-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditFilm()">✖ Annuler</button>
-</div>
-</div>
-    <div id="films-list"></div>
+<!-- GESTION PANEL -->
+<div class="tab-panel" id="panel-gestion">
+  <div class="sub-tabs">
+    <button class="sub-tab-btn active-programme" id="subtab-programme" onclick="switchSubTab('programme')">🎞 Programme</button>
+    <button class="sub-tab-btn" id="subtab-support" onclick="switchSubTab('support')">📩 Support</button>
+    <button class="sub-tab-btn" id="subtab-info" onclick="switchSubTab('info')">ℹ️ Infos pratiques</button>
   </div>
-  <div class="programme-section">
-    <h2>🗓 Séances</h2>
 
-    <!-- Toggle mode -->
-    <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <button id="mode-single-btn" class="btn btn-validate" onclick="setSeanceMode('single')" style="font-size:0.8rem;padding:7px 14px;">📅 Date unique</button>
-      <button id="mode-period-btn" class="btn btn-edit" onclick="setSeanceMode('period')" style="font-size:0.8rem;padding:7px 14px;">📆 Période</button>
+  <!-- Sous-panel Programme -->
+  <div id="subpanel-programme">
+    <div class="programme-section">
+      <h2>🎬 Films</h2>
+      <div class="inline-form">
+        <input id="film-title" type="text" placeholder="Titre *">
+        <input id="film-genre" type="text" placeholder="Genre">
+        <input id="film-duration" type="number" placeholder="Durée (min)">
+        <input id="film-poster" type="text" placeholder="URL affiche (facultatif)">
+        <input id="film-synopsis" type="text" placeholder="Synopsis (facultatif)">
+        <div class="form-actions">
+          <button id="film-submit-btn" class="btn btn-validate" onclick="creerFilm()">➕ Ajouter le film</button>
+          <button id="film-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditFilm()">✖ Annuler</button>
+        </div>
+      </div>
+      <div id="films-list"></div>
     </div>
+    <div class="programme-section">
+      <h2>🗓 Séances</h2>
+      <div class="inline-form">
+        <select id="seance-film"></select>
+        <input id="seance-room" type="text" placeholder="Salle">
+        <input id="seance-date" type="date">
+        <input id="seance-time" type="time">
+        <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
+        <input id="seance-info" type="text" placeholder="Message info (facultatif)">
+        <div class="form-actions">
+          <button id="seance-submit-btn" class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
+          <button id="seance-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
+        </div>
+      </div>
+      <div id="seances-list"></div>
+    </div>
+  </div>
 
-    <div class="inline-form">
-      <select id="seance-film"></select>
-      <input id="seance-room" type="text" placeholder="Salle">
+  <!-- Sous-panel Support -->
+  <div id="subpanel-support" style="display:none;">
+    <div id="panel-support"></div>
+  </div>
 
-      <!-- Mode date unique -->
-      <input id="seance-date" type="date" style="display:block;">
-
-      <!-- Mode période -->
-      <input id="seance-date-from" type="date" placeholder="Du…" style="display:none;">
-      <input id="seance-date-to"   type="date" placeholder="Au…" style="display:none;">
-
-      <input id="seance-time" type="time">
-      <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
-      <input id="seance-info" type="text" placeholder="Message info (facultatif)">
-      <div class="form-actions">
-        <button id="seance-submit-btn" class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
-        <button id="seance-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
+  <!-- Sous-panel Infos pratiques -->
+  <div id="subpanel-info" style="display:none;">
+    <div class="info-editor">
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Ce texte s'affiche en bas de la page d'accueil. Tu peux y mettre les horaires, l'adresse, les tarifs, etc.</p>
+      <textarea id="info-content" placeholder="Ex : Ouvert du mardi au dimanche — Tarifs : 8€ adulte, 5€ enfant…"></textarea>
+      <div class="save-row">
+        <button class="btn btn-validate" onclick="saveInfo()">💾 Enregistrer</button>
+        <span id="info-save-msg" class="info-save-msg"></span>
       </div>
     </div>
-    <div id="seances-list"></div>
   </div>
-</div>
-  <div class="tab-panel" id="panel-support"></div>
 </div>
 <!-- FAB -->
 <button onclick="toggleForm()" id="fab">➕</button>
@@ -686,21 +756,62 @@ async function refreshAll() {
   btn.style.transition = "transform 0.5s ease";
   setTimeout(() => { btn.style.transform = ""; btn.style.transition = ""; }, 500);
   await Promise.all([load(), loadSupport()]);
-  if (currentTab === "programme") loadProgramme();
+  if (currentTab === "gestion" && currentSubTab === "programme") loadProgramme();
+  if (currentTab === "gestion" && currentSubTab === "info") loadInfo();
 }
 
 /* ── TABS ── */
 function switchTab(tab) {
   currentTab = tab;
-  ["attente","valide","refuse","expire","programme","support"].forEach(t => {
+  ["attente","valide","refuse","expire","gestion"].forEach(t => {
     document.getElementById(`panel-${t}`).classList.toggle("visible", t === tab);
     const btn = document.getElementById(`tab-${t}`);
     btn.className = "tab-btn";
     if (t === tab) btn.classList.add(`active-${t}`);
   });
-  document.getElementById("fab").style.display = (tab === "programme" || tab === "support") ? "none" : "flex";
+  document.getElementById("fab").style.display = tab === "gestion" ? "none" : "flex";
+  if (tab === "gestion") switchSubTab(currentSubTab || "programme");
 }
 
+let currentSubTab = "programme";
+
+function switchSubTab(sub) {
+  currentSubTab = sub;
+  ["programme","support","info"].forEach(s => {
+    document.getElementById(`subpanel-${s}`).style.display = s === sub ? "" : "none";
+    const btn = document.getElementById(`subtab-${s}`);
+    btn.className = "sub-tab-btn";
+    if (s === sub) btn.classList.add(`active-${s}`);
+  });
+  if (sub === "info") loadInfo();
+}
+
+async function loadInfo() {
+  const res = await fetch("/api/info");
+  const data = await res.json();
+  document.getElementById("info-content").value = data.content || "";
+}
+
+async function saveInfo() {
+  const content = document.getElementById("info-content").value;
+  const msg = document.getElementById("info-save-msg");
+  try {
+    const res = await fetch("/api/admin/info", {
+      method: "POST", headers: adminHeaders(), body: JSON.stringify({ content })
+    });
+    if (res.ok) {
+      msg.style.color = "var(--green)";
+      msg.textContent = "✅ Enregistré !";
+    } else {
+      msg.style.color = "var(--red)";
+      msg.textContent = "❌ Erreur lors de l'enregistrement.";
+    }
+  } catch {
+    msg.style.color = "var(--red)";
+    msg.textContent = "❌ Erreur serveur.";
+  }
+  setTimeout(() => msg.textContent = "", 3000);
+}
 /* ── SORT HELPER ── */
 function sortKey(r) {
   return `${r.sessionDate || ""} ${r.sessionTime || ""}`.trim();
