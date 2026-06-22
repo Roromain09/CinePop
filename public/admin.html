@@ -1276,6 +1276,15 @@ function buildSeanceRow(s) {
     </div>`;
 }
 
+function buildSeanceSection(title, seances, color) {
+  if (!seances.length) return "";
+  return `
+    <div style="margin-bottom:18px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:1.2px;color:${color};margin-bottom:8px;padding:0 4px;">${title} <span style="font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;opacity:0.7;">(${seances.length})</span></div>
+      ${seances.map(buildSeanceRow).join("")}
+    </div>`;
+}
+
 function editSeance(id) {
   const s = seancesCache.find(x => x.id === id);
   if (!s) return;
@@ -1405,10 +1414,24 @@ async function loadSeances() {
   const res = await fetch(`/api/admin/seances`, { headers: adminHeaders() });
   const data = await res.json();
   seancesCache = data.seances || [];
-  document.getElementById("seances-list").innerHTML = seancesCache.length
-    ? seancesCache.map(buildSeanceRow).join("")
-    : emptyState("🗓", "Aucune séance programmée.");
 
+  const nowTs = new Date();
+  const limit30 = new Date(nowTs.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const aVenir   = seancesCache.filter(s => new Date(`${s.session_date}T${s.session_time}`) >= nowTs);
+  const termine  = seancesCache.filter(s => {
+    const dt = new Date(`${s.session_date}T${s.session_time}`);
+    return dt < nowTs && dt >= limit30;
+  });
+  const vieux    = seancesCache.filter(s => new Date(`${s.session_date}T${s.session_time}`) < limit30);
+
+  const html = [
+    buildSeanceSection("🟢 À venir", aVenir, "var(--green)"),
+    buildSeanceSection("🟡 Terminé", termine, "var(--gold)"),
+    buildSeanceSection("⚫ Terminé +30 jours", vieux, "var(--text-muted)"),
+  ].join("") || emptyState("🗓", "Aucune séance programmée.");
+
+  document.getElementById("seances-list").innerHTML = html;
   fillSeanceSelect(document.getElementById("f-seanceId"));
 }
 
