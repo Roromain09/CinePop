@@ -720,6 +720,33 @@ app.post("/api/admin/support/supprimer", async (req, res) => {
     res.send("Message supprimé");
 });
 // ============================================
+//  INFOS PRATIQUES (public)
+// ============================================
+app.get("/api/info", async (req, res) => {
+    const { data, error } = await supabase
+        .from("infos_pratiques")
+        .select("content")
+        .eq("id", 1)
+        .maybeSingle();
+
+    if (error) return res.status(500).json({ ok: false });
+    res.json({ ok: true, content: data?.content || "" });
+});
+
+// ============================================
+//  INFOS PRATIQUES (admin)
+// ============================================
+app.post("/api/admin/info", async (req, res) => {
+    const { content } = req.body;
+
+    const { error } = await supabase
+        .from("infos_pratiques")
+        .upsert({ id: 1, content: content || "" }, { onConflict: "id" });
+
+    if (error) return res.status(500).send(error.message);
+    res.json({ ok: true });
+});
+// ============================================
 //  VÉRIFICATION QR CODE
 // ============================================
 app.get("/verify", async (req, res) => {
