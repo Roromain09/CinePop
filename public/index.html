@@ -265,13 +265,31 @@
   </div>
 </div>
 
+<div class="section" id="infos">
+  <div class="section-title">ℹ️ Infos pratiques</div>
+  <div class="section-subtitle">Tout ce qu'il faut savoir avant de venir.</div>
+  <div class="info-card" id="infoContent" style="white-space: pre-wrap; line-height: 1.8; color: var(--gris); font-size: 0.95rem; max-width: 700px;"></div>
+</div>
+
 <footer>
   <div>© CinéPop — Tous droits réservés</div>
   <div><a href="/admin.html">Espace administration</a></div>
 </footer>
 
 </body>
-  <script>
+<script>
+async function loadInfo() {
+  const res = await fetch("/api/info");
+  const data = await res.json();
+  const el = document.getElementById("infoContent");
+  if (data.ok && data.content) {
+    el.textContent = data.content;
+    document.getElementById("infos").style.display = "";
+  } else {
+    document.getElementById("infos").style.display = "none";
+  }
+}
+loadInfo();
 document.getElementById("navToggle").addEventListener("click", () => {
   document.getElementById("navLinks").classList.toggle("open");
 });
