@@ -138,12 +138,29 @@
     border-color: rgba(245,183,0,0.35);
     background: rgba(245,183,0,0.06);
   }
-  .seance-info { display:flex; gap: 18px; flex-wrap: wrap; font-size: 0.92rem; }
+  .seance-row.cancelled {
+    opacity: 0.6;
+    border-color: rgba(255,68,85,0.25);
+    background: rgba(255,68,85,0.04);
+  }
+  .seance-info { display:flex; gap: 18px; flex-wrap: wrap; font-size: 0.92rem; align-items: center; }
   .seance-info span b { color: var(--blanc); }
   .seance-info span { color: var(--gris); }
   .remaining { font-weight: 700; }
   .remaining.low { color: #ff8c66; }
   .remaining.full { color: #ff6b6b; }
+  .badge-annulee {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,68,85,0.18);
+    color: #ff4455;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+  }
 
   .btn-reserve {
     padding: 10px 18px;
@@ -160,6 +177,12 @@
   .btn-reserve.disabled {
     background: rgba(255,255,255,0.08);
     color: var(--gris);
+    pointer-events: none;
+    cursor: default;
+  }
+  .btn-reserve.annulee {
+    background: rgba(255,68,85,0.14);
+    color: #ff6b6b;
     pointer-events: none;
     cursor: default;
   }
@@ -241,7 +264,6 @@
   .cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
   .cal-nav:disabled:hover { background: rgba(255,255,255,0.05); }
 
-  /* Weekdays : grille fixe séparée */
   .calendar-weekdays {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -253,7 +275,6 @@
     font-weight: 700; text-transform: uppercase; padding-bottom: 4px;
   }
 
-  /* Jours : grille indépendante */
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -321,8 +342,12 @@
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 16px; padding: 14px 16px; margin-bottom: 10px;
   }
+  .day-seance-item.cancelled {
+    opacity: 0.65;
+    border-color: rgba(255,68,85,0.2);
+  }
   .day-seance-item:last-child { margin-bottom: 0; }
-  .day-seance-film { font-weight: 800; font-size: 0.96rem; margin-bottom: 8px; }
+  .day-seance-film { font-weight: 800; font-size: 0.96rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .day-seance-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.85rem; margin-bottom: 12px; }
   .day-seance-meta span b { color: var(--blanc); }
   .day-seance-meta span { color: var(--gris); }
@@ -373,7 +398,6 @@
         <div class="calendar-month-label" id="calendarMonthLabel"></div>
         <button class="cal-nav" id="calNextBtn" onclick="changeMonth(1)">›</button>
       </div>
-      <!-- En-têtes fixes, indépendants des jours -->
       <div class="calendar-weekdays">
         <div class="calendar-weekday">Lun</div>
         <div class="calendar-weekday">Mar</div>
@@ -383,7 +407,6 @@
         <div class="calendar-weekday">Sam</div>
         <div class="calendar-weekday">Dim</div>
       </div>
-      <!-- Grille des jours uniquement -->
       <div class="calendar-grid" id="calendarGrid"></div>
     </div>
   </div>
@@ -438,7 +461,8 @@ function flattenSeances(films) {
         roomNumber: s.roomNumber,
         sessionDate: s.sessionDate,
         sessionTime: s.sessionTime,
-        remaining: s.remaining
+        remaining: s.remaining,
+        cancelled: s.cancelled || false
       });
     });
   });
@@ -456,33 +480,32 @@ function renderCalendar() {
 
   const pad = n => String(n).padStart(2, "0");
   const firstOfMonth = new Date(calendarYear, calendarMonth, 1);
-  const startOffset = (firstOfMonth.getDay() + 6) % 7; // lundi = 0
+  const startOffset = (firstOfMonth.getDay() + 6) % 7;
   const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
   const now = new Date();
   const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
   let html = "";
 
-  // Cellules vides avant le 1er
   for (let i = 0; i < startOffset; i++) {
     html += `<div class="calendar-day empty"></div>`;
   }
 
-  // Jours du mois
   for (let d = 1; d <= daysInMonth; d++) {
     const dateKey = `${calendarYear}-${pad(calendarMonth + 1)}-${pad(d)}`;
     const daySeances = seancesByDate[dateKey] || [];
-    const hasSeances = daySeances.length > 0;
+    // Ne compter que les séances non annulées pour l'indicateur vert
+    const activeSeances = daySeances.filter(s => !s.cancelled);
+    const hasSeances = activeSeances.length > 0;
     const isToday = dateKey === todayKey;
     html += `
       <div class="calendar-day ${hasSeances ? "has-seances" : ""} ${isToday ? "today" : ""}"
            ${hasSeances ? `onclick="openDayModal('${dateKey}')"` : ""}>
         <span class="day-number">${d}</span>
-        ${hasSeances ? `<span class="day-count">${daySeances.length}</span>` : ""}
+        ${hasSeances ? `<span class="day-count">${activeSeances.length}</span>` : ""}
       </div>`;
   }
 
-  // Cellules vides après le dernier jour
   const totalCells = startOffset + daysInMonth;
   const remainingCells = (7 - (totalCells % 7)) % 7;
   for (let i = 0; i < remainingCells; i++) {
@@ -506,6 +529,20 @@ function openDayModal(dateKey) {
     dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
 
   document.getElementById("dayModalBody").innerHTML = seances.map(s => {
+    if (s.cancelled) {
+      return `
+        <div class="day-seance-item cancelled">
+          <div class="day-seance-film">
+            ${s.filmTitle}
+            <span class="badge-annulee">🚫 Annulée</span>
+          </div>
+          <div class="day-seance-meta">
+            <span>🕐 <b>${s.sessionTime}</b></span>
+            ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
+          </div>
+          <span class="btn-reserve annulee">Annulée</span>
+        </div>`;
+    }
     const full = s.remaining <= 0;
     const low = !full && s.remaining <= 5;
     const remClass = full ? "full" : (low ? "low" : "");
@@ -552,6 +589,18 @@ function buildFilmCard(film) {
     .filter(Boolean).join(" • ");
 
   const seancesHtml = film.seances.map((s, i) => {
+    if (s.cancelled) {
+      return `
+        <div class="seance-row cancelled">
+          <div class="seance-info">
+            <span><b>${formatDate(s.sessionDate)}</b></span>
+            <span>🕐 ${s.sessionTime}</span>
+            ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
+            <span class="badge-annulee">🚫 Annulée</span>
+          </div>
+          <span class="btn-reserve annulee">Annulée</span>
+        </div>`;
+    }
     const full = s.remaining <= 0;
     const low = !full && s.remaining <= 5;
     const remClass = full ? "full" : (low ? "low" : "");
@@ -589,7 +638,9 @@ function buildFilmCard(film) {
 }
 
 function nextSeanceKey(film) {
-  const s = film.seances[0];
+  // Ignorer les séances annulées pour le tri
+  const active = film.seances.filter(s => !s.cancelled);
+  const s = active[0] || film.seances[0];
   return s ? `${s.sessionDate} ${s.sessionTime}` : "9999-12-31 23:59";
 }
 
