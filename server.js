@@ -624,7 +624,7 @@ app.get("/api/admin/seances", async (req, res) => {
 });
 
 app.post("/api/admin/seances/creer", async (req, res) => {
-    const { filmId, roomNumber, sessionDate, sessionTime, capacity } = req.body;
+    const { filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage } = req.body;
     if (!filmId || !sessionDate || !sessionTime) {
         return res.status(400).send("Film, date et heure sont obligatoires.");
     }
@@ -633,12 +633,12 @@ app.post("/api/admin/seances/creer", async (req, res) => {
         room_number: roomNumber || null,
         session_date: sessionDate,
         session_time: sessionTime,
-        capacity: capacity ? parseInt(capacity) : 50
+        capacity: capacity ? parseInt(capacity) : 50,
+        info_message: infoMessage || null
     });
     if (error) return res.status(500).send(error.message);
     res.json({ ok: true });
 });
-
 app.post("/api/admin/seances/modifier", async (req, res) => {
     const { id, filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage } = req.body;
     if (!id || !filmId || !sessionDate || !sessionTime) {
