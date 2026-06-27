@@ -161,22 +161,7 @@
     padding: 3px 9px; border-radius: 999px;
   }
 
-  /* ── STATS OCCUPANCY ── */
-  .occupancy-wrap {
-    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
-  }
-  .occupancy-bar-wrap {
-    width: 80px; height: 6px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 999px; overflow: hidden;
-  }
-  .occupancy-bar {
-    height: 100%; border-radius: 999px;
-    background: linear-gradient(90deg, var(--jaune), var(--jaune-soft));
-    transition: width 0.4s ease;
-  }
-  .occupancy-bar.full { background: linear-gradient(90deg, #ff6b6b, #ff8c66); }
-  .occupancy-label { font-size: 0.78rem; font-weight: 700; color: var(--gris); white-space: nowrap; }
+
 
   /* ── EMPTY ── */
   .empty {
@@ -190,7 +175,6 @@
     .poster-frame { width: min(75vw, 280px); }
     .film-synopsis { text-align: left; margin: 0 auto; }
     .seance-row { flex-direction: column; align-items: flex-start; }
-    .occupancy-wrap { width: 100%; justify-content: flex-start; }
   }
 </style>
 </head>
@@ -237,19 +221,6 @@ function groupByFilm(seances) {
   return Object.values(map);
 }
 
-function buildOccupancy(occupied, capacity) {
-  if (!capacity) return "";
-  const pct = Math.min(100, Math.round((occupied / capacity) * 100));
-  const isFull = pct >= 100;
-  return `
-    <div class="occupancy-wrap">
-      <div class="occupancy-bar-wrap">
-        <div class="occupancy-bar ${isFull ? "full" : ""}" style="width:${pct}%"></div>
-      </div>
-      <span class="occupancy-label">${occupied}/${capacity} places</span>
-    </div>`;
-}
-
 function buildFilmCard(film) {
   const poster = film.posterUrl
     ? `<img class="film-poster" src="${film.posterUrl}" alt="${film.filmTitle}" loading="lazy">`
@@ -263,7 +234,6 @@ function buildFilmCard(film) {
         ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
         <span class="badge-passee">✓ Passée</span>
       </div>
-      ${buildOccupancy(s.occupied, s.capacity)}
     </div>`).join("");
 
   return `
