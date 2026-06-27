@@ -20,7 +20,6 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-// --- FONCTION POUR SÉCURISER LE HTML ---
 function escapeHtml(str) {
     return String(str ?? "")
         .replace(/&/g, "&amp;")
@@ -30,22 +29,17 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
-// --- AUTH ADMIN ---
 app.post("/api/checkpass", (req, res) => {
     const { password } = req.body;
-
     if (!process.env.ADMIN_PASSWORD) {
         return res.status(500).json({ ok: false, error: "ADMIN_PASSWORD non défini" });
     }
-
     if (password === process.env.ADMIN_PASSWORD) {
         return res.json({ ok: true });
     }
-
     res.json({ ok: false });
 });
 
-// Toutes les routes /api/admin/* exigent le mot de passe en en-tête x-admin-password.
 function requireAdmin(req, res, next) {
     const provided = req.get("x-admin-password");
     if (!process.env.ADMIN_PASSWORD || provided !== process.env.ADMIN_PASSWORD) {
@@ -55,7 +49,6 @@ function requireAdmin(req, res, next) {
 }
 app.use("/api/admin", requireAdmin);
 
-// --- HELPERS DATE ---
 function sessionDateTimeOf(date, time) {
     return DateTime.fromFormat(`${date} ${time}`, "yyyy-MM-dd HH:mm", { zone: "Europe/Paris" });
 }
@@ -63,7 +56,6 @@ function now() {
     return DateTime.now().setZone("Europe/Paris");
 }
 
-// Met à plat une réservation (avec sa séance/film joints) au format utilisé par le front.
 function flattenReservation(r) {
     const seance = r.seances || {};
     const film = seance.films || {};
@@ -85,7 +77,6 @@ function flattenReservation(r) {
 
 const RESA_SELECT = "*, seances(room_number, session_date, session_time, films(title))";
 
-// --- EXPIRATION AUTOMATIQUE ---
 async function applyExpirations() {
     const { data, error } = await supabase
         .from("reservations")
@@ -125,7 +116,6 @@ async function applyExpirations() {
 
 setInterval(applyExpirations, 60 * 1000);
 
-// --- ROUTES PAGES ---
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/public/index.html");
 });
@@ -134,14 +124,12 @@ app.get("/", (req, res) => {
 //  PROGRAMME (public)
 // ============================================
 app.get("/api/programme", async (req, res) => {
-    const today = now().toFormat("yyyy-MM-dd");
-
     const { data, error } = await supabase
         .from("films")
         .select(`
             id, title, poster_url, synopsis, duration_minutes, genre,
             seances ( id, room_number, session_date, session_time, capacity, cancelled, info_message,
-    reservations ( people_number, status ) )
+                reservations ( people_number, status ) )
         `)
         .order("title", { ascending: true });
 
@@ -159,20 +147,20 @@ app.get("/api/programme", async (req, res) => {
                 return !dt.isValid || dt >= nowTime;
             })
             .map(s => {
-    const taken = (s.reservations || [])
-        .filter(r => r.status === "en attente" || r.status === "validé")
-        .reduce((sum, r) => sum + (r.people_number || 0), 0);
-    return {
-        id: s.id,
-        roomNumber: s.room_number,
-        sessionDate: s.session_date,
-        sessionTime: (s.session_time || "").slice(0, 5),
-        capacity: s.capacity,
-        remaining: Math.max(0, s.capacity - taken),
-        cancelled: s.cancelled || false,
-        infoMessage: s.info_message || null
-    };
-})
+                const taken = (s.reservations || [])
+                    .filter(r => r.status === "en attente" || r.status === "validé")
+                    .reduce((sum, r) => sum + (r.people_number || 0), 0);
+                return {
+                    id: s.id,
+                    roomNumber: s.room_number,
+                    sessionDate: s.session_date,
+                    sessionTime: (s.session_time || "").slice(0, 5),
+                    capacity: s.capacity,
+                    remaining: Math.max(0, s.capacity - taken),
+                    cancelled: s.cancelled || false,
+                    infoMessage: s.info_message || null
+                };
+            })
             .sort((a, b) => `${a.sessionDate} ${a.sessionTime}`.localeCompare(`${b.sessionDate} ${b.sessionTime}`));
 
         return {
@@ -188,8 +176,9 @@ app.get("/api/programme", async (req, res) => {
 
     res.json({ ok: true, films });
 });
+
 // ============================================
-//  HISTORIQUE (public) — séances passées (30 derniers jours)
+//  HISTORIQUE (public)
 // ============================================
 app.get("/api/historique", async (req, res) => {
     const nowTime = now();
@@ -197,10 +186,8 @@ app.get("/api/historique", async (req, res) => {
     const { data, error } = await supabase
         .from("seances")
         .select(`
-    id, room_number, session_date, session_time, capacity, cancelled,
-    films ( title, poster_url, genre ),
-    reservations ( people_number, status )
-`)
+            id, room_number, session_date, session_time, capacity, cancelled,
+            films ( title, poster_url, genre ),
             reservations ( people_number, status )
         `);
 
@@ -225,12 +212,13 @@ app.get("/api/historique", async (req, res) => {
                 sessionTime: (s.session_time || "").slice(0, 5),
                 capacity: s.capacity,
                 occupied,
+                cancelled: s.cancelled || false,
                 dt
             };
         })
         .filter(s => s.dt.isValid && s.dt < nowTime && !s.cancelled)
         .sort((a, b) => b.dt.toMillis() - a.dt.toMillis())
-        .map(({ dt, ...rest }) => rest);
+        .map(({ dt, cancelled, ...rest }) => rest);
 
     res.json({ ok: true, seances });
 });
@@ -290,8 +278,6 @@ app.post("/api/reserver", async (req, res) => {
     res.send("Réservation enregistrée");
 });
 
-// Consulter ses réservations par nom (public, utilisé par check.html)
-// Correspondance EXACTE (insensible à la casse) sur le nom du client.
 app.get("/api/reservation", async (req, res) => {
     const name = (req.query.name || "").trim().toLowerCase();
     if (!name) {
@@ -314,6 +300,7 @@ app.get("/api/reservation", async (req, res) => {
 
     res.json({ ok: true, reservations: data.map(flattenReservation) });
 });
+
 app.post("/api/support", async (req, res) => {
     const { email, subject, message } = req.body;
     if (!email || !subject || !message) {
@@ -328,8 +315,9 @@ app.post("/api/support", async (req, res) => {
     }
     res.send("Message envoyé");
 });
+
 // ============================================
-//  ADMIN — RÉSERVATIONS  (protégé par requireAdmin)
+//  ADMIN — RÉSERVATIONS
 // ============================================
 app.get("/api/admin", async (req, res) => {
     await applyExpirations();
@@ -359,7 +347,6 @@ app.post("/api/admin/supprimer", async (req, res) => {
     res.send("Réservation supprimée");
 });
 
-// Créer réservation depuis l'admin (ID personnalisé, séance existante)
 app.post("/api/admin/creer", async (req, res) => {
     const { id, clientName, email, seanceId, peopleNumber } = req.body;
 
@@ -401,8 +388,6 @@ app.post("/api/admin/creer", async (req, res) => {
     res.json({ ok: true, message: "Réservation créée avec succès." });
 });
 
-// Valider + générer le PDF du ticket
-// Valider une réservation (statut uniquement, sans génération de PDF)
 app.post("/api/admin/valider", async (req, res) => {
     try {
         const { id } = req.body;
@@ -442,7 +427,6 @@ app.post("/api/admin/valider", async (req, res) => {
     }
 });
 
-// Générer / régénérer le PDF du ticket (réservation déjà validée)
 app.post("/api/admin/ticket", async (req, res) => {
     try {
         const { id } = req.body;
@@ -473,23 +457,11 @@ app.post("/api/admin/ticket", async (req, res) => {
 <meta charset="UTF-8">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-        width: 300px;
-        height: 500px;
-        overflow: hidden;
-        font-family: Arial, sans-serif;
-    }
+    html, body { width: 300px; height: 500px; overflow: hidden; font-family: Arial, sans-serif; }
     .ticket {
-        width: 280px;
-        height: 490px;
-        border: 2px dashed black;
-        padding: 12px 16px;
-        text-align: center;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
+        width: 280px; height: 490px; border: 2px dashed black;
+        padding: 12px 16px; text-align: center; margin: 0 auto;
+        display: flex; flex-direction: column; justify-content: space-between; align-items: center;
     }
     h2 { font-size: 14px; }
     hr { width: 100%; border: none; border-top: 1px solid #ccc; }
@@ -512,8 +484,7 @@ app.post("/api/admin/ticket", async (req, res) => {
         <p class="ticket-id">Ticket #${resa.id}</p>
     </div>
 </body>
-</html>
-`;
+</html>`;
 
         const browser = await puppeteer.launch({
             args: [
@@ -532,12 +503,7 @@ app.post("/api/admin/ticket", async (req, res) => {
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: "networkidle0" });
 
-        const buffer = await page.pdf({
-            width: "300px",
-            height: "500px",
-            printBackground: true
-        });
-
+        const buffer = await page.pdf({ width: "300px", height: "500px", printBackground: true });
         await browser.close();
 
         res.setHeader("Content-Type", "application/pdf");
@@ -556,7 +522,6 @@ app.post("/api/admin/refuser", async (req, res) => {
         const { error } = await supabase.from("reservations")
             .update({ status: "refusé", refused_at: new Date().toISOString() })
             .eq("id", id);
-
         if (error) throw error;
         res.send("Réservation refusée");
     } catch (err) {
@@ -577,7 +542,6 @@ app.get("/api/admin/films", async (req, res) => {
 app.post("/api/admin/films/creer", async (req, res) => {
     const { title, posterUrl, synopsis, durationMinutes, genre } = req.body;
     if (!title) return res.status(400).send("Le titre est obligatoire.");
-
     const { error } = await supabase.from("films").insert({
         title,
         poster_url: posterUrl || null,
@@ -592,7 +556,6 @@ app.post("/api/admin/films/creer", async (req, res) => {
 app.post("/api/admin/films/modifier", async (req, res) => {
     const { id, title, posterUrl, synopsis, durationMinutes, genre } = req.body;
     if (!id || !title) return res.status(400).send("ID et titre obligatoires.");
-
     const { error } = await supabase.from("films").update({
         title,
         poster_url: posterUrl || null,
@@ -641,19 +604,20 @@ app.post("/api/admin/seances/creer", async (req, res) => {
     if (error) return res.status(500).send(error.message);
     res.json({ ok: true });
 });
+
 app.post("/api/admin/seances/modifier", async (req, res) => {
     const { id, filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage } = req.body;
     if (!id || !filmId || !sessionDate || !sessionTime) {
         return res.status(400).send("Champs obligatoires manquants.");
     }
     const { error } = await supabase.from("seances").update({
-    film_id: filmId,
-    room_number: roomNumber || null,
-    session_date: sessionDate,
-    session_time: sessionTime,
-    capacity: capacity ? parseInt(capacity) : 50,
-    info_message: infoMessage || null
-}).eq("id", id);
+        film_id: filmId,
+        room_number: roomNumber || null,
+        session_date: sessionDate,
+        session_time: sessionTime,
+        capacity: capacity ? parseInt(capacity) : 50,
+        info_message: infoMessage || null
+    }).eq("id", id);
     if (error) return res.status(500).send(error.message);
     res.json({ ok: true });
 });
@@ -665,23 +629,19 @@ app.post("/api/admin/seances/supprimer", async (req, res) => {
     if (error) return res.status(500).send(error.message);
     res.send("Séance supprimée");
 });
+
 app.post("/api/admin/seances/annuler", async (req, res) => {
     const { id } = req.body;
     if (!id) return res.status(400).send("ID manquant");
-
-    // Annuler la séance
     const { error } = await supabase.from("seances")
         .update({ cancelled: true })
         .eq("id", id);
     if (error) return res.status(500).send(error.message);
-
-    // Refuser toutes les réservations liées en attente ou validées
     const { error: rezaError } = await supabase.from("reservations")
         .update({ status: "refusé", refused_at: new Date().toISOString() })
         .eq("seance_id", id)
         .in("status", ["en attente", "validé"]);
     if (rezaError) return res.status(500).send(rezaError.message);
-
     res.json({ ok: true });
 });
 
@@ -694,6 +654,10 @@ app.post("/api/admin/seances/restaurer", async (req, res) => {
     if (error) return res.status(500).send(error.message);
     res.json({ ok: true });
 });
+
+// ============================================
+//  ADMIN — SUPPORT
+// ============================================
 app.get("/api/admin/support", async (req, res) => {
     const { data, error } = await supabase
         .from("support_messages")
@@ -720,8 +684,9 @@ app.post("/api/admin/support/supprimer", async (req, res) => {
     if (error) return res.status(500).send(error.message);
     res.send("Message supprimé");
 });
+
 // ============================================
-//  INFOS PRATIQUES (public)
+//  INFOS PRATIQUES
 // ============================================
 app.get("/api/info", async (req, res) => {
     const { data, error } = await supabase
@@ -729,24 +694,19 @@ app.get("/api/info", async (req, res) => {
         .select("content")
         .eq("id", 1)
         .maybeSingle();
-
     if (error) return res.status(500).json({ ok: false });
     res.json({ ok: true, content: data?.content || "" });
 });
 
-// ============================================
-//  INFOS PRATIQUES (admin)
-// ============================================
 app.post("/api/admin/info", async (req, res) => {
     const { content } = req.body;
-
     const { error } = await supabase
         .from("infos_pratiques")
         .upsert({ id: 1, content: content || "" }, { onConflict: "id" });
-
     if (error) return res.status(500).send(error.message);
     res.json({ ok: true });
 });
+
 // ============================================
 //  VÉRIFICATION QR CODE
 // ============================================
@@ -807,153 +767,89 @@ app.get("/verify", async (req, res) => {
 <style>
     * { box-sizing: border-box; }
     body {
-        background: #fff;
-        font-family: Arial, sans-serif;
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 16px;
-        text-align: center;
+        background: #fff; font-family: Arial, sans-serif; margin: 0;
+        min-height: 100vh; display: flex; justify-content: center;
+        align-items: center; padding: 16px; text-align: center;
     }
     #checkBtn {
-        width: min(90vw, 360px);
-        padding: 18px 24px;
-        font-size: 20px;
-        border-radius: 12px;
-        border: none;
-        background: #3498db;
-        color: white;
-        cursor: pointer;
-        touch-action: manipulation;
+        width: min(90vw, 360px); padding: 18px 24px; font-size: 20px;
+        border-radius: 12px; border: none; background: #3498db;
+        color: white; cursor: pointer; touch-action: manipulation;
     }
-    #result {
-        margin-top: 20px;
-        display: none;
-    }
+    #result { margin-top: 20px; display: none; }
     .card {
-        width: min(92vw, 420px);
-        padding: 28px 20px;
-        border-radius: 16px;
-        border: 2px solid #e0e0e0;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        margin: 0 auto;
-        background: white;
+        width: min(92vw, 420px); padding: 28px 20px; border-radius: 16px;
+        border: 2px solid #e0e0e0; box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        margin: 0 auto; background: white;
     }
-    .icon {
-        width: 96px;
-        height: auto;
-        margin-bottom: 16px;
-    }
-    h1 {
-        font-size: 28px;
-        margin: 10px 0;
-    }
-    p {
-        font-size: 17px;
-        margin: 6px 0;
-        line-height: 1.4;
-        word-break: break-word;
-    }
-    .loader {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 15px;
-        border-radius: 50%;
-        position: relative;
-    }
+    .icon { width: 96px; height: auto; margin-bottom: 16px; }
+    h1 { font-size: 28px; margin: 10px 0; }
+    p { font-size: 17px; margin: 6px 0; line-height: 1.4; word-break: break-word; }
+    .loader { width: 80px; height: 80px; margin: 0 auto 15px; border-radius: 50%; position: relative; }
     .loader::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        border: 4px solid transparent;
-        border-top: 4px solid #00d4ff;
-        border-right: 4px solid #00d4ff;
-        animation: spin 1s linear infinite;
+        content: ""; position: absolute; inset: 0; border-radius: 50%;
+        border: 4px solid transparent; border-top: 4px solid #00d4ff;
+        border-right: 4px solid #00d4ff; animation: spin 1s linear infinite;
     }
     .loader::after {
-        content: "";
-        position: absolute;
-        inset: 12px;
-        border-radius: 50%;
+        content: ""; position: absolute; inset: 12px; border-radius: 50%;
         background: radial-gradient(circle, #00d4ff33, transparent);
         animation: pulse 1.5s ease-in-out infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 0.6; }
-        50% { transform: scale(1.2); opacity: 1; }
-    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.2); opacity: 1; } }
 </style>
 </head>
 <body>
-
 <div>
     <button id="checkBtn">CHECK TICKET</button>
     <div id="result"></div>
 </div>
-
 <script>
 document.getElementById("checkBtn").addEventListener("click", async () => {
     navigator.vibrate?.(40);
     const box = document.getElementById("result");
     box.style.display = "block";
-
     box.innerHTML = '<div class="loader"></div><div class="text">Vérification...</div>';
-
     await new Promise(resolve => setTimeout(resolve, 1000));
-
     try {
         const res = await fetch("/verify?id=${id}&check=1");
         const data = await res.json();
-
         if (data.status === "valid") {
-    const alreadyScanned = data.scanCount > 1
-    ? '<div style="background:#3498db;color:#000;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:15px;font-weight:bold;">❗ Ce ticket a déjà été scanné ' + (data.scanCount - 1) + ' fois</div>'
-    : "";
-
-    box.innerHTML =
-        '<div class="card">' +
-        alreadyScanned +
-        '<img src="/img/check.png" class="icon"><h1 style="color:#2ecc71;">Ticket VALIDE</h1>' +
-        '<p><b>Client :</b> ' + data.client + '</p>' +
-        '<p><b>Film :</b> ' + data.film + '</p>' +
-        '<p><b>Salle :</b> ' + data.salle + '</p>' +
-        '<p><b>Date :</b> ' + data.date + '</p>' +
-        '<p><b>Heure :</b> ' + data.heure + '</p>' +
-        '<p><b>Places :</b> ' + data.places + '</p></div>';
-
+            const alreadyScanned = data.scanCount > 1
+                ? '<div style="background:#3498db;color:#000;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:15px;font-weight:bold;">❗ Ce ticket a déjà été scanné ' + (data.scanCount - 1) + ' fois</div>'
+                : "";
+            box.innerHTML =
+                '<div class="card">' + alreadyScanned +
+                '<img src="/img/check.png" class="icon"><h1 style="color:#2ecc71;">Ticket VALIDE</h1>' +
+                '<p><b>Client :</b> ' + data.client + '</p>' +
+                '<p><b>Film :</b> ' + data.film + '</p>' +
+                '<p><b>Salle :</b> ' + data.salle + '</p>' +
+                '<p><b>Date :</b> ' + data.date + '</p>' +
+                '<p><b>Heure :</b> ' + data.heure + '</p>' +
+                '<p><b>Places :</b> ' + data.places + '</p></div>';
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const response = await fetch("/sounds/valid.mp3");
             const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
             const source = ctx.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(ctx.destination);
-            source.start(0);
-
+            source.buffer = audioBuffer; source.connect(ctx.destination); source.start(0);
         } else {
             box.innerHTML =
                 '<div class="card"><img src="/img/cross.png" class="icon"><h1 style="color:#e74c3c;">Ticket REFUSÉ</h1>' +
                 '<p>Raison : ' + data.reason + '</p></div>';
-
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const response = await fetch("/sounds/error.mp3");
             const arrayBuffer = await response.arrayBuffer();
             const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
             const source = ctx.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(ctx.destination);
-            source.start(0);
+            source.buffer = audioBuffer; source.connect(ctx.destination); source.start(0);
         }
     } catch (err) {
         box.innerHTML = '<div class="card"><h1 style="color:#e74c3c;">Erreur</h1><p>Impossible de vérifier le ticket</p></div>';
     }
 });
 </script>
-
 </body>
 </html>
 `);
