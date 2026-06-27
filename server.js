@@ -197,8 +197,10 @@ app.get("/api/historique", async (req, res) => {
     const { data, error } = await supabase
         .from("seances")
         .select(`
-            id, room_number, session_date, session_time, capacity,
-            films ( title, poster_url, genre ),
+    id, room_number, session_date, session_time, capacity, cancelled,
+    films ( title, poster_url, genre ),
+    reservations ( people_number, status )
+`)
             reservations ( people_number, status )
         `);
 
@@ -226,7 +228,7 @@ app.get("/api/historique", async (req, res) => {
                 dt
             };
         })
-        .filter(s => s.dt.isValid && s.dt < nowTime)
+        .filter(s => s.dt.isValid && s.dt < nowTime && !s.cancelled)
         .sort((a, b) => b.dt.toMillis() - a.dt.toMillis())
         .map(({ dt, ...rest }) => rest);
 
