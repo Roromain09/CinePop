@@ -1352,7 +1352,7 @@ async function creerSeance() {
     };
     if (isEdit) payload.id = editingSeanceId;
 
-    showLoader();
+   showLoader();
     try {
       const res = await fetch(isEdit ? `/api/admin/seances/modifier` : `/api/admin/seances/creer`, {
         method: "POST", headers: adminHeaders(), body: JSON.stringify(payload)
@@ -1360,9 +1360,9 @@ async function creerSeance() {
       if (!res.ok) { alert(await res.text()); hideLoader(); return; }
       cancelEditSeance();
     } catch { alert("Erreur serveur !"); }
-    hideLoader(); loadSeances();
+    hideLoader();
+    loadSeances();
     return;
-  }
 
   /* ── MODE PÉRIODE ── */
   const from = document.getElementById("seance-date-from").value;
@@ -1407,9 +1407,7 @@ async function creerSeance() {
     alert(`✅ ${dates.length} séance(s) créée(s) avec succès !`);
   }
   cancelEditSeance();
-  loadSeances();
-}
-
+  await loadSeances();
 async function loadSeances() {
   const res = await fetch(`/api/admin/seances`, { headers: adminHeaders() });
   const data = await res.json();
