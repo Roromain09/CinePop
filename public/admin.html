@@ -37,7 +37,6 @@ body {
   min-height: 100vh;
 }
 
-/* ─── HEADER ─── */
 h1 {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 1.6rem;
@@ -82,7 +81,6 @@ h1 {
 }
 .back-link:hover { color: var(--text); background: rgba(255,255,255,0.06); }
 
-/* ─── TABS ─── */
 .tabs {
   display: flex;
   gap: 4px;
@@ -140,12 +138,9 @@ h1 {
 .tab-btn.active-expire   .badge { background: var(--orange); color: #fff; }
 .tab-btn.active-programme.badge { background: var(--blue);   color: #fff; }
 
-
-/* ─── PANELS ─── */
 .tab-panel { display: none; flex-direction: column; gap: 14px; }
 .tab-panel.visible { display: flex; }
 
-/* ─── CARDS ─── */
 .resa-card {
   background: var(--surface2);
   border-radius: 14px;
@@ -249,7 +244,6 @@ h1 {
 .chip-nouveau { background: rgba(245,183,0,0.12); color: var(--gold); }
 .chip-traite  { background: rgba(0,232,150,0.12); color: var(--green); }
 
-/* ─── BUTTONS ─── */
 .btn {
   padding: 8px 14px;
   border: none;
@@ -271,7 +265,6 @@ h1 {
 .btn-edit      { background: rgba(77,166,255,0.12); color: var(--blue); border: 1px solid rgba(77,166,255,0.25); }
 .btn-edit:hover      { background: rgba(77,166,255,0.24); }
 
-/* ─── EMPTY STATE ─── */
 .empty {
   text-align: center;
   padding: 60px 20px;
@@ -280,7 +273,6 @@ h1 {
 }
 .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
 
-/* ─── FAB ─── */
 #fab {
   position: fixed;
   bottom: 20px;
@@ -302,7 +294,6 @@ h1 {
 }
 #fab:hover { background: rgba(245,183,0,0.1); }
 
-/* ─── CREATE PANEL ─── */
 #creer-panel {
   display: none;
   position: fixed;
@@ -353,7 +344,6 @@ h1 {
 }
 .form-fields input::placeholder, .form-fields textarea::placeholder { color: var(--text-muted); }
 
-/* ─── PROGRAMME TAB ─── */
 .programme-section { margin-bottom: 28px; }
 .programme-section h2 {
   font-family: 'Bebas Neue', sans-serif;
@@ -407,7 +397,6 @@ h1 {
 .film-row .meta, .seance-row .meta { font-size: 0.78rem; color: var(--text-muted); }
 .row-actions { display: flex; gap: 6px; }
 
-/* ─── LOADER ─── */
 #loader {
   position: fixed;
   top: 0; left: 0;
@@ -431,7 +420,6 @@ h1 {
 #loader p { margin-top: 14px; color: var(--gold); font-size: 0.85rem; letter-spacing: 0.5px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ─── LOGIN ─── */
 #login-screen {
   position: fixed;
   top: 0; left: 0;
@@ -482,7 +470,7 @@ h1 {
     overflow-x: visible;
   }
 }
-  /* ─── SÉANCES ACCORDÉON (panel validé) ─── */
+
 .seance-group { margin-bottom: 10px; border-radius: 14px; overflow: hidden; }
 .seance-group-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -521,7 +509,7 @@ h1 {
 }
 .seance-group-body .resa-card:last-child { border-bottom: none; border-radius: 0 0 14px 14px; }
 .seance-group-body .resa-card:hover { transform: none; }
-/* ─── SOUS-ONGLETS GESTION ─── */
+
 .sub-tabs {
   display: flex;
   gap: 4px;
@@ -607,7 +595,8 @@ h1 {
   </div>
   <a href="/index.html" class="back-link">← Retour au site</a>
 </div>
-  <h1>🎬 Administration</h1>
+<h1>🎬 Administration</h1>
+
 <!-- TABS -->
 <div class="tabs">
   <button class="tab-btn active-attente" id="tab-attente" onclick="switchTab('attente')">
@@ -633,7 +622,6 @@ h1 {
 <div class="tab-panel" id="panel-refuse"></div>
 <div class="tab-panel" id="panel-expire"></div>
 
-<!-- PROGRAMME PANEL -->
 <!-- GESTION PANEL -->
 <div class="tab-panel" id="panel-gestion">
   <div class="sub-tabs">
@@ -665,9 +653,15 @@ h1 {
         <select id="seance-film"></select>
         <input id="seance-room" type="text" placeholder="Salle">
         <input id="seance-date" type="date">
+        <input id="seance-date-from" type="date" style="display:none;">
+        <input id="seance-date-to" type="date" style="display:none;">
         <input id="seance-time" type="time">
         <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
         <input id="seance-info" type="text" placeholder="Message info (facultatif)">
+        <div class="form-actions" style="margin-bottom:4px;">
+          <button id="mode-single-btn" class="btn btn-validate" style="font-size:0.8rem;padding:7px 14px;" onclick="setSeanceMode('single')">📅 Date unique</button>
+          <button id="mode-period-btn" class="btn btn-edit" style="font-size:0.8rem;padding:7px 14px;" onclick="setSeanceMode('period')">📆 Période</button>
+        </div>
         <div class="form-actions">
           <button id="seance-submit-btn" class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
           <button id="seance-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
@@ -694,6 +688,7 @@ h1 {
     </div>
   </div>
 </div>
+
 <!-- FAB -->
 <button onclick="toggleForm()" id="fab">➕</button>
 
@@ -720,7 +715,7 @@ h1 {
 <script>
 let ADMIN_PASS = "";
 let currentTab = "attente";
-let seancesCache = []; // pour les selects (création résa + création séance)
+let seancesCache = [];
 let filmsCache = [];
 
 /* ── AUTH ── */
@@ -750,6 +745,7 @@ function adminHeaders() {
 /* ── LOADER ── */
 function showLoader() { document.getElementById("loader").style.display = "flex"; }
 function hideLoader() { document.getElementById("loader").style.display = "none"; }
+
 async function refreshAll() {
   const btn = document.getElementById("refreshBtn");
   btn.style.transform = "rotate(360deg)";
@@ -812,6 +808,7 @@ async function saveInfo() {
   }
   setTimeout(() => msg.textContent = "", 3000);
 }
+
 /* ── SORT HELPER ── */
 function sortKey(r) {
   return `${r.sessionDate || ""} ${r.sessionTime || ""}`.trim();
@@ -879,6 +876,7 @@ function buildCard(r) {
 function emptyState(icon, msg) {
   return `<div class="empty"><div class="empty-icon">${icon}</div>${msg}</div>`;
 }
+
 /* ── PANEL VALIDÉ : GROUPÉ PAR SÉANCE ── */
 function renderValideGrouped(reservations) {
   const el = document.getElementById("panel-valide");
@@ -887,7 +885,6 @@ function renderValideGrouped(reservations) {
     return;
   }
 
-  // Grouper par séanceId
   const map = {};
   reservations.forEach(r => {
     const key = r.seanceId;
@@ -895,7 +892,6 @@ function renderValideGrouped(reservations) {
     map[key].items.push(r);
   });
 
-  // Trier les séances par date/heure décroissant (plus récentes en premier)
   const groups = Object.values(map).sort((a, b) =>
     `${b.sessionDate} ${b.sessionTime}`.localeCompare(`${a.sessionDate} ${a.sessionTime}`)
   );
@@ -967,13 +963,6 @@ async function load() {
   document.getElementById("count-refuse").textContent  = groups["refusé"].length;
   document.getElementById("count-expire").textContent  = groups["expiré"].length;
 
-  const panels = [
-    ["attente", "en attente", "⏳", "Aucune réservation en attente"],
-    ["valide",  "validé",     "✅", "Aucune réservation validée"],
-    ["refuse",  "refusé",     "❌", "Aucune réservation refusée"],
-    ["expire",  "expiré",     "⏱", "Aucune réservation expirée"],
-  ];
-  // Panel attente, refuse, expire (inchangés)
   [
     ["attente", "en attente", "⏳", "Aucune réservation en attente"],
     ["refuse",  "refusé",     "❌", "Aucune réservation refusée"],
@@ -984,9 +973,8 @@ async function load() {
     el.innerHTML = items.length ? items.map(buildCard).join("") : emptyState(icon, msg);
   });
 
-  // Panel validé — groupé par séance
   renderValideGrouped(groups["validé"]);
-  };
+}
 
 /* ── ACTIONS RÉSERVATIONS ── */
 async function supprimer(id) {
@@ -1093,6 +1081,7 @@ async function creer() {
   }
   hideLoader(); load();
 }
+
 /* ── SUPPORT ── */
 function buildSupportCard(m) {
   const isNouveau = m.status === "nouveau";
@@ -1159,6 +1148,7 @@ async function supprimerSupport(id) {
   } catch { alert("Erreur serveur !"); }
   hideLoader(); loadSupport();
 }
+
 /* ── PROGRAMME : FILMS ── */
 let editingFilmId = null;
 
@@ -1294,14 +1284,16 @@ function editSeance(id) {
   document.getElementById("seance-date").value = s.session_date || "";
   document.getElementById("seance-time").value = (s.session_time || "").slice(0,5);
   document.getElementById("seance-capacity").value = s.capacity || 50;
+  document.getElementById("seance-info").value = s.info_message || "";
   document.getElementById("seance-submit-btn").textContent = "💾 Enregistrer les modifications";
   document.getElementById("seance-cancel-btn").style.display = "inline-block";
   document.getElementById("seance-film").scrollIntoView({ behavior: "smooth", block: "center" });
-  document.getElementById("seance-info").value = s.info_message || "";
+  // Forcer le mode single en édition
+  setSeanceMode("single");
 }
 
 /* ── MODE SÉANCE ── */
-let seanceMode = "single"; // "single" | "period"
+let seanceMode = "single";
 
 function setSeanceMode(mode) {
   seanceMode = mode;
@@ -1314,7 +1306,6 @@ function setSeanceMode(mode) {
   document.getElementById("seance-date").style.display      = mode === "single" ? "block" : "none";
   document.getElementById("seance-date-from").style.display = mode === "period" ? "block" : "none";
   document.getElementById("seance-date-to").style.display   = mode === "period" ? "block" : "none";
-  // Le mode période est incompatible avec l'édition
   if (mode === "period") cancelEditSeance();
 }
 
@@ -1326,9 +1317,9 @@ function cancelEditSeance() {
   document.getElementById("seance-date-to").value = "";
   document.getElementById("seance-time").value = "";
   document.getElementById("seance-capacity").value = 50;
+  document.getElementById("seance-info").value = "";
   document.getElementById("seance-submit-btn").textContent = "➕ Ajouter la séance";
   document.getElementById("seance-cancel-btn").style.display = "none";
-  document.getElementById("seance-info").value = "";
 }
 
 async function creerSeance() {
@@ -1352,7 +1343,7 @@ async function creerSeance() {
     };
     if (isEdit) payload.id = editingSeanceId;
 
-   showLoader();
+    showLoader();
     try {
       const res = await fetch(isEdit ? `/api/admin/seances/modifier` : `/api/admin/seances/creer`, {
         method: "POST", headers: adminHeaders(), body: JSON.stringify(payload)
@@ -1361,8 +1352,9 @@ async function creerSeance() {
       cancelEditSeance();
     } catch { alert("Erreur serveur !"); }
     hideLoader();
-    loadSeances();
+    await loadSeances();
     return;
+  }
 
   /* ── MODE PÉRIODE ── */
   const from = document.getElementById("seance-date-from").value;
@@ -1370,7 +1362,6 @@ async function creerSeance() {
   if (!from || !to) { alert("Merci de renseigner les dates de début et de fin."); return; }
   if (from > to) { alert("La date de début doit être antérieure ou égale à la date de fin."); return; }
 
-  // Construire la liste de dates
   const dates = [];
   const cur = new Date(from + "T00:00:00");
   const end = new Date(to   + "T00:00:00");
@@ -1408,6 +1399,8 @@ async function creerSeance() {
   }
   cancelEditSeance();
   await loadSeances();
+}
+
 async function loadSeances() {
   const res = await fetch(`/api/admin/seances`, { headers: adminHeaders() });
   const data = await res.json();
@@ -1449,6 +1442,7 @@ async function loadProgramme() {
   await loadFilms();
   await loadSeances();
 }
+
 async function annulerSeance(id) {
   if (!confirm("Annuler cette séance ? Les réservations en attente et validées seront refusées.")) return;
   showLoader();
