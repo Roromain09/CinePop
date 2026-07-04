@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion — CinéPop</title>
+  <link rel="icon" href="img/favicon.ico">
+  <style>
+    :root {
+      --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+      --jaune: #f5b700; --jaune-soft: #ffd84d;
+      --blanc: #ffffff; --gris: #a7b3d1;
+      --vert: #39d98a; --rouge: #ff6b6b;
+      --ombre: rgba(0, 0, 0, 0.45);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      min-height: 100vh;
+      color: var(--blanc);
+      background:
+        radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+        linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+      padding-bottom: 60px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 32px; max-width: 1200px; margin: 0 auto;
+    }
+    .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+    .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+    .nav-links { display:flex; gap:8px; }
+    .nav-links a {
+      color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+      padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+    }
+    .nav-links a:hover { color: var(--blanc); background: rgba(255,255,255,0.07); }
+    .nav-toggle {
+      display: none;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--blanc); font-size: 1.3rem; line-height: 1;
+      padding: 8px 14px; border-radius: 12px; cursor: pointer;
+    }
+    @media (max-width: 680px) {
+      nav { flex-wrap: wrap; }
+      .nav-toggle { display: block; }
+      .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
+      .nav-links.open { display: flex; }
+      .nav-links a { text-align: center; padding: 12px 16px; }
+    }
+
+    /* ── LAYOUT ── */
+    .wrap { max-width: 440px; margin: 10px auto; padding: 0 24px; }
+
+    .form-card {
+      background: rgba(17, 34, 64, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px; padding: 38px 36px;
+      box-shadow: 0 24px 70px var(--ombre);
+      position: relative; overflow: hidden;
+    }
+    .form-card::before {
+      content: ""; position: absolute; top:0; left:0; right:0; height: 5px;
+      background: linear-gradient(90deg, var(--jaune), var(--jaune-soft));
+    }
+
+    .brand-pill {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 999px;
+      background: rgba(245, 183, 0, 0.12); color: var(--jaune-soft);
+      font-weight: 700; border: 1px solid rgba(245, 183, 0, 0.22);
+      margin-bottom: 20px;
+    }
+    .brand-pill .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+
+    h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 6px; }
+    .page-subtitle { color: var(--gris); font-size: 0.92rem; line-height: 1.6; margin-bottom: 28px; }
+
+    /* ── FORM ── */
+    .form-fields { display: flex; flex-direction: column; gap: 14px; }
+
+    .field-group { display: flex; flex-direction: column; gap: 5px; }
+    .field-label {
+      font-size: 0.74rem; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; color: var(--gris);
+    }
+
+    .input-wrap { position: relative; }
+    input {
+      width: 100%; padding: 14px 16px; border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.05); color: var(--blanc);
+      font-size: 1rem; outline: none; font-family: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    input[type="password"] { padding-right: 48px; }
+    input::placeholder { color: rgba(255, 255, 255, 0.35); }
+    input:focus {
+      border-color: var(--jaune); background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(245, 183, 0, 0.14); transform: translateY(-1px);
+    }
+    input.error { border-color: rgba(255,107,107,0.6); box-shadow: none; }
+
+    /* Bouton afficher/masquer mdp */
+    .toggle-pw {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--gris); font-size: 1rem; padding: 4px;
+      transition: color 0.2s ease;
+    }
+    .toggle-pw:hover { color: var(--blanc); }
+
+    /* Mot de passe oublié */
+    .forgot-row {
+      display: flex; justify-content: flex-end; margin-top: -6px;
+    }
+    .forgot-link {
+      font-size: 0.78rem; color: var(--gris); text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .forgot-link:hover { color: var(--jaune-soft); }
+
+    /* Erreur */
+    .error-card {
+      display: none; padding: 13px 15px; border-radius: 12px;
+      background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3);
+      color: #ffd6d6; font-size: 0.88rem;
+    }
+    .error-card.show { display: block; }
+
+    /* Bouton submit */
+    .btn-submit {
+      width: 100%; padding: 15px 18px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
+      font-size: 1rem; font-weight: 900; letter-spacing: 0.4px; cursor: pointer;
+      box-shadow: 0 12px 28px rgba(245, 183, 0, 0.24);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .btn-submit:hover { transform: translateY(-2px); }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    /* Séparateur */
+    .separator {
+      display: flex; align-items: center; gap: 12px; margin: 4px 0;
+    }
+    .separator::before, .separator::after {
+      content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.08);
+    }
+    .separator span { color: var(--gris); font-size: 0.78rem; white-space: nowrap; }
+
+    /* Lien inscription */
+    .signup-link {
+      text-align: center; margin-top: 20px;
+      font-size: 0.88rem; color: var(--gris);
+    }
+    .signup-link a { color: var(--jaune-soft); font-weight: 700; text-decoration: none; }
+    .signup-link a:hover { text-decoration: underline; }
+
+    /* Modal mot de passe oublié */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(7,17,31,0.78);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: rgba(17,34,64,0.97);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 22px; padding: 30px;
+      width: min(420px, 100%);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .modal h2 { font-size: 1.2rem; font-weight: 900; margin-bottom: 8px; }
+    .modal p { color: var(--gris); font-size: 0.88rem; line-height: 1.6; margin-bottom: 18px; }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px; border-radius: 50%; border: none;
+      background: rgba(255,255,255,0.08); color: var(--blanc);
+      font-size: 1rem; cursor: pointer;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.16); }
+    .modal input { margin-bottom: 12px; }
+    .modal .btn-submit { margin-top: 0; }
+    .modal-success {
+      display: none; text-align: center; padding: 10px 0;
+    }
+    .modal-success.show { display: block; }
+    .modal-success .check-icon {
+      width: 44px; height: 44px; border-radius: 50%; background: var(--vert);
+      color: #06281a; display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 1.2rem; margin: 0 auto 12px;
+    }
+    .modal-success p { color: var(--gris); font-size: 0.88rem; margin: 0; }
+
+    @media (max-width: 540px) {
+      .form-card { padding: 28px 22px; border-radius: 22px; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html">Programme</a>
+    <a href="/check.html">Mes réservations</a>
+    <a href="/historique.html">Historique</a>
+    <a href="/support.html">Support</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="form-card">
+    <div class="brand-pill"><span class="dot"></span> CINÉPOP — Mon compte</div>
+    <h1>Connexion</h1>
+    <p class="page-subtitle">Content de te revoir ! Connecte-toi pour accéder à ton espace fidélité.</p>
+
+    <div class="form-fields" id="loginForm">
+      <div class="field-group">
+        <label class="field-label" for="email">Email</label>
+        <input type="email" id="email" placeholder="martin@email.com" autocomplete="email">
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="password">Mot de passe</label>
+        <div class="input-wrap">
+          <input type="password" id="password" placeholder="Ton mot de passe" autocomplete="current-password">
+          <button class="toggle-pw" type="button" onclick="togglePw()" id="togglePwBtn" aria-label="Afficher le mot de passe">👁</button>
+        </div>
+      </div>
+
+      <div class="forgot-row">
+        <a href="#" class="forgot-link" onclick="openForgot(event)">Mot de passe oublié ?</a>
+      </div>
+
+      <div id="errorCard" class="error-card"></div>
+
+      <button class="btn-submit" id="submitBtn" onclick="seConnecter()">Se connecter</button>
+
+      <div class="separator"><span>ou</span></div>
+
+      <div style="text-align:center; font-size:0.82rem; color:var(--gris);">
+        Pas encore de compte ?
+        <a href="/inscription.html" style="color:var(--jaune-soft); font-weight:700; text-decoration:none;">Créer un compte →</a>
+      </div>
+    </div>
+  </div>
+  <div class="signup-link" style="margin-top:16px;">
+    Continuer sans compte → <a href="/programme.html">Voir le programme</a>
+  </div>
+</div>
+
+<!-- MODAL MOT DE PASSE OUBLIÉ -->
+<div class="modal-overlay" id="forgotOverlay" onclick="closeForgot(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeForgot()">✕</button>
+
+    <div id="forgotForm">
+      <h2>Mot de passe oublié</h2>
+      <p>Saisis ton email, on t'envoie un lien pour réinitialiser ton mot de passe.</p>
+      <input type="email" id="forgotEmail" placeholder="Ton email">
+      <div id="forgotError" class="error-card" style="margin-bottom:12px;"></div>
+      <button class="btn-submit" onclick="envoyerReset()">Envoyer le lien</button>
+    </div>
+
+    <div class="modal-success" id="forgotSuccess">
+      <div class="check-icon">✓</div>
+      <p>Un lien de réinitialisation a été envoyé à ton adresse email.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const _supabase = createClient(
+  "https://fsywnmsppegrffvoijuv.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeXdubXNwcGVncmZmdm9panV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTE1MjUsImV4cCI6MjA5NzE4NzUyNX0.dXoTVu3ZN5kt7JtqSy9PcQpqI9vvto1s61S23WuJgbU"
+);
+
+document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("navLinks").classList.toggle("open");
+});
+
+/* ── AFFICHER/MASQUER MOT DE PASSE ── */
+let pwVisible = false;
+function togglePw() {
+  pwVisible = !pwVisible;
+  const input = document.getElementById("password");
+  const btn   = document.getElementById("togglePwBtn");
+  input.type  = pwVisible ? "text" : "password";
+  btn.textContent = pwVisible ? "🙈" : "👁";
+}
+
+/* ── ERREUR ── */
+function showError(msg) {
+  const el = document.getElementById("errorCard");
+  el.textContent = msg;
+  el.classList.add("show");
+}
+function hideError() {
+  document.getElementById("errorCard").classList.remove("show");
+}
+
+/* ── CONNEXION ── */
+async function seConnecter() {
+  hideError();
+  const email    = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    showError("⛔ Merci de remplir tous les champs.");
+    return;
+  }
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled    = true;
+  btn.textContent = "Connexion…";
+
+  try {
+    const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    window.location.href = "/compte.html";
+
+  } catch (err) {
+    const msg = err.message || "";
+    const lisible = msg.includes("Invalid login") ? "Email ou mot de passe incorrect." : msg;
+    showError("❌ " + lisible);
+    btn.disabled    = false;
+    btn.textContent = "Se connecter";
+  }
+}
+
+/* ── MOT DE PASSE OUBLIÉ ── */
+function openForgot(e) {
+  if (e) e.preventDefault();
+  document.getElementById("forgotOverlay").classList.add("show");
+  setTimeout(() => document.getElementById("forgotEmail").focus(), 100);
+}
+function closeForgot(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById("forgotOverlay").classList.remove("show");
+  document.getElementById("forgotForm").style.display = "";
+  document.getElementById("forgotSuccess").classList.remove("show");
+  document.getElementById("forgotEmail").value = "";
+  document.getElementById("forgotError").classList.remove("show");
+}
+
+async function envoyerReset() {
+  const email = document.getElementById("forgotEmail").value.trim();
+  const errEl = document.getElementById("forgotError");
+  errEl.classList.remove("show");
+
+  if (!email) {
+    errEl.textContent = "⛔ Saisis ton adresse email.";
+    errEl.classList.add("show");
+    return;
+  }
+
+  try {
+    const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/reset-password.html"
+    });
+    if (error) throw error;
+    document.getElementById("forgotForm").style.display = "none";
+    document.getElementById("forgotSuccess").classList.add("show");
+  } catch (err) {
+    errEl.textContent = "❌ " + (err.message || "Erreur lors de l'envoi.");
+    errEl.classList.add("show");
+  }
+}
+
+/* Entrée clavier */
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    if (document.getElementById("forgotOverlay").classList.contains("show")) {
+      envoyerReset();
+    } else {
+      seConnecter();
+    }
+  }
+  if (e.key === "Escape") closeForgot();
+});
+</script>
+
+</body>
+</html>
