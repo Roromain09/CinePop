@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mon compte — CinéPop</title>
+  <link rel="icon" href="img/favicon.ico">
+  <style>
+    :root {
+      --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+      --jaune: #f5b700; --jaune-soft: #ffd84d;
+      --blanc: #ffffff; --gris: #a7b3d1;
+      --vert: #39d98a; --rouge: #ff6b6b; --orange: #ff8c66;
+      --ombre: rgba(0, 0, 0, 0.45);
+      --bronze: #cd7f32; --argent: #a8b8cc; --or: #f5b700;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      min-height: 100vh;
+      color: var(--blanc);
+      background:
+        radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+        linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+      padding-bottom: 60px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 32px; max-width: 1200px; margin: 0 auto;
+    }
+    .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+    .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+    .nav-links { display:flex; gap:8px; }
+    .nav-links a {
+      color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+      padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
+    .nav-toggle {
+      display: none;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--blanc); font-size: 1.3rem; line-height: 1;
+      padding: 8px 14px; border-radius: 12px; cursor: pointer;
+    }
+    @media (max-width: 680px) {
+      nav { flex-wrap: wrap; }
+      .nav-toggle { display: block; }
+      .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
+      .nav-links.open { display: flex; }
+      .nav-links a { text-align: center; padding: 12px 16px; }
+    }
+
+    /* ── LAYOUT ── */
+    .wrap { max-width: 900px; margin: 0 auto; padding: 10px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── HERO PROFIL ── */
+    .profile-hero {
+      background: rgba(17, 34, 64, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: 0 24px 70px var(--ombre);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .profile-hero::before {
+      content: ""; position: absolute; top:0; left:0; right:0; height: 5px;
+      background: linear-gradient(90deg, var(--jaune), var(--jaune-soft));
+    }
+
+    .avatar {
+      width: 78px; height: 78px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(245,183,0,0.3), rgba(245,183,0,0.08));
+      border: 2px solid rgba(245,183,0,0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 0 28px rgba(245,183,0,0.18);
+    }
+
+    .profile-info { flex: 1; min-width: 180px; }
+    .profile-name { font-size: 1.5rem; font-weight: 900; margin-bottom: 4px; }
+    .profile-email { color: var(--gris); font-size: 0.88rem; margin-bottom: 12px; }
+
+    .level-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 14px; border-radius: 999px; font-weight: 800; font-size: 0.82rem;
+      border: 1px solid;
+    }
+    .level-bronze { background: rgba(205,127,50,0.15); color: var(--bronze); border-color: rgba(205,127,50,0.35); }
+    .level-argent { background: rgba(168,184,204,0.15); color: var(--argent); border-color: rgba(168,184,204,0.35); }
+    .level-or     { background: rgba(245,183,0,0.15);  color: var(--or);     border-color: rgba(245,183,0,0.40); }
+
+    .profile-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .btn-logout {
+      padding: 9px 18px; border-radius: 12px; border: 1px solid rgba(255,107,107,0.3);
+      background: rgba(255,107,107,0.10); color: var(--rouge);
+      font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+    }
+    .btn-logout:hover { background: rgba(255,107,107,0.22); }
+
+    /* ── POINTS CARD ── */
+    .points-card {
+      background: rgba(17, 34, 64, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px; padding: 26px 30px;
+      box-shadow: 0 14px 40px var(--ombre);
+    }
+    .points-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .points-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--gris); margin-bottom: 4px; }
+    .points-value { font-size: 2.6rem; font-weight: 900; color: var(--jaune); line-height: 1; }
+    .points-sub { color: var(--gris); font-size: 0.85rem; margin-top: 4px; }
+
+    .next-level-info { text-align: right; }
+    .next-level-label { font-size: 0.72rem; color: var(--gris); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .next-level-name { font-size: 1rem; font-weight: 800; color: var(--argent); }
+    .next-level-pts { font-size: 0.82rem; color: var(--gris); }
+
+    /* Barre de progression */
+    .progress-track {
+      height: 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, var(--jaune), var(--jaune-soft));
+      box-shadow: 0 0 12px rgba(245,183,0,0.5);
+      transition: width 1s cubic-bezier(.4,0,.2,1);
+    }
+    .progress-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--gris); }
+
+    /* Niveaux miniatures */
+    .levels-row {
+      display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .level-pill {
+      flex: 1; min-width: 90px;
+      border-radius: 14px; padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.03);
+      text-align: center;
+    }
+    .level-pill.current {
+      border-color: rgba(205,127,50,0.4);
+      background: rgba(205,127,50,0.1);
+    }
+    .level-pill .lp-icon { font-size: 1.3rem; margin-bottom: 4px; }
+    .level-pill .lp-name { font-size: 0.78rem; font-weight: 800; }
+    .level-pill .lp-pts  { font-size: 0.68rem; color: var(--gris); margin-top: 2px; }
+    .level-pill.current .lp-name { color: var(--bronze); }
+
+    /* ── STATS RAPIDES ── */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .stat-card {
+      background: rgba(17, 34, 64, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 18px; padding: 18px 20px;
+      box-shadow: 0 8px 24px var(--ombre);
+    }
+    .stat-icon { font-size: 1.4rem; margin-bottom: 8px; }
+    .stat-value { font-size: 1.6rem; font-weight: 900; }
+    .stat-label { color: var(--gris); font-size: 0.78rem; margin-top: 2px; }
+
+    /* ── HISTORIQUE ── */
+    .section-title {
+      font-size: 1.1rem; font-weight: 800; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title .count {
+      background: rgba(245,183,0,0.15); color: var(--jaune-soft);
+      font-size: 0.72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px;
+    }
+
+    .resa-card {
+      background: rgba(17, 34, 64, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 18px; padding: 16px 20px;
+      margin-bottom: 10px;
+      box-shadow: 0 8px 20px var(--ombre);
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .resa-poster {
+      width: 44px; height: 62px; border-radius: 8px; flex-shrink: 0;
+      background: linear-gradient(150deg, #1c3258, #08101d);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; overflow: hidden;
+    }
+    .resa-poster img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+    .resa-info { flex: 1; min-width: 140px; }
+    .resa-film { font-weight: 800; font-size: 0.96rem; margin-bottom: 4px; }
+    .resa-meta { color: var(--gris); font-size: 0.8rem; display: flex; gap: 12px; flex-wrap: wrap; }
+    .resa-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+
+    .status-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 11px; border-radius: 999px; font-size: 0.76rem; font-weight: 700;
+    }
+    .chip-valide  { background: rgba(57,217,138,0.14); color: var(--vert); }
+    .chip-attente { background: rgba(245,183,0,0.14);  color: var(--jaune-soft); }
+    .chip-refuse  { background: rgba(255,107,107,0.14); color: var(--rouge); }
+
+    .pts-earned {
+      font-size: 0.76rem; font-weight: 700; color: var(--jaune-soft);
+      background: rgba(245,183,0,0.1); padding: 3px 9px; border-radius: 999px;
+    }
+
+    .empty {
+      text-align: center; padding: 50px 20px; color: var(--gris);
+    }
+    .empty-icon { font-size: 2rem; margin-bottom: 10px; }
+
+    @media (max-width: 600px) {
+      .profile-hero { flex-direction: column; align-items: flex-start; }
+      .profile-actions { align-items: flex-start; flex-direction: row; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stats-row .stat-card:last-child { grid-column: 1 / -1; }
+      .points-header { flex-direction: column; }
+      .next-level-info { text-align: left; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html">Programme</a>
+    <a href="/check.html">Mes réservations</a>
+    <a href="/historique.html">Historique</a>
+    <a href="/support.html">Support</a>
+    <a href="/compte.html" class="active">Mon compte</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- PROFIL HERO -->
+  <div class="profile-hero">
+    <div class="avatar">🎬</div>
+    <div class="profile-info">
+      <div class="profile-name" id="profileName">Martin Dupont</div>
+      <div class="profile-email" id="profileEmail">martin.dupont@email.com</div>
+      <span class="level-badge level-bronze" id="levelBadge">🥉 Bronze</span>
+    </div>
+    <div class="profile-actions">
+      <button class="btn-logout" onclick="seDeconnecter()">Se déconnecter</button>
+    </div>
+  </div>
+
+  <!-- POINTS & PROGRESSION -->
+  <div class="points-card">
+    <div class="points-header">
+      <div>
+        <div class="points-label">Mes points fidélité</div>
+        <div class="points-value" id="pointsValue">140</div>
+        <div class="points-sub">points accumulés</div>
+      </div>
+      <div class="next-level-info">
+        <div class="next-level-label">Prochain niveau</div>
+        <div class="next-level-name">🥈 Argent</div>
+        <div class="next-level-pts" id="ptsRestants">160 pts restants</div>
+      </div>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width: 47%"></div>
+    </div>
+    <div class="progress-labels">
+      <span>🥉 Bronze — 0 pts</span>
+      <span>🥈 Argent — 300 pts</span>
+    </div>
+
+    <div class="levels-row">
+      <div class="level-pill current">
+        <div class="lp-icon">🥉</div>
+        <div class="lp-name">Bronze</div>
+        <div class="lp-pts">0 pts</div>
+      </div>
+      <div class="level-pill">
+        <div class="lp-icon">🥈</div>
+        <div class="lp-name">Argent</div>
+        <div class="lp-pts">300 pts</div>
+      </div>
+      <div class="level-pill">
+        <div class="lp-icon">🥇</div>
+        <div class="lp-name">Or</div>
+        <div class="lp-pts">800 pts</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon">🎟</div>
+      <div class="stat-value" id="statResas">7</div>
+      <div class="stat-label">Réservations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🎬</div>
+      <div class="stat-value" id="statFilms">5</div>
+      <div class="stat-label">Films vus</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value" id="statPersonnes">14</div>
+      <div class="stat-label">Places réservées</div>
+    </div>
+  </div>
+
+  <!-- HISTORIQUE RÉSERVATIONS -->
+  <div>
+    <div class="section-title">
+      Mes réservations <span class="count" id="resaCount">7</span>
+    </div>
+    <div id="resaList"></div>
+  </div>
+
+</div>
+
+<script>
+const { createClient } = supabase;
+const _supabase = createClient(
+  "https://fsywnmsppegrffvoijuv.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeXdubXNwcGVncmZmdm9panV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTE1MjUsImV4cCI6MjA5NzE4NzUyNX0.dXoTVu3ZN5kt7JtqSy9PcQpqI9vvto1s61S23WuJgbU"
+);
+
+document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("navLinks").classList.toggle("open");
+});
+
+const LEVELS = [
+  { key: "bronze", label: "🥉 Bronze", min: 0,   max: 300 },
+  { key: "argent", label: "🥈 Argent", min: 300, max: 800 },
+  { key: "or",     label: "🥇 Or",     min: 800, max: null },
+];
+
+const STATUS = {
+  "validé":     { label: "Validé",     chip: "chip-valide",  icon: "✅" },
+  "en attente": { label: "En attente", chip: "chip-attente", icon: "⏳" },
+  "refusé":     { label: "Refusé",     chip: "chip-refuse",  icon: "❌" },
+  "expiré":     { label: "Expiré",     chip: "chip-refuse",  icon: "⏱" },
+};
+
+function formatDate(d) {
+  const date = new Date(d + "T00:00:00");
+  return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+}
+
+function buildResaCard(r) {
+  const st = STATUS[r.status] || STATUS["en attente"];
+  const pts = r.pts_gagnes || 0;
+  const ptsHtml = pts > 0 ? `<span class="pts-earned">+${pts} pts</span>` : "";
+  const personnes = r.people_number || 1;
+  const seance = r.seances || {};
+  const film = seance.films || {};
+  return `
+    <div class="resa-card">
+      <div class="resa-poster">🎬</div>
+      <div class="resa-info">
+        <div class="resa-film">${film.title || "—"}</div>
+        <div class="resa-meta">
+          <span>📅 ${formatDate(seance.session_date || "")}</span>
+          <span>🕐 ${(seance.session_time || "").slice(0,5)}</span>
+          ${seance.room_number ? `<span>🏛 ${seance.room_number}</span>` : ""}
+          <span>🎟 ${personnes} place${personnes > 1 ? "s" : ""}</span>
+        </div>
+      </div>
+      <div class="resa-right">
+        <span class="status-chip ${st.chip}">${st.icon} ${st.label}</span>
+        ${ptsHtml}
+      </div>
+    </div>`;
+}
+
+function renderProfil(profil, reservations) {
+  const name  = profil?.display_name || "—";
+  const pts   = profil?.points || 0;
+  const level = profil?.level || "bronze";
+
+  document.getElementById("profileName").textContent  = name;
+  document.getElementById("pointsValue").textContent  = pts;
+
+  const lv    = LEVELS.find(l => l.key === level) || LEVELS[0];
+  const badge = document.getElementById("levelBadge");
+  badge.textContent = lv.label;
+  badge.className   = `level-badge level-${level}`;
+
+  // Barre de progression
+  if (lv.max !== null) {
+    const pct = Math.min(100, Math.round(((pts - lv.min) / (lv.max - lv.min)) * 100));
+    document.getElementById("progressFill").style.width = pct + "%";
+    const next = LEVELS.find(l => l.min === lv.max);
+    document.getElementById("ptsRestants").textContent = `${lv.max - pts} pts restants`;
+    document.querySelector(".progress-labels").innerHTML =
+      `<span>${lv.label} — ${lv.min} pts</span><span>${next ? next.label : ""} — ${lv.max} pts</span>`;
+  } else {
+    document.getElementById("progressFill").style.width = "100%";
+    document.getElementById("ptsRestants").textContent  = "Niveau maximum atteint !";
+  }
+
+  // Pastilles niveaux
+  document.querySelectorAll(".level-pill").forEach((el, i) => {
+    const keys = ["bronze","argent","or"];
+    el.classList.toggle("current", keys[i] === level);
+    const nameEl = el.querySelector(".lp-name");
+    nameEl.style.color = keys[i] === level ? `var(--${keys[i]})` : "";
+  });
+
+  // Stats
+  const valides   = reservations.filter(r => r.status === "validé");
+  const films     = new Set(valides.map(r => r.seances?.films?.title).filter(Boolean)).size;
+  const personnes = valides.reduce((s, r) => s + (r.people_number || 0), 0);
+  document.getElementById("statResas").textContent     = reservations.length;
+  document.getElementById("statFilms").textContent     = films;
+  document.getElementById("statPersonnes").textContent = personnes;
+  document.getElementById("resaCount").textContent     = reservations.length;
+
+  // Liste réservations
+  const list = document.getElementById("resaList");
+  list.innerHTML = reservations.length
+    ? reservations.map(buildResaCard).join("")
+    : `<div class="empty"><div class="empty-icon">🎟</div>Aucune réservation pour le moment.</div>`;
+}
+
+async function init() {
+  // Vérifier session
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) {
+    window.location.href = "/connexion.html";
+    return;
+  }
+
+  const user = session.user;
+  document.getElementById("profileEmail").textContent = user.email;
+
+  // Charger profil
+  const { data: profil } = await _supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  // Charger réservations liées au compte
+  const { data: reservations } = await _supabase
+    .from("reservations")
+    .select("*, seances(room_number, session_date, session_time, films(title)), pts_gagnes")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  renderProfil(profil, reservations || []);
+}
+
+async function seDeconnecter() {
+  if (confirm("Se déconnecter de ton compte CinéPop ?")) {
+    await _supabase.auth.signOut();
+    window.location.href = "/index.html";
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
