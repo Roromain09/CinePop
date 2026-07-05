@@ -106,6 +106,15 @@
       font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
     }
     .btn-logout:hover { background: rgba(255,107,107,0.22); }
+    .btn-delete-account {
+      padding: 9px 18px; border-radius: 12px; border: 1px solid rgba(255,107,107,0.15);
+      background: transparent; color: rgba(255,107,107,0.45);
+      font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+    }
+    .btn-delete-account:hover {
+      background: rgba(255,107,107,0.10); color: var(--rouge);
+      border-color: rgba(255,107,107,0.3);
+    }
 
     /* ── POINTS CARD ── */
     .points-card {
@@ -259,6 +268,7 @@
     </div>
     <div class="profile-actions">
       <button class="btn-logout" onclick="seDeconnecter()">Se déconnecter</button>
+      <button class="btn-delete-account" onclick="supprimerCompte()">Supprimer mon compte</button>
     </div>
   </div>
 
@@ -464,6 +474,34 @@ async function init() {
     .order("created_at", { ascending: false });
 
   renderProfil(profil, reservations || []);
+}
+
+async function supprimerCompte() {
+  const etape1 = confirm("Supprimer définitivement ton compte CinéPop ?\nTes points et ton historique seront perdus.");
+  if (!etape1) return;
+  const etape2 = confirm("Dernière confirmation — cette action est irréversible.");
+  if (!etape2) return;
+
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) return;
+
+  // Supprimer le profil fidélité
+  await _supabase.from("profiles").delete().eq("user_id", session.user.id);
+
+  // Supprimer le compte auth via route serveur (service_role requis)
+  const res = await fetch("/api/supprimer-compte", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: session.user.id })
+  });
+
+  if (!res.ok) {
+    alert("Erreur lors de la suppression du compte. Contacte le support.");
+    return;
+  }
+
+  await _supabase.auth.signOut();
+  window.location.href = "/index.html";
 }
 
 async function seDeconnecter() {
