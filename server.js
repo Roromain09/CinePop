@@ -854,7 +854,13 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
 </html>
 `);
 });
-
+app.post("/api/supprimer-compte", async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) return res.status(400).send("userId manquant");
+  const { error } = await supabase.auth.admin.deleteUser(userId);
+  if (error) return res.status(500).send(error.message);
+  res.json({ ok: true });
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("Serveur lancé sur le port " + PORT);
