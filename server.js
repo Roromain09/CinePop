@@ -115,6 +115,70 @@ async function applyExpirations() {
 }
 
 setInterval(applyExpirations, 60 * 1000);
+async function applyFidelitePoints() {
+    const { data, error } = await supabase
+        .from("reservations")
+        .select("id, people_number, user_id, seances(session_date, session_time, films(title))")
+        .eq("status", "validé")
+        .eq("points_credited", false)
+        .not("user_id", "is", null);
+
+    if (error) { console.error("Erreur fidelite lecture :", error.message); return; }
+
+    const nowTime = now();
+
+    for (const r of (data || [])) {
+        const s = r.seances;
+        if (!s?.session_date || !s?.session_time) continue;
+
+        const dt = sessionDateTimeOf(s.session_date, (s.session_time || "").slice(0, 5));
+        if (!dt.isValid || nowTime < dt.plus({ hours: 1 })) continue;
+
+        const pts = (r.people_number || 1) * 10;
+        const filmTitle = s.films?.title || null;
+
+        // Lire le profil actuel
+        const { data: profil } = await supabase
+            .from("profiles")
+            .select("points, total_seances, total_personnes, total_films_vus, films_vus_list")
+            .eq("user_id", r.user_id)
+            .maybeSingle();
+
+        if (!profil) continue;
+
+        const filmsVus = profil.films_vus_list || [];
+        const dejaVu = filmTitle && filmsVus.includes(filmTitle);
+        const newFilmsList = (filmTitle && !dejaVu) ? [...filmsVus, filmTitle] : filmsVus;
+
+        const newPoints = (profil.points || 0) + pts;
+        const newLevel =
+            newPoints >= 800 ? "or" :
+            newPoints >= 300 ? "argent" : "bronze";
+
+        const { error: upErr } = await supabase
+            .from("profiles")
+            .update({
+                points: newPoints,
+                level: newLevel,
+                total_seances:    (profil.total_seances || 0) + 1,
+                total_personnes:  (profil.total_personnes || 0) + (r.people_number || 1),
+                total_films_vus:  dejaVu ? (profil.total_films_vus || 0) : (profil.total_films_vus || 0) + 1,
+                films_vus_list:   newFilmsList
+            })
+            .eq("user_id", r.user_id);
+
+        if (upErr) { console.error("Erreur update profil :", upErr.message); continue; }
+
+        await supabase
+            .from("reservations")
+            .update({ points_credited: true, pts_gagnes: pts })
+            .eq("id", r.id);
+
+        console.log(`[Fidélité] +${pts} pts → user ${r.user_id}`);
+    }
+}
+
+setInterval(applyFidelitePoints, 60 * 1000);
 
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/public/index.html");
