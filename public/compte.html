@@ -433,12 +433,9 @@ function renderProfil(profil, reservations) {
   });
 
   // Stats
-  const valides   = reservations.filter(r => r.status === "validé");
-  const films     = new Set(valides.map(r => r.seances?.films?.title).filter(Boolean)).size;
-  const personnes = valides.reduce((s, r) => s + (r.people_number || 0), 0);
-  document.getElementById("statResas").textContent     = reservations.length;
-  document.getElementById("statFilms").textContent     = films;
-  document.getElementById("statPersonnes").textContent = personnes;
+  document.getElementById("statResas").textContent     = profil?.total_seances    || 0;
+  document.getElementById("statFilms").textContent     = profil?.total_films_vus  || 0;
+  document.getElementById("statPersonnes").textContent = profil?.total_personnes  || 0;
   document.getElementById("resaCount").textContent     = reservations.length;
 
   // Liste réservations
