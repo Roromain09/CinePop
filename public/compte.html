@@ -436,7 +436,7 @@ function renderProfil(profil, reservations) {
   document.getElementById("statResas").textContent     = profil?.total_seances    || 0;
   document.getElementById("statFilms").textContent     = profil?.total_films_vus  || 0;
   document.getElementById("statPersonnes").textContent = profil?.total_personnes  || 0;
-  document.getElementById("resaCount").textContent     = reservations.length;
+    document.getElementById("resaCount").textContent     = reservations.length || 0;
 
   // Liste réservations
   const list = document.getElementById("resaList");
