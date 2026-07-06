@@ -291,7 +291,7 @@ app.get("/api/historique", async (req, res) => {
 //  RÉSERVATION CLIENT
 // ============================================
 app.post("/api/reserver", async (req, res) => {
-    const { seanceId, clientName, email, peopleNumber } = req.body;
+    const { seanceId, clientName, email, peopleNumber, userId } = req.body;
 
     if (!seanceId || !clientName || !peopleNumber) {
         return res.status(400).send("Champs obligatoires manquants.");
@@ -325,13 +325,14 @@ app.post("/api/reserver", async (req, res) => {
     }
 
     const newResa = {
-        id: randomUUID(),
-        seance_id: seanceId,
-        client_name: clientName,
-        email: email || "",
-        people_number: parseInt(peopleNumber),
-        status: "en attente"
-    };
+    id: randomUUID(),
+    seance_id: seanceId,
+    client_name: clientName,
+    email: email || "",
+    people_number: parseInt(peopleNumber),
+    status: "en attente",
+    user_id: userId || null
+};
 
     const { error: insertError } = await supabase.from("reservations").insert(newResa);
     if (insertError) {
