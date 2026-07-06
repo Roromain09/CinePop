@@ -251,6 +251,7 @@
 }
 .info-banner .info-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -518,7 +519,7 @@ if (seance.infoMessage) {
       const request = fetch("/api/reserver", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        body: JSON.stringify({ ...data, userId: currentUserId })
       });
 
       const [res] = await Promise.all([request, delay]);
@@ -540,6 +541,20 @@ if (seance.infoMessage) {
   document.getElementById("navToggle").addEventListener("click", () => {
   document.getElementById("navLinks").classList.toggle("open");
 });
+  // Récupérer le user_id Supabase si connecté
+let currentUserId = null;
+(async () => {
+  try {
+    const { createClient } = window.supabase || {};
+    if (!createClient) return;
+    const _sb = createClient(
+      "https://fsywnmsppegrffvoijuv.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeXdubXNwcGVncmZmdm9panV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTE1MjUsImV4cCI6MjA5NzE4NzUyNX0.dXoTVu3ZN5kt7JtqSy9PcQpqI9vvto1s61S23WuJgbU"
+    );
+    const { data: { session } } = await _sb.auth.getSession();
+    if (session?.user) currentUserId = session.user.id;
+  } catch {}
+})();
 
   loadSeances();
 </script>
