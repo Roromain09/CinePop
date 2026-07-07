@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Réservation CinéPop</title>
   <link rel="icon" href="img/favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     :root {
       --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
@@ -128,389 +129,270 @@
 
     input, select {
       width: 100%; padding: 15px 16px; border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.10);
-      background: rgba(255, 255, 255, 0.05); color: var(--blanc);
-      font-size: 1rem; outline: none;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.10); background: rgba(255, 255, 255, 0.05);
+      color: var(--blanc); font-size: 1rem; outline: none; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
     select { color-scheme: dark; }
-    select option {
-      background: var(--bleu2);
-      color: var(--blanc);
-    }
+    select option { background: var(--bleu2); color: var(--blanc); }
     input::placeholder { color: rgba(255, 255, 255, 0.45); }
-    input:focus, select:focus {
-      border-color: var(--jaune); background: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 0 0 4px rgba(245, 183, 0, 0.14); transform: translateY(-1px);
+    input:focus, select:focus { border-color: var(--jaune); background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 4px rgba(245,183,0,0.15); }
+
+    .btn-submit {
+      margin-top: 10px; padding: 16px; border-radius: 14px; border: none;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+      color: #111; font-weight: 800; font-size: 1rem; cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
     }
+    .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(245,183,0,0.2); }
+    .btn-submit:active { transform: translateY(1px); }
 
-    button {
-      width: 100%; padding: 15px 18px; margin-top: 6px; border: none; border-radius: 14px;
-      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
-      font-size: 1rem; font-weight: 900; letter-spacing: 0.4px; cursor: pointer;
-      box-shadow: 0 12px 28px rgba(245, 183, 0, 0.24);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-    }
-    button:hover { transform: translateY(-2px); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; transform:none; }
-
-    form.hidden { display: none; }
-
-    .error-card {
-      display: none; margin-top: 16px; padding: 14px 16px; border-radius: 14px;
-      background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3);
-      color: #ffd6d6; font-size: 0.92rem;
-    }
-    .error-card.show { display: block; }
-
-    .success-card { display: none; margin-top: 4px; }
-    .success-card.show { display: block; }
-    .success-top { display:flex; gap: 14px; align-items:flex-start; margin-bottom: 18px; }
-    .check-icon {
-      width: 36px; height: 36px; border-radius: 50%; background: var(--vert);
-      color: #06281a; display:flex; align-items:center; justify-content:center;
-      font-weight: 900; flex-shrink: 0;
-    }
-    .success-title { font-weight: 800; font-size: 1.1rem; }
-    .success-subtitle { color: var(--gris); font-size: 0.92rem; margin-top: 4px; line-height:1.5; }
-
-    .ticket { background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; }
-    .ticket-row { display:grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.08); }
+    .card-msg { display:none; animation: pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; padding: 14px 16px; border-radius: 14px; font-size: 0.92rem; font-weight: 600; line-height: 1.4; }
+    .card-msg.show { display: block; }
+    .card-msg.error { background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.2); color: #ff8b8b; }
+    
+    .success-panel { display:none; text-align:center; padding: 20px 10px; animation: pop 0.3s ease both; }
+    .success-panel.show { display: block; }
+    .success-icon { font-size: 3.5rem; margin-bottom: 16px; display:inline-block; }
+    .success-title { font-size: 1.6rem; font-weight:900; margin-bottom: 8px; }
+    .success-p { color: var(--gris); font-size: 0.96rem; line-height: 1.6; margin-bottom: 24px; }
+    
+    .ticket-stub { background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); border-radius:18px; padding: 20px; text-align: left; max-width: 360px; margin: 0 auto 28px; }
+    .ticket-row { display: flex; justify-content: space-between; font-size:0.88rem; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .ticket-row:last-child { border-bottom: none; }
-    .ticket-label { color: var(--gris); font-size: 0.82rem; }
-    .ticket-value { font-weight: 700; font-size: 0.92rem; text-align: right; }
+    .ticket-row span { color: var(--gris); }
+    .ticket-row b { color: var(--blanc); }
 
-    .status-pill {
-      margin-top: 16px; display:inline-flex; align-items:center; gap:8px;
-      background: rgba(57,217,138,0.12); color: var(--vert); padding: 8px 14px;
-      border-radius: 999px; font-size: 0.85rem; font-weight: 700;
-    }
-    .status-dot { width:8px; height:8px; border-radius:50%; background: var(--vert); }
-
-    .loading-overlay {
-      position: fixed; inset: 0; background: rgba(7,17,31,0.85); display:none;
-      align-items:center; justify-content:center; z-index: 999;
-    }
-    .loading-overlay.show { display:flex; }
-    .loading-box { text-align:center; }
-    .spinner {
-      width: 50px; height:50px; margin: 0 auto 16px; border-radius:50%;
-      border: 4px solid rgba(255,255,255,0.1); border-top:4px solid var(--jaune);
-      animation: spin 0.8s linear infinite;
-    }
+    .loader-overlay { position:absolute; inset:0; background: rgba(7, 17, 31, 0.85); backdrop-filter: blur(8px); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; opacity:0; pointer-events: none; transition: opacity 0.3s ease; border-radius:28px; }
+    .loader-overlay.show { opacity:1; pointer-events: auto; }
+    .spinner { width: 44px; height: 44px; border: 4px solid rgba(245,183,0,0.15); border-top-color: var(--jaune); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-title { font-weight: 800; margin-bottom: 6px; }
-    .loading-text { color: var(--gris); font-size: 0.9rem; }
+    @keyframes pop { from { opacity:0; transform: scale(0.95); } to { opacity:1; transform: scale(1); } }
 
-    @media (max-width: 920px) {
-      .page { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 540px) {
-      .hero, .form-card { padding: 22px; border-radius: 22px; }
-      .hero { min-height: 360px; }
-      .ticket-row { grid-template-columns: 1fr; gap: 4px; }
-    }
-    .nav-toggle {
-  display: none;
-  width: auto;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: var(--blanc);
-  font-size: 1.3rem;
-  line-height: 1;
-  padding: 8px 14px;
-  border-radius: 12px;
-  cursor: pointer;
-}
+    .nav-toggle { display: none; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--blanc); font-size: 1.3rem; padding: 8px 14px; border-radius: 12px; cursor: pointer; }
 
-@media (max-width: 680px) {
-  nav { flex-wrap: wrap; }
-  .nav-toggle { display: block; }
-  .nav-links {
-    display: none;
-    width: 100%;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 14px;
-  }
-  .nav-links.open { display: flex; }
-  .nav-links a { text-align: center; padding: 12px 16px; }
-}
-    .info-banner {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    background: rgba(77, 166, 255, 0.12);
-    border: 1px solid rgba(77, 166, 255, 0.3);
-    border-radius: 12px;
-    padding: 11px 14px;
-    margin-top: 10px;
-    color: #9ecfff;
-    font-size: 0.88rem;
-    line-height: 1.5;
-}
-.info-banner .info-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
+    @media (max-width: 860px) {
+      .page { grid-template-columns: 1fr; gap: 32px; }
+      .hero { min-height: auto; padding: 28px; }
+    }
+    @media (max-width: 680px) {
+      nav { flex-wrap: wrap; }
+      .nav-toggle { display: block; }
+      .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
+      .nav-links.open { display: flex; }
+      .nav-links a { text-align: center; padding: 12px 16px; }
+    }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
 <nav>
-  <div class="logo"><span class="dot"></span> CINÉPOP</div>
-  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="logo"><div class="dot"></div>CinéPop</div>
+  <button class="nav-toggle" id="navToggle">☰</button>
   <div class="nav-links" id="navLinks">
     <a href="/index.html">Accueil</a>
     <a href="/programme.html">Programme</a>
     <a href="/check.html">Mes réservations</a>
     <a href="/historique.html">Historique</a>
     <a href="/support.html">Support</a>
+    <a href="/connexion.html" id="navCompteLink">Mon compte</a>
   </div>
 </nav>
 
 <div class="page">
-  <section class="hero">
+  <div class="hero">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-overlay"></div>
-
     <div class="hero-content">
-      <div class="brand"><span class="dot"></span> CINEPOP — Réservation</div>
-      <h1>Réserve ton billet en quelques clics.</h1>
-      <p class="subtitle">Choisis ta séance, indique tes informations, et c'est réservé.</p>
-
-      <div class="selected-seance" id="selectedSeanceBox">
-        <div class="row"><span>Film</span><b id="ssFilm"></b></div>
-        <div class="row"><span>Date</span><b id="ssDate"></b></div>
-        <div class="row"><span>Heure</span><b id="ssTime"></b></div>
-        <div class="row"><span>Salle</span><b id="ssRoom"></b></div>
-        <div class="row"><span>Places restantes</span><b id="ssRemaining"></b></div>
+      <div class="brand"><div class="dot"></div>Ticket en ligne</div>
+      <h1 id="filmTitle">Sélectionnez votre séance</h1>
+      <p class="subtitle" id="filmSynopsis">Parcourez le programme de notre cinéma pour choisir une séance et réserver directement vos billets sécurisés.</p>
+      
+      <div class="selected-seance" id="seanceSummary">
+        <div class="row"><span>Date de projection</span><b id="summaryDate">-</b></div>
+        <div class="row"><span>Horaire de début</span><b id="summaryTime">-</b></div>
+        <div class="row"><span>Salle</span><b id="summaryRoom">-</b></div>
+        <div class="row"><span>Places restantes</span><b id="summarySeats">-</b></div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <section class="form-card">
-    <div class="form-title">Réserve ta séance</div>
-    <div class="form-subtitle">Remplis les infos ci-dessous, puis valide ta séance.</div>
+  <div class="form-card" style="position:relative;">
+    <div class="loader-overlay" id="loader">
+      <div class="spinner"></div>
+      <span style="font-weight:700; font-size:0.95rem; color: var(--jaune-soft);">Traitement de votre réservation...</span>
+    </div>
 
-    <form id="resaForm">
+    <div id="successPanel" class="success-panel">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Réservation validée !</div>
+      <p class="success-p">Votre place a été enregistrée avec succès. Retrouvez votre ticket d'accès ci-dessous.</p>
+      
+      <div class="ticket-stub">
+        <div class="ticket-row"><span>Film</span><b id="tktTitle">-</b></div>
+        <div class="ticket-row"><span>Séance</span><b id="tktTime">-</b></div>
+        <div class="ticket-row"><span>Titulaire</span><b id="tktName">-</b></div>
+        <div class="ticket-row"><span>Places réservées</span><b id="tktQty">-</b></div>
+      </div>
+
+      <a href="/check.html" class="btn-submit" style="text-decoration:none; display:block;">Accéder à mes e-billets</a>
+    </div>
+
+    <form id="reserveForm">
+      <div class="form-title">Finaliser ma réservation</div>
+      <div class="form-subtitle">Remplissez les informations ci-dessous pour bloquer vos places immédiatement.</div>
+
+      <div id="errorBox" class="card-msg error"></div>
+
       <div class="field">
-        <label class="field-label">Séance</label>
-        <select id="seanceId" required>
-          <option value="">Chargement des séances…</option>
+        <label class="field-label">Choix de la séance</label>
+        <select id="seanceSelect" required>
+          <option value="" disabled selected>Sélectionnez une option...</option>
         </select>
       </div>
 
       <div class="field">
-        <input type="text" id="clientName" placeholder="Nom Prénom" required>
+        <label class="field-label">Votre nom complet</label>
+        <input type="text" id="clientName" placeholder="Ex: Alice Martin" required />
       </div>
 
       <div class="field">
-        <input type="email" id="email" placeholder="Email" required>
+        <label class="field-label">Nombre de places (Maximum 6)</label>
+        <select id="peopleNumber" required>
+          <option value="1" selected>1 place</option>
+          <option value="2">2 places</option>
+          <option value="3">3 places</option>
+          <option value="4">4 places</option>
+          <option value="5">5 places</option>
+          <option value="6">6 places</option>
+        </select>
       </div>
 
-      <div class="field">
-        <input type="number" id="peopleNumber" min="1" max="10" placeholder="Nombre de personnes" required>
-      </div>
-
-      <button id="submitBtn" type="submit">Réserver</button>
+      <button type="submit" class="btn-submit">Confirmer la réservation</button>
     </form>
-
-    <div id="errorCard" class="error-card"></div>
-
-    <div id="successCard" class="success-card">
-      <div class="success-top">
-        <div class="check-icon">✓</div>
-        <div>
-          <div class="success-title">Réservation confirmée</div>
-          <div class="success-subtitle">Ton billet a bien été enregistré.
-          Nos équipes traiterons ta demande au plus vite ! Tu recevras tes billets par mail.</div>
-        </div>
-      </div>
-
-      <div class="ticket">
-        <div class="ticket-row"><div class="ticket-label">Client</div><div class="ticket-value" id="confirmClient"></div></div>
-        <div class="ticket-row"><div class="ticket-label">Film</div><div class="ticket-value" id="confirmFilm"></div></div>
-        <div class="ticket-row"><div class="ticket-label">Salle</div><div class="ticket-value" id="confirmRoom"></div></div>
-        <div class="ticket-row"><div class="ticket-label">Séance à</div><div class="ticket-value" id="confirmSession"></div></div>
-        <div class="ticket-row"><div class="ticket-label">Nombre</div><div class="ticket-value" id="confirmNumber"></div></div>
-        <div class="ticket-row"><div class="ticket-label">Email</div><div class="ticket-value" id="confirmEmail"></div></div>
-      </div>
-
-      <div class="status-pill"><span class="status-dot"></span> Réservation envoyée avec succès</div>
-    </div>
-  </section>
-</div>
-
-<div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
-  <div class="loading-box">
-    <div class="spinner"></div>
-    <div class="loading-title">Réservation en cours...</div>
-    <div class="loading-text">On vérifie ta demande et on prépare tes tickets.</div>
   </div>
 </div>
 
 <script>
-  const form = document.getElementById("resaForm");
-  const submitBtn = document.getElementById("submitBtn");
-  const loadingOverlay = document.getElementById("loadingOverlay");
-  const successCard = document.getElementById("successCard");
-  const errorCard = document.getElementById("errorCard");
-  const seanceSelect = document.getElementById("seanceId");
+  let allSeances = [];
+  let selectedSeanceGlobal = null;
 
-  let seancesFlat = []; // { id, label, filmTitle, roomNumber, sessionDate, sessionTime, remaining, posterUrl }
+  const urlParams = new URLSearchParams(window.location.search);
+  const preselectedId = urlParams.get("seanceId");
 
-  function showLoading() {
-    loadingOverlay.classList.add("show");
-    submitBtn.disabled = true;
-    form.querySelectorAll("input, select").forEach(el => el.disabled = true);
-  }
-  function hideLoading() {
-    loadingOverlay.classList.remove("show");
-    submitBtn.disabled = false;
-    form.querySelectorAll("input, select").forEach(el => el.disabled = false);
-  }
-  function showError(message) {
-    errorCard.textContent = message;
-    errorCard.classList.add("show");
-  }
-  function hideError() {
-    errorCard.classList.remove("show");
-    errorCard.textContent = "";
-  }
+  const seanceSelect = document.getElementById("seanceSelect");
+  const filmTitle = document.getElementById("filmTitle");
+  const filmSynopsis = document.getElementById("filmSynopsis");
+  const heroBg = document.getElementById("heroBg");
+  const seanceSummary = document.getElementById("seanceSummary");
+  
+  const sDate = document.getElementById("summaryDate");
+  const sTime = document.getElementById("summaryTime");
+  const sRoom = document.getElementById("summaryRoom");
+  const sSeats = document.getElementById("summarySeats");
 
-  function formatDate(d) {
-    const date = new Date(d + "T00:00:00");
-    return date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+  const form = document.getElementById("reserveForm");
+  const loader = document.getElementById("loader");
+  const errorBox = document.getElementById("errorBox");
+  const successPanel = document.getElementById("successPanel");
+
+  function formatDate(isoStr) {
+    if (!isoStr) return "";
+    const [y, m, d] = isoStr.split("-");
+    return `${d}/${m}/${y}`;
   }
 
-  function updatePoster(seance) {
-    const bg = document.getElementById("heroBg");
-    if (seance && seance.posterUrl) {
-      bg.style.backgroundImage = `url('${seance.posterUrl}')`;
-      bg.classList.add("show");
-    } else {
-      bg.classList.remove("show");
-      bg.style.backgroundImage = "";
-    }
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.add("show");
+    errorBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
+  function hideError() { errorBox.classList.remove("show"); }
+  function showLoading() { loader.classList.add("show"); }
+  function hideLoading() { loader.classList.remove("show"); }
 
-  function updateSelectedSeanceBox() {
-    const seance = seancesFlat.find(s => s.id === seanceSelect.value);
-    const box = document.getElementById("selectedSeanceBox");
-    updatePoster(seance);
-    if (!seance) { box.classList.remove("show"); return; }
-    document.getElementById("ssFilm").textContent = seance.filmTitle;
-    document.getElementById("ssDate").textContent = formatDate(seance.sessionDate);
-    document.getElementById("ssTime").textContent = seance.sessionTime;
-    document.getElementById("ssRoom").textContent = seance.roomNumber || "—";
-    document.getElementById("ssRemaining").textContent = seance.remaining + " place(s)";
-  box.classList.add("show");
-
-// Bandeau info
-const existingBanner = box.querySelector(".info-banner");
-if (existingBanner) existingBanner.remove();
-if (seance.infoMessage) {
-    const banner = document.createElement("div");
-    banner.className = "info-banner";
-    banner.innerHTML = `<span class="info-icon">ℹ️</span><span>${seance.infoMessage}</span>`;
-    box.appendChild(banner);
-}
-
-    const peopleInput = document.getElementById("peopleNumber");
-    peopleInput.max = Math.min(10, seance.remaining);
-  }
-
-  async function loadSeances() {
+  async function init() {
     try {
       const res = await fetch("/api/programme");
       const data = await res.json();
-      if (!data.ok) throw new Error();
+      if (!data.ok) return;
 
-      seancesFlat = [];
-      data.films.forEach(film => {
-        film.seances.forEach(s => {
-          seancesFlat.push({
-    id: s.id,
-    filmTitle: film.title,
-    roomNumber: s.roomNumber,
-    sessionDate: s.sessionDate,
-    sessionTime: s.sessionTime,
-    remaining: s.remaining,
-    posterUrl: film.posterUrl,
-    cancelled: s.cancelled || false,
-    infoMessage: s.infoMessage || null
-});
+      data.films.forEach(f => {
+        f.seances.forEach(s => {
+          if (!s.cancelled && s.seatsRemaining > 0) {
+            allSeances.push({ ...s, filmTitle: f.title, synopsis: f.synopsis, posterUrl: f.posterUrl });
+          }
         });
       });
 
-      seancesFlat.sort((a, b) =>
-        `${a.sessionDate} ${a.sessionTime}`.localeCompare(`${b.sessionDate} ${b.sessionTime}`)
-      );
+      allSeances.sort((a, b) => {
+        const da = `${a.sessionDate} ${a.sessionTime}`;
+        const db = `${b.sessionDate} ${b.sessionTime}`;
+        return da.localeCompare(db);
+      });
 
-      if (seancesFlat.length === 0) {
-        seanceSelect.innerHTML = `<option value="">Aucune séance disponible</option>`;
-        return;
-      }
+      seanceSelect.innerHTML = '<option value="" disabled selected>Sélectionnez une option...</option>' + 
+        allSeances.map(s => `<option value="${s.id}">${s.filmTitle} — ${formatDate(s.sessionDate)} à ${s.sessionTime}</option>`).join("");
 
-     seanceSelect.innerHTML = seancesFlat.map(s => {
-    const unavailable = s.remaining <= 0 || s.cancelled;
-    const label = `${s.filmTitle} — ${formatDate(s.sessionDate)} à ${s.sessionTime}${s.roomNumber ? " (" + s.roomNumber + ")" : ""}${s.cancelled ? " — annulée" : (s.remaining <= 0 ? " — complet" : "")}`;
-    return `<option value="${s.id}" ${unavailable ? "disabled" : ""}>${label}</option>`;
-}).join("");
-      const params = new URLSearchParams(window.location.search);
-      const preselect = params.get("seance");
-      if (preselect && seancesFlat.some(s => s.id === preselect)) {
-        seanceSelect.value = preselect;
+      if (preselectedId) {
+        seanceSelect.value = preselectedId;
+        updateUI(preselectedId);
       }
-      updateSelectedSeanceBox();
-    } catch {
-      seanceSelect.innerHTML = `<option value="">Erreur de chargement</option>`;
+    } catch (e) {
+      console.error(e);
     }
   }
 
-  seanceSelect.addEventListener("change", updateSelectedSeanceBox);
+  function updateUI(seanceId) {
+    hideError();
+    const s = allSeances.find(item => item.id == seanceId);
+    if (!s) {
+      seanceSummary.classList.remove("show");
+      return;
+    }
+    selectedSeanceGlobal = s;
+    filmTitle.textContent = s.filmTitle;
+    filmSynopsis.textContent = s.synopsis || "Aucun résumé disponible.";
+    
+    if (s.posterUrl) {
+      heroBg.style.backgroundImage = `url('${s.posterUrl}')`;
+      heroBg.classList.add("show");
+    } else {
+      heroBg.classList.remove("show");
+    }
 
-  function showSuccess(data, seance) {
-    document.getElementById("confirmClient").textContent = data.clientName;
-    document.getElementById("confirmFilm").textContent = seance.filmTitle;
-    document.getElementById("confirmRoom").textContent = seance.roomNumber || "—";
-    document.getElementById("confirmNumber").textContent = data.peopleNumber;
-    document.getElementById("confirmSession").textContent = `${seance.sessionDate} à ${seance.sessionTime}`;
-    document.getElementById("confirmEmail").textContent = data.email;
+    sDate.textContent = formatDate(s.sessionDate);
+    sTime.textContent = s.sessionTime;
+    sRoom.textContent = s.roomNumber ? `Salle ${s.roomNumber}` : "Non spécifiée";
+    sSeats.textContent = `${s.seatsRemaining} places`;
+    seanceSummary.classList.add("show");
+  }
 
-    successCard.classList.add("show");
-    form.classList.add("hidden");
-    document.querySelector(".form-subtitle").textContent = "Résumé de ta commande :";
+  seanceSelect.addEventListener("change", (e) => updateUI(e.target.value));
+
+  function showSuccess(formData, seance) {
+    form.style.display = "none";
+    document.getElementById("tktTitle").textContent = seance.filmTitle;
+    document.getElementById("tktTime").textContent = `${formatDate(seance.sessionDate)} à ${seance.sessionTime}`;
+    document.getElementById("tktName").textContent = formData.clientName;
+    document.getElementById("tktQty").textContent = `${formData.peopleNumber} place(s)`;
+    successPanel.classList.add("show");
   }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     hideError();
-    successCard.classList.remove("show");
 
-    const seance = seancesFlat.find(s => s.id === seanceSelect.value);
+    const seanceId = seanceSelect.value;
     const data = {
-      seanceId: seanceSelect.value,
+      seanceId: seanceId,
       clientName: document.getElementById("clientName").value.trim(),
-      email: document.getElementById("email").value.trim(),
-      peopleNumber: document.getElementById("peopleNumber").value.trim()
+      peopleNumber: parseInt(document.getElementById("peopleNumber").value, 10)
     };
 
-    if (!data.seanceId) {
-      showError("⛔ Merci de choisir une séance.");
-      return;
-    }
-    if (seance && seance.cancelled) {
-    showError("⛔ Cette séance a été annulée.");
-    return;
-}
-    if (parseInt(data.peopleNumber) > 10 || parseInt(data.peopleNumber) < 1) {
-      showError("⛔ Le nombre de personnes doit être entre 1 et 10.");
-      return;
-    }
-    if (seance && parseInt(data.peopleNumber) > seance.remaining) {
-      showError(`⛔ Il ne reste que ${seance.remaining} place(s) pour cette séance.`);
-      return;
-    }
+    const seance = allSeances.find(item => item.id == seanceId);
+    if (!seance) { showError("⚠ Veuillez choisir une séance valide."); return; }
+    if (!data.clientName) { showError("⚠ Veuillez inscrire votre nom."); return; }
+    if (data.peopleNumber > seance.seatsRemaining) { showError(`⛔ Désolé, il ne reste que ${seance.seatsRemaining} places.`); return; }
 
     showLoading();
     const delay = new Promise(resolve => setTimeout(resolve, 1500));
@@ -538,26 +420,31 @@ if (seance.infoMessage) {
       showError(err.message || "Impossible de finaliser la réservation.");
     }
   });
+
   document.getElementById("navToggle").addEventListener("click", () => {
-  document.getElementById("navLinks").classList.toggle("open");
-});
-  // Récupérer le user_id Supabase si connecté
-let currentUserId = null;
-(async () => {
-  try {
-    const { createClient } = window.supabase || {};
-    if (!createClient) return;
-    const _sb = createClient(
+    document.getElementById("navLinks").classList.toggle("open");
+  });
+
+  init();
+
+  // 3 — Récupérer le user_id Supabase si connecté (Spécificité reservation.html)
+  let currentUserId = null;
+  (async () => {
+    const _sb = supabase.createClient(
       "https://fsywnmsppegrffvoijuv.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeXdubXNwcGVncmZmdm9panV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTE1MjUsImV4cCI6MjA5NzE4NzUyNX0.dXoTVu3ZN5kt7JtqSy9PcQpqI9vvto1s61S23WuJgbU"
     );
     const { data: { session } } = await _sb.auth.getSession();
-    if (session?.user) currentUserId = session.user.id;
-  } catch {}
-})();
-
-  loadSeances();
+    const link = document.getElementById("navCompteLink");
+    if (session?.user) {
+      currentUserId = session.user.id;
+      link.href = "/compte.html";
+      link.textContent = "Mon compte";
+    } else {
+      link.href = "/connexion.html";
+      link.textContent = "Connexion";
+    }
+  })();
 </script>
-
 </body>
 </html>
