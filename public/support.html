@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support — CinéPop</title>
+  <link rel="icon" href="img/favicon.ico">
+  <style>
+    :root {
+      --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+      --jaune: #f5b700; --jaune-soft: #ffd84d;
+      --blanc: #ffffff; --gris: #a7b3d1;
+      --vert: #39d98a; --rouge: #ff6b6b;
+      --ombre: rgba(0, 0, 0, 0.45);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      min-height: 100vh;
+      color: var(--blanc);
+      background:
+        radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+        linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+      padding-bottom: 60px;
+    }
+
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 32px; max-width: 1200px; margin: 0 auto;
+    }
+    .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+    .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+    .nav-links { display:flex; gap:8px; }
+    .nav-links a {
+      color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+      padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
+
+    .wrap { max-width: 640px; margin: 0 auto; padding: 10px 24px; }
+
+    .form-card {
+      background: rgba(17, 34, 64, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+      padding: 36px;
+      box-shadow: 0 24px 70px var(--ombre);
+      position: relative;
+      overflow: hidden;
+    }
+    .form-card::before {
+      content: ""; position: absolute; top:0; left:0; right:0; height: 5px;
+      background: linear-gradient(90deg, var(--jaune), var(--jaune-soft));
+    }
+
+    .brand-pill {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 999px;
+      background: rgba(245, 183, 0, 0.12); color: var(--jaune-soft);
+      font-weight: 700; border: 1px solid rgba(245, 183, 0, 0.22);
+      margin-bottom: 20px;
+    }
+    .brand-pill .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+
+    h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); font-weight: 900; margin-bottom: 10px; }
+    .page-subtitle { color: var(--gris); margin-bottom: 26px; line-height: 1.6; }
+
+    form { display: grid; gap: 12px; }
+    .field { position: relative; }
+
+    input, textarea {
+      width: 100%; padding: 15px 16px; border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.05); color: var(--blanc);
+      font-size: 1rem; outline: none; font-family: inherit;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    textarea { resize: vertical; min-height: 140px; }
+    input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.45); }
+    input:focus, textarea:focus {
+      border-color: var(--jaune); background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(245, 183, 0, 0.14); transform: translateY(-1px);
+    }
+
+    button {
+      width: 100%; padding: 15px 18px; margin-top: 6px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
+      font-size: 1rem; font-weight: 900; letter-spacing: 0.4px; cursor: pointer;
+      box-shadow: 0 12px 28px rgba(245, 183, 0, 0.24);
+      transition: transform 0.2s ease;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform:none; }
+
+    form.hidden { display: none; }
+
+    .error-card {
+      display: none; margin-top: 16px; padding: 14px 16px; border-radius: 14px;
+      background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3);
+      color: #ffd6d6; font-size: 0.92rem;
+    }
+    .error-card.show { display: block; }
+
+    .success-card { display: none; text-align: center; padding: 10px 0; }
+    .success-card.show { display: block; }
+    .check-icon {
+      width: 50px; height: 50px; border-radius: 50%; background: var(--vert);
+      color: #06281a; display:flex; align-items:center; justify-content:center;
+      font-weight: 900; font-size: 1.4rem; margin: 0 auto 16px;
+    }
+    .success-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 6px; }
+    .success-subtitle { color: var(--gris); font-size: 0.92rem; line-height: 1.5; }
+
+    @media (max-width: 540px) {
+      .form-card { padding: 24px; border-radius: 22px; }
+    }
+   .nav-toggle {
+  display: none;
+  width: auto;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--blanc);
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 8px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  nav { flex-wrap: wrap; }
+  .nav-toggle { display: block; }
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { text-align: center; padding: 12px 16px; }
+}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html">Programme</a>
+    <a href="/check.html">Mes réservations</a>
+    <a href="/historique.html">Historique</a>
+    <a href="/support.html" class="active">Support</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="form-card">
+    <div class="brand-pill"><span class="dot"></span> CINÉPOP — Support</div>
+    <h1>Une question, un souci ?</h1>
+    <p class="page-subtitle">Décris-nous ta demande, on te répond par mail dans les meilleurs délais.</p>
+
+    <form id="supportForm">
+      <div class="field">
+        <input type="email" id="email" placeholder="Ton email" required>
+      </div>
+      <div class="field">
+        <input type="text" id="subject" placeholder="Objet de ta demande" required>
+      </div>
+      <div class="field">
+        <textarea id="message" placeholder="Ton message" required></textarea>
+      </div>
+      <button id="submitBtn" type="submit">Envoyer le message</button>
+    </form>
+
+    <div id="errorCard" class="error-card"></div>
+
+    <div id="successCard" class="success-card">
+      <div class="check-icon">✓</div>
+      <div class="success-title">Message envoyé</div>
+      <div class="success-subtitle">Merci, on revient vers toi par email dès que possible.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById("supportForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const errorCard = document.getElementById("errorCard");
+  const successCard = document.getElementById("successCard");
+
+  function showError(message) {
+    errorCard.textContent = message;
+    errorCard.classList.add("show");
+  }
+  function hideError() {
+    errorCard.classList.remove("show");
+    errorCard.textContent = "";
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideError();
+
+    const data = {
+      email: document.getElementById("email").value.trim(),
+      subject: document.getElementById("subject").value.trim(),
+      message: document.getElementById("message").value.trim()
+    };
+
+    if (!data.email || !data.subject || !data.message) {
+      showError("⛔ Merci de remplir tous les champs.");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Envoi en cours...";
+
+    try {
+      const res = await fetch("/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Erreur lors de l'envoi.");
+      }
+
+      form.classList.add("hidden");
+      successCard.classList.add("show");
+
+    } catch (err) {
+      showError(err.message || "Impossible d'envoyer le message.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Envoyer le message";
+    }
+  });
+  document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("navLinks").classList.toggle("open");
+});
+</script>
+
+</body>
+</html>

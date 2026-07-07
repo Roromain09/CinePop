@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CinéPop — Historique</title>
+<link rel="icon" href="img/favicon.ico">
+<style>
+  :root {
+    --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+    --jaune: #f5b700; --jaune-soft: #ffd84d;
+    --blanc: #ffffff; --gris: #a7b3d1;
+    --ombre: rgba(0, 0, 0, 0.45);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
+    color: var(--blanc);
+    background:
+      radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+      linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+    padding-bottom: 60px;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+  .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+  .nav-links { display:flex; gap:8px; }
+  .nav-links a {
+    color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+    padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
+
+  .nav-toggle {
+    display: none;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--blanc);
+    font-size: 1.3rem;
+    line-height: 1;
+    padding: 8px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  @media (max-width: 680px) {
+    nav { flex-wrap: wrap; }
+    .nav-toggle { display: block; }
+    .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
+    .nav-links.open { display: flex; }
+    .nav-links a { text-align: center; padding: 12px 16px; }
+  }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+
+  .page-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 8px; }
+  .page-subtitle { color: var(--gris); margin-bottom: 36px; }
+
+  /* ── FILM CARD (calqué sur programme.html) ── */
+  .film-card {
+    background: rgba(17, 34, 64, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 28px;
+    box-shadow: 0 20px 50px var(--ombre);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .film-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 26px 64px var(--ombre);
+  }
+
+  .film-head { display:flex; gap:32px; align-items:flex-start; margin-bottom: 24px; }
+  .film-info { flex: 1 1 220px; min-width: 0; padding-top: 6px; }
+
+  .poster-frame {
+    position: relative;
+    flex-shrink: 0;
+    width: clamp(220px, 28vw, 300px);
+  }
+  .poster-frame::before {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(circle, rgba(245,183,0,0.32), transparent 70%);
+    filter: blur(26px);
+    z-index: 0;
+  }
+  .film-poster {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 18px;
+    background: linear-gradient(150deg, #1c3258 0%, #0c1830 60%, #08101d 100%);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 22px 48px rgba(0,0,0,0.6);
+    object-fit: cover;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+  }
+  .film-card:hover .film-poster {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 28px 58px rgba(0,0,0,0.7);
+  }
+  .poster-placeholder { display:flex; align-items:center; justify-content:center; }
+  .poster-placeholder .placeholder-icon { font-size: 3.4rem; opacity: 0.55; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+
+  .poster-tag {
+    position: absolute;
+    z-index: 2;
+    top: 10px; left: 10px;
+    background: rgba(7,17,31,0.75);
+    backdrop-filter: blur(6px);
+    color: var(--jaune-soft);
+    font-size: 0.68rem; font-weight: 800;
+    letter-spacing: 0.4px; text-transform: uppercase;
+    padding: 5px 10px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.14);
+  }
+
+  .film-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+  .film-meta { color: var(--jaune-soft); font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
+  .film-synopsis { color: var(--gris); font-size: 0.92rem; line-height: 1.6; max-width: 65ch; }
+
+  /* ── SÉANCES LIST ── */
+  .seances-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .seance-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 12px 16px;
+  }
+
+  .seance-info { display:flex; gap: 18px; flex-wrap: wrap; font-size: 0.92rem; align-items: center; }
+  .seance-info span { color: var(--gris); }
+  .seance-info span b { color: var(--blanc); }
+
+  /* ── BADGE PASSÉE ── */
+  .badge-passee {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(167,179,209,0.12);
+    color: var(--gris);
+    font-size: 0.72rem; font-weight: 700;
+    padding: 3px 9px; border-radius: 999px;
+  }
+
+
+
+  /* ── EMPTY ── */
+  .empty {
+    text-align: center; padding: 80px 20px; color: var(--gris);
+  }
+  .empty .icon { font-size: 2.5rem; margin-bottom: 14px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .film-head { flex-direction: column; align-items: center; text-align: center; }
+    .poster-frame { width: min(75vw, 280px); }
+    .film-synopsis { text-align: left; margin: 0 auto; }
+    .seance-row { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html">Programme</a>
+    <a href="/check.html">Mes réservations</a>
+    <a href="/historique.html" class="active">Historique</a>
+    <a href="/support.html">Support</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="page-title">🕓 Historique</div>
+  <div class="page-subtitle">Toutes les séances passées de CinéPop.</div>
+  <div id="content"><div class="empty"><div class="icon">⏳</div>Chargement de l'historique…</div></div>
+</div>
+
+<script>
+function formatDate(d) {
+  const date = new Date(d + "T00:00:00");
+  return date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+}
+
+// Grouper les séances par film
+function groupByFilm(seances) {
+  const map = {};
+  seances.forEach(s => {
+    if (!map[s.filmTitle]) {
+      map[s.filmTitle] = {
+        filmTitle: s.filmTitle,
+        posterUrl: s.posterUrl,
+        genre: s.genre,
+        seances: []
+      };
+    }
+    map[s.filmTitle].seances.push(s);
+  });
+  return Object.values(map);
+}
+
+function buildFilmCard(film) {
+  const poster = film.posterUrl
+    ? `<img class="film-poster" src="${film.posterUrl}" alt="${film.filmTitle}" loading="lazy">`
+    : `<div class="film-poster poster-placeholder"><span class="placeholder-icon">🎬</span></div>`;
+
+  const seancesHtml = film.seances.map(s => `
+    <div class="seance-row">
+      <div class="seance-info">
+        <span><b>${formatDate(s.sessionDate)}</b></span>
+        <span>🕐 ${s.sessionTime}</span>
+        ${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}
+        <span class="badge-passee">✓ Passée</span>
+      </div>
+    </div>`).join("");
+
+  return `
+    <div class="film-card">
+      <div class="film-head">
+        <div class="poster-frame">
+          ${film.genre ? `<span class="poster-tag">${film.genre}</span>` : ""}
+          ${poster}
+        </div>
+        <div class="film-info">
+          <div class="film-title">${film.filmTitle}</div>
+          ${film.genre ? `<div class="film-meta">${film.genre}</div>` : ""}
+          <div class="seances-list" style="margin-top:16px;">${seancesHtml}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function load() {
+  const content = document.getElementById("content");
+  try {
+    const res = await fetch("/api/historique");
+    const data = await res.json();
+
+    if (!data.ok || data.seances.length === 0) {
+      content.innerHTML = `<div class="empty"><div class="icon">🎞️</div>Aucune séance passée pour le moment.</div>`;
+      return;
+    }
+
+    const groups = groupByFilm(data.seances);
+    content.innerHTML = groups.map(buildFilmCard).join("");
+  } catch {
+    content.innerHTML = `<div class="empty"><div class="icon">⚠️</div>Impossible de charger l'historique.</div>`;
+  }
+}
+
+document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("navLinks").classList.toggle("open");
+});
+
+load();
+</script>
+
+</body>
+</html>
