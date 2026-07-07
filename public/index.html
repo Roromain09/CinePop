@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CinéPop — Accueil</title>
   <link rel="icon" href="img/favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root {
     --bleu: #07111f;
@@ -84,171 +85,122 @@
     margin-bottom: 22px;
   }
   .brand-pill .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+  h1 { font-size: clamp(2.4rem, 5vw, 4.2rem); line-height: 1.04; font-weight: 900; letter-spacing: -0.04em; margin-bottom: 16px; }
+  h1 span { color: var(--jaune); }
+  .hero-p { color: var(--gris); font-size: 1.08rem; line-height: 1.7; max-width: 52ch; margin-bottom: 32px; }
 
-  h1 {
-    font-size: clamp(2.4rem, 5vw, 4.2rem);
-    line-height: 1.04;
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    max-width: 12ch;
-  }
-
-  .subtitle {
-    margin-top: 18px;
-    max-width: 50ch;
-    color: var(--gris);
-    font-size: 1.08rem;
-    line-height: 1.7;
-  }
-
-  .cta-row { display:flex; flex-wrap:wrap; gap:14px; margin-top: 30px; }
-  .btn {
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding: 16px 26px;
-    border-radius: 14px;
-    font-weight: 900;
-    font-size: 1rem;
-    text-decoration:none;
-    cursor:pointer;
-    border:none;
+  .hero-btns { display: flex; gap: 14px; align-items: center; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+    color: #111; font-weight: 800; font-size: 0.95rem; padding: 14px 28px;
+    border-radius: 16px; text-decoration: none; box-shadow: 0 14px 30px rgba(245,183,0,0.25);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .btn-primary { background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color:#111; box-shadow: 0 12px 28px rgba(245,183,0,0.24); }
-  .btn-primary:hover { transform: translateY(-2px); }
-  .btn-ghost { background: rgba(255,255,255,0.06); color: var(--blanc); border:1px solid rgba(255,255,255,0.12); }
-  .btn-ghost:hover { background: rgba(255,255,255,0.1); }
-
-  .chips { display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; }
-  .chip { padding:10px 14px; border-radius:999px; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#dbe6ff; font-size:0.92rem; }
-
-  .poster {
-    border-radius: 28px;
-    min-height: 380px;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
-      radial-gradient(circle at 20% 20%, rgba(245,183,0,0.22), transparent 30%),
-      radial-gradient(circle at 80% 30%, rgba(255,255,255,0.08), transparent 22%),
-      linear-gradient(135deg, #132743, #08101d);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 24px 70px var(--ombre);
-    position: relative;
-    overflow: hidden;
-    display:flex;
-    align-items:flex-end;
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 38px rgba(245,183,0,0.35); }
+  .btn-secondary {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--blanc); font-weight: 700; font-size: 0.95rem; padding: 14px 26px;
+    border-radius: 16px; text-decoration: none; transition: background 0.2s;
   }
-  .poster img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:0.9; }
-  .poster-badge {
-    position: relative;
-    margin: 18px;
-    padding: 10px 14px;
-    border-radius: 14px;
-    background: rgba(7, 17, 31, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px);
-    color: var(--jaune-soft);
-    font-weight: 700;
-    z-index: 1;
-  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.1); }
 
-  .section {
-    max-width: 1100px;
-    margin: 90px auto 0;
-    padding: 0 24px;
+  .hero-right { position: relative; display: flex; justify-content: center; }
+  .hero-glow {
+    position: absolute; width: 350px; height: 350px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,183,0,0.2), transparent 65%);
+    filter: blur(40px); z-index: 0; pointer-events: none;
   }
-  .section-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; }
-  .section-subtitle { color: var(--gris); margin-bottom: 32px; max-width: 60ch; line-height: 1.6; }
+  .promo-card {
+    position: relative; z-index: 1; width: 100%; max-width: 380px;
+    background: rgba(17, 34, 64, 0.75); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px; padding: 24px; box-shadow: 0 30px 60px var(--ombre);
+    backdrop-filter: blur(12px); transform: rotate(1deg); transition: transform 0.3s;
+  }
+  .promo-card:hover { transform: rotate(0deg) translateY(-4px); }
+  .promo-img { width: 100%; aspect-ratio: 16/10; border-radius: 18px; background: #07111f; margin-bottom: 18px; object-fit: cover; }
+  .promo-tag { color: var(--jaune); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .promo-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 6px; }
+  .promo-p { color: var(--gris); font-size: 0.88rem; line-height: 1.5; }
 
-  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .section { max-width: 1200px; margin: 90px auto 0; padding: 0 24px; }
+  .section-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .section-subtitle { color: var(--gris); font-size: 0.98rem; margin-bottom: 32px; }
+
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
   .info-card {
-    background: rgba(17, 34, 64, 0.78);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 22px;
-    padding: 26px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 22px; padding: 28px; transition: background 0.2s, border-color 0.2s;
   }
-  .info-card .icon { font-size: 1.8rem; margin-bottom: 14px; }
-  .info-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
-  .info-card p { color: var(--gris); font-size: 0.95rem; line-height: 1.6; }
+  .info-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
+  .info-card .icon { font-size: 2.2rem; margin-bottom: 16px; }
+  .info-card h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+  .info-card p { color: var(--gris); font-size: 0.92rem; line-height: 1.6; }
 
   footer {
-    max-width: 1100px;
-    margin: 90px auto 0;
-    padding: 28px 24px 40px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    color: var(--gris);
-    font-size: 0.85rem;
-    flex-wrap: wrap;
-    gap: 12px;
+    max-width: 1200px; margin: 100px auto 0; padding: 32px 24px;
+    border-top: 1px solid rgba(255,255,255,0.06); display: flex;
+    justify-content: space-between; align-items: center; color: var(--gris); font-size: 0.88rem;
   }
-  footer a { color: var(--gris); text-decoration: none; }
-  footer a:hover { color: var(--blanc); }
- @media (max-width: 920px) {
-    .hero { grid-template-columns: 1fr; }
-    .grid3 { grid-template-columns: 1fr; }
-}
- @media (max-width: 680px) {
-  nav { flex-wrap: wrap; }
-  .nav-toggle { display: block; }
-  .nav-links {
-    display: none;
-    width: 100%;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 14px;
+  footer a { color: var(--gris); text-decoration: none; font-weight: 600; }
+  footer a:hover { color: var(--jaune); }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; text-align: center; gap: 48px; }
+    .hero-p { margin-left: auto; margin-right: auto; }
+    .hero-btns { justify-content: center; }
+    .promo-card { margin: 0 auto; }
   }
-  .nav-links.open { display: flex; }
-  .nav-links a { text-align: center; padding: 12px 16px; }
-}
+  @media (max-width: 680px) {
+    nav { flex-wrap: wrap; }
+    .nav-toggle { display: block; }
+    .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
+    .nav-links.open { display: flex; }
+    .nav-links a { text-align: center; padding: 12px 16px; }
+  }
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="logo"><span class="dot"></span> CINÉPOP</div>
-  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="logo"><div class="dot"></div>CinéPop</div>
+  <button class="nav-toggle" id="navToggle">☰</button>
   <div class="nav-links" id="navLinks">
     <a href="/index.html" class="active">Accueil</a>
     <a href="/programme.html">Programme</a>
     <a href="/check.html">Mes réservations</a>
     <a href="/historique.html">Historique</a>
     <a href="/support.html">Support</a>
+    <a href="/connexion.html" id="navCompteLink">Mon compte</a>
   </div>
 </nav>
 
 <div class="hero">
   <div>
-    <div class="brand-pill"><span class="dot"></span> Votre cinéma préféré !</div>
-    <h1>Et POP, voilà votre ciné !</h1>
-    <p class="subtitle">
-      CinéPop, c'est du cinéma simple, chaleureux et accessible. Découvrez le programme
-      de la semaine et réservez votre séance en quelques clics, sans file d'attente.
-    </p>
-    <div class="cta-row">
-      <a class="btn btn-primary" href="/programme.html">🎬 Voir le programme</a>
-      <a class="btn btn-ghost" href="/check.html">Mes réservations</a>
-    </div>
-    <div class="chips">
-      <div class="chip">Sécurisé</div>
-      <div class="chip">Rapide</div>
-      <div class="chip">Gratuit</div>
+    <div class="brand-pill"><div class="dot"></div>Nouveau cinéma à Lille</div>
+    <h1>Vos places de cinéma<br>en <span>quelques clics</span></h1>
+    <p class="hero-p">Découvrez une expérience cinématographique simplifiée. Consultez les séances, réservez vos billets en ligne instantanément et accédez à vos salles préférées sans attente.</p>
+    <div class="hero-btns">
+      <a href="/programme.html" class="btn-primary">Voir le programme</a>
+      <a href="#concept" class="btn-secondary">Découvrir CinéPop</a>
     </div>
   </div>
-
-  <div class="poster">
-    <img src="img/acp.png" alt="CinéPop">
-    <div class="poster-badge">🍿 Bienvenue chez CinéPop</div>
+  <div class="hero-right">
+    <div class="hero-glow"></div>
+    <div class="promo-card">
+      <img src="img/cinema-hero.jpg" alt="Salle" class="promo-img" onerror="this.style.display='none'">
+      <div class="promo-tag">À l'affiche cette semaine</div>
+      <div class="promo-title">Inception (Reprise)</div>
+      <div class="promo-p">Dom Cobb est un voleur expérimenté dans l'art périlleux de l'extraction de secrets enfouis dans le subconscient pendant le sommeil.</div>
+    </div>
   </div>
 </div>
 
-<div class="section">
-  <div class="section-title">Comment ça marche ?</div>
-  <div class="section-subtitle">Trois étapes, zéro complication.</div>
-  <div class="grid3">
+<div class="section" id="concept">
+  <div class="section-title">✨ Le concept CinéPop</div>
+  <div class="section-subtitle">Comment ça marche ? Un parcours fluide et rapide.</div>
+  <div class="grid-3">
     <div class="info-card">
-      <div class="icon">📅</div>
+      <div class="icon">🎬</div>
       <h3>1. Choisissez votre séance</h3>
       <p>Consultez le programme : films, salles et horaires disponibles, mis à jour en direct.</p>
     </div>
@@ -290,8 +242,26 @@ async function loadInfo() {
   }
 }
 loadInfo();
+
 document.getElementById("navToggle").addEventListener("click", () => {
   document.getElementById("navLinks").classList.toggle("open");
 });
+
+// 3 — Initialisation Supabase et état de la Navigation
+(async () => {
+  const _sb = supabase.createClient(
+    "https://fsywnmsppegrffvoijuv.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzeXdubXNwcGVncmZmdm9panV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTE1MjUsImV4cCI6MjA5NzE4NzUyNX0.dXoTVu3ZN5kt7JtqSy9PcQpqI9vvto1s61S23WuJgbU"
+  );
+  const { data: { session } } = await _sb.auth.getSession();
+  const link = document.getElementById("navCompteLink");
+  if (session?.user) {
+    link.href = "/compte.html";
+    link.textContent = "Mon compte";
+  } else {
+    link.href = "/connexion.html";
+    link.textContent = "Connexion";
+  }
+})();
 </script>
 </html>
