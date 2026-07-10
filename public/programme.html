@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CinéPop — Programme</title>
+<link rel="icon" href="img/favicon.ico">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+    --jaune: #f5b700; --jaune-soft: #ffd84d;
+    --blanc: #ffffff; --gris: #a7b3d1;
+    --ombre: rgba(0, 0, 0, 0.45);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh; color: var(--blanc);
+    background:
+      radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+      linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+    padding-bottom: 60px;
+  }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 32px; max-width: 1200px; margin: 0 auto;
+  }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+  .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+  .nav-links { display:flex; gap:8px; align-items:center; }
+  .nav-links a {
+    color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+    padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
+
+  .nav-avatar {
+    width: 38px; height: 38px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+    border-radius: 52% 48% 55% 45% / 50% 46% 54% 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; text-decoration: none;
+    box-shadow: 0 0 16px rgba(245,183,0,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid rgba(245,183,0,0.6);
+  }
+  .nav-avatar:hover { transform: scale(1.1); box-shadow: 0 0 24px rgba(245,183,0,0.55); }
+  .nav-link-connexion { color: var(--gris) !important; }
+
+  .nav-toggle {
+    display: none;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    color: var(--blanc); font-size: 1.3rem; line-height: 1;
+    padding: 8px 14px; border-radius: 12px; cursor: pointer;
+  }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+  .page-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 8px; }
+  .page-subtitle { color: var(--gris); margin-bottom: 36px; }
+
+  .film-card {
+    background: rgba(17, 34, 64, 0.78); border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px; padding: 32px; margin-bottom: 28px;
+    box-shadow: 0 20px 50px var(--ombre); transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .film-card:hover { transform: translateY(-3px); box-shadow: 0 26px 64px var(--ombre); }
+  .film-head { display:flex; gap:32px; align-items:flex-start; margin-bottom: 24px; }
+  .film-info { flex: 1 1 220px; min-width: 0; padding-top: 6px; }
+
+  .poster-frame { position: relative; flex-shrink: 0; width: clamp(220px, 28vw, 300px); }
+  .poster-frame::before {
+    content: ""; position: absolute; inset: -20px;
+    background: radial-gradient(circle, rgba(245,183,0,0.32), transparent 70%);
+    filter: blur(26px); z-index: 0;
+  }
+  .film-poster {
+    position: relative; z-index: 1; display: block; width: 100%; aspect-ratio: 2 / 3;
+    border-radius: 18px; background: linear-gradient(150deg, #1c3258 0%, #0c1830 60%, #08101d 100%);
+    border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 22px 48px rgba(0,0,0,0.6);
+    object-fit: cover; transition: transform 0.35s ease, box-shadow 0.35s ease;
+  }
+  .film-card:hover .film-poster { transform: translateY(-3px) scale(1.02); box-shadow: 0 28px 58px rgba(0,0,0,0.7); }
+  .poster-placeholder { display: flex; align-items: center; justify-content: center; }
+  .poster-placeholder .placeholder-icon { font-size: 3.4rem; opacity: 0.55; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+  .poster-tag {
+    position: absolute; z-index: 2; top: 10px; left: 10px;
+    background: rgba(7,17,31,0.75); backdrop-filter: blur(6px);
+    color: var(--jaune-soft); font-size: 0.68rem; font-weight: 800;
+    letter-spacing: 0.4px; text-transform: uppercase;
+    padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14);
+  }
+
+  .film-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+  .film-meta  { color: var(--jaune-soft); font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
+  .film-synopsis { color: var(--gris); font-size: 0.92rem; line-height: 1.6; max-width: 65ch; }
+
+  .seances-list { display: flex; flex-direction: column; gap: 10px; }
+  .seance-row {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 12px 16px;
+  }
+  .seance-row.next   { border-color: rgba(245,183,0,0.35); background: rgba(245,183,0,0.06); }
+  .seance-row.cancelled { opacity: 0.6; border-color: rgba(255,68,85,0.25); background: rgba(255,68,85,0.04); }
+  .seance-info { display:flex; gap: 18px; flex-wrap: wrap; font-size: 0.92rem; align-items: center; }
+  .seance-info span b { color: var(--blanc); }
+  .seance-info span { color: var(--gris); }
+  .remaining { font-weight: 700; }
+  .remaining.low  { color: #ff8c66; }
+  .remaining.full { color: #ff6b6b; }
+  .badge-annulee {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,68,85,0.18); color: #ff4455;
+    font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+  }
+
+  .btn-reserve {
+    padding: 10px 18px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+    color: #111; font-weight: 800; font-size: 0.88rem; cursor: pointer;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-reserve.disabled { background: rgba(255,255,255,0.08); color: var(--gris); pointer-events: none; }
+  .btn-reserve.annulee  { background: rgba(255,68,85,0.14); color: #ff6b6b; pointer-events: none; }
+
+  .empty { text-align: center; padding: 80px 20px; color: var(--gris); }
+  .empty .icon { font-size: 2.5rem; margin-bottom: 14px; }
+
+  /* ── VUE CALENDRIER ── */
+  .view-toggle { display: flex; gap: 8px; margin-bottom: 24px; }
+  .view-btn {
+    padding: 10px 18px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04); color: var(--gris);
+    font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s ease;
+  }
+  .view-btn.active {
+    background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+    color: #111; border-color: transparent; box-shadow: 0 8px 20px rgba(245,183,0,0.22);
+  }
+  .calendar-card {
+    background: rgba(17, 34, 64, 0.78); border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px; padding: 28px; box-shadow: 0 20px 50px var(--ombre);
+  }
+  .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .calendar-month-label { font-size: 1.3rem; font-weight: 800; text-transform: capitalize; }
+  .cal-nav {
+    width: 40px; height: 40px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--blanc);
+    font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s ease;
+  }
+  .cal-nav:hover { background: rgba(255,255,255,0.12); }
+  .cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+  .calendar-weekdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+  .calendar-weekday { text-align: center; color: var(--gris); font-size: 0.76rem; font-weight: 700; text-transform: uppercase; padding-bottom: 4px; }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 80px; gap: 8px; }
+  .calendar-day {
+    position: relative; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    color: var(--gris); font-size: 0.85rem;
+  }
+  .calendar-day.empty { background: transparent; border: none; }
+  .calendar-day .day-number { position: absolute; top: 6px; left: 8px; font-size: 0.72rem; color: var(--gris); }
+  .calendar-day.has-seances {
+    background: rgba(57,217,138,0.16); border-color: rgba(57,217,138,0.4);
+    cursor: pointer; transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .calendar-day.has-seances:hover { background: rgba(57,217,138,0.3); transform: translateY(-2px); }
+  .calendar-day.has-seances .day-count { font-size: 1.3rem; font-weight: 900; color: #39d98a; }
+  .calendar-day.today { box-shadow: inset 0 0 0 2px var(--jaune); }
+
+  .day-modal-overlay {
+    position: fixed; inset: 0; background: rgba(7,17,31,0.75);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px; backdrop-filter: blur(4px); box-sizing: border-box;
+  }
+  .day-modal-overlay.show { display: flex; }
+  .day-modal {
+    background: rgba(17,34,64,0.97); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px; padding: 26px;
+    width: min(480px, calc(100vw - 40px)); max-height: 80vh; overflow-y: auto;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6); box-sizing: border-box; min-width: 0;
+  }
+  .day-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 12px; }
+  .day-modal-title { font-size: 1.15rem; font-weight: 800; text-transform: capitalize; min-width: 0; word-break: break-word; }
+  .day-modal-close {
+    width: 34px; height: 34px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.08); color: var(--blanc); font-size: 1rem; cursor: pointer; flex-shrink: 0;
+  }
+  .day-modal-close:hover { background: rgba(255,255,255,0.16); }
+  .day-seance-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; }
+  .day-seance-item.cancelled { opacity: 0.65; border-color: rgba(255,68,85,0.2); }
+  .day-seance-item:last-child { margin-bottom: 0; }
+  .day-seance-film { font-weight: 800; font-size: 0.96rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .day-seance-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.85rem; margin-bottom: 12px; }
+  .day-seance-meta span b { color: var(--blanc); }
+  .day-seance-meta span { color: var(--gris); }
+
+  @media (max-width: 680px) {
+    nav { flex-wrap: wrap; }
+    .nav-toggle { display: block; }
+    .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
+    .nav-links.open { display: flex; }
+    .nav-links a { text-align: center; padding: 12px 16px; }
+    .nav-avatar { display: none !important; }
+    .nav-auth-mobile {
+      display: flex !important; align-items: center; justify-content: center; gap: 8px;
+      background: rgba(245,183,0,0.1) !important; color: var(--blanc) !important;
+    }
+  }
+  @media (max-width: 600px) {
+    .film-head { flex-direction: column; align-items: center; text-align: center; }
+    .poster-frame { width: min(75vw, 280px); }
+    .film-synopsis { text-align: left; margin: 0 auto; }
+    .seance-row { flex-direction: column; align-items: flex-start; }
+    .btn-reserve { width: 100%; text-align: center; }
+    .view-toggle { flex-wrap: wrap; }
+    .view-btn { flex: 1; text-align: center; }
+    .calendar-card { padding: 16px; }
+    .calendar-weekdays { gap: 4px; }
+    .calendar-grid { gap: 4px; grid-auto-rows: 52px; }
+    .calendar-day { font-size: 0.7rem; border-radius: 10px; }
+    .calendar-day .day-number { font-size: 0.62rem; top: 4px; left: 5px; }
+    .calendar-day.has-seances .day-count { font-size: 1.05rem; }
+    .calendar-month-label { font-size: 1.05rem; }
+    .cal-nav { width: 34px; height: 34px; font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html" class="active">Programme</a>
+    <a href="/check.html">Mes réservations</a>
+    <a href="/historique.html">Historique</a>
+    <a href="/support.html">Support</a>
+    <a href="/connexion.html" id="navAuthMobile" class="nav-auth-mobile" style="display:none;">
+      <span class="nav-emoji-mobile">👤</span> Mon compte
+    </a>
+  </div>
+  <a href="/connexion.html" class="nav-avatar" id="navAuthLink" title="Connexion">👤</a>
+</nav>
+
+<div class="wrap">
+  <div class="page-title">🎬 Programme</div>
+  <div class="page-subtitle">Nous vous avons préparé un programme de qualité pour des clients de qualité !</div>
+
+  <div class="view-toggle">
+    <button id="viewListBtn" class="view-btn active" onclick="setView('list')">📋 Vue liste</button>
+    <button id="viewCalendarBtn" class="view-btn" onclick="setView('calendar')">📅 Vue calendrier</button>
+  </div>
+
+  <div id="content"><div class="empty"><div class="icon">⏳</div>Chargement du programme…</div></div>
+
+  <div id="calendarView" style="display:none;">
+    <div class="calendar-card">
+      <div class="calendar-header">
+        <button class="cal-nav" id="calPrevBtn" onclick="changeMonth(-1)">‹</button>
+        <div class="calendar-month-label" id="calendarMonthLabel"></div>
+        <button class="cal-nav" id="calNextBtn" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="calendar-weekdays">
+        <div class="calendar-weekday">Lun</div><div class="calendar-weekday">Mar</div>
+        <div class="calendar-weekday">Mer</div><div class="calendar-weekday">Jeu</div>
+        <div class="calendar-weekday">Ven</div><div class="calendar-weekday">Sam</div>
+        <div class="calendar-weekday">Dim</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+  </div>
+
+  <div class="page-subtitle" style="margin-top:36px;">C'est tout pour le moment ! Si vous avez des suggestions, n'hésitez pas à nous en faire part !</div>
+</div>
+
+<div id="dayModalOverlay" class="day-modal-overlay" onclick="closeDayModal(event)">
+  <div class="day-modal" onclick="event.stopPropagation()">
+    <div class="day-modal-header">
+      <div class="day-modal-title" id="dayModalTitle"></div>
+      <button class="day-modal-close" onclick="closeDayModal()">✕</button>
+    </div>
+    <div class="day-modal-body" id="dayModalBody"></div>
+  </div>
+</div>
+
+<script>
+let programmeFilms = [];
+let currentView = "list";
+const calToday = new Date();
+let calendarYear = calToday.getFullYear();
+let calendarMonth = calToday.getMonth();
+const MIN_MONTH_INDEX = calendarYear * 12 + calendarMonth;
+const MAX_MONTH_INDEX = MIN_MONTH_INDEX + 2;
+const MONTH_NAMES = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+
+function setView(view) {
+  currentView = view;
+  document.getElementById("viewListBtn").classList.toggle("active", view === "list");
+  document.getElementById("viewCalendarBtn").classList.toggle("active", view === "calendar");
+  document.getElementById("content").style.display = view === "list" ? "" : "none";
+  document.getElementById("calendarView").style.display = view === "calendar" ? "" : "none";
+  if (view === "calendar") renderCalendar();
+}
+
+function changeMonth(delta) {
+  const index = calendarYear * 12 + calendarMonth + delta;
+  if (index < MIN_MONTH_INDEX || index > MAX_MONTH_INDEX) return;
+  calendarYear = Math.floor(index / 12);
+  calendarMonth = index % 12;
+  renderCalendar();
+}
+
+function flattenSeances(films) {
+  const list = [];
+  films.forEach(film => {
+    film.seances.forEach(s => {
+      list.push({ id: s.id, filmTitle: film.title, roomNumber: s.roomNumber, sessionDate: s.sessionDate, sessionTime: s.sessionTime, remaining: s.remaining, cancelled: s.cancelled || false });
+    });
+  });
+  return list;
+}
+
+function renderCalendar() {
+  document.getElementById("calendarMonthLabel").textContent = `${MONTH_NAMES[calendarMonth]} ${calendarYear}`;
+  const seancesByDate = {};
+  flattenSeances(programmeFilms).forEach(s => { (seancesByDate[s.sessionDate] = seancesByDate[s.sessionDate] || []).push(s); });
+  const pad = n => String(n).padStart(2, "0");
+  const firstOfMonth = new Date(calendarYear, calendarMonth, 1);
+  const startOffset = (firstOfMonth.getDay() + 6) % 7;
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  let html = "";
+  for (let i = 0; i < startOffset; i++) html += `<div class="calendar-day empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateKey = `${calendarYear}-${pad(calendarMonth + 1)}-${pad(d)}`;
+    const daySeances = seancesByDate[dateKey] || [];
+    const activeSeances = daySeances.filter(s => !s.cancelled);
+    const hasSeances = activeSeances.length > 0;
+    const isToday = dateKey === todayKey;
+    html += `<div class="calendar-day ${hasSeances ? "has-seances" : ""} ${isToday ? "today" : ""}" ${hasSeances ? `onclick="openDayModal('${dateKey}')"` : ""}>
+      <span class="day-number">${d}</span>
+      ${hasSeances ? `<span class="day-count">${activeSeances.length}</span>` : ""}
+    </div>`;
+  }
+  const totalCells = startOffset + daysInMonth;
+  const remainingCells = (7 - (totalCells % 7)) % 7;
+  for (let i = 0; i < remainingCells; i++) html += `<div class="calendar-day empty"></div>`;
+  document.getElementById("calendarGrid").innerHTML = html;
+  const currentIndex = calendarYear * 12 + calendarMonth;
+  document.getElementById("calPrevBtn").disabled = currentIndex <= MIN_MONTH_INDEX;
+  document.getElementById("calNextBtn").disabled = currentIndex >= MAX_MONTH_INDEX;
+}
+
+function openDayModal(dateKey) {
+  const seances = flattenSeances(programmeFilms).filter(s => s.sessionDate === dateKey).sort((a, b) => a.sessionTime.localeCompare(b.sessionTime));
+  const dateObj = new Date(dateKey + "T00:00:00");
+  document.getElementById("dayModalTitle").textContent = dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+  document.getElementById("dayModalBody").innerHTML = seances.map(s => {
+    if (s.cancelled) return `<div class="day-seance-item cancelled"><div class="day-seance-film">${s.filmTitle}<span class="badge-annulee">🚫 Annulée</span></div><div class="day-seance-meta"><span>🕐 <b>${s.sessionTime}</b></span>${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}</div><span class="btn-reserve annulee">Annulée</span></div>`;
+    const full = s.remaining <= 0;
+    const low  = !full && s.remaining <= 5;
+    const remClass = full ? "full" : (low ? "low" : "");
+    const remText  = full ? "Complet" : `${s.remaining} place(s) restante(s)`;
+    const btn = full ? `<span class="btn-reserve disabled">Complet</span>` : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
+    return `<div class="day-seance-item"><div class="day-seance-film">${s.filmTitle}</div><div class="day-seance-meta"><span>🕐 <b>${s.sessionTime}</b></span>${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}<span class="remaining ${remClass}">${remText}</span></div>${btn}</div>`;
+  }).join("");
+  document.getElementById("dayModalOverlay").classList.add("show");
+}
+
+function closeDayModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById("dayModalOverlay").classList.remove("show");
+}
+
+function formatDate(d) {
+  const date = new Date(d + "T00:00:00");
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diffDays = Math.round((date - today) / 86400000);
+  if (diffDays === 0) return "Aujourd'hui";
+  if (diffDays === 1) return "Demain";
+  return date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long" });
+}
+
+function buildFilmCard(film) {
+  const poster = film.posterUrl
+    ? `<img class="film-poster" src="${film.posterUrl}" alt="${film.title}" loading="lazy">`
+    : `<div class="film-poster poster-placeholder"><span class="placeholder-icon">🎬</span></div>`;
+  const meta = [film.genre, film.durationMinutes ? `${film.durationMinutes} min` : null].filter(Boolean).join(" • ");
+  const seancesHtml = film.seances.map((s, i) => {
+    if (s.cancelled) return `<div class="seance-row cancelled"><div class="seance-info"><span><b>${formatDate(s.sessionDate)}</b></span><span>🕐 ${s.sessionTime}</span>${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}<span class="badge-annulee">🚫 Annulée</span></div><span class="btn-reserve annulee">Annulée</span></div>`;
+    const full = s.remaining <= 0;
+    const low  = !full && s.remaining <= 5;
+    const btn  = full ? `<span class="btn-reserve disabled">Complet</span>` : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
+    return `<div class="seance-row ${i === 0 ? "next" : ""}"><div class="seance-info"><span><b>${formatDate(s.sessionDate)}</b></span><span>🕐 ${s.sessionTime}</span>${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}<span class="remaining ${full ? "full" : (low ? "low" : "")}">${full ? "Complet" : `${s.remaining} place(s) restante(s)`}</span></div>${btn}</div>`;
+  }).join("");
+  return `<div class="film-card"><div class="film-head"><div class="poster-frame">${film.genre ? `<span class="poster-tag">${film.genre}</span>` : ""}${poster}</div><div class="film-info"><div class="film-title">${film.title}</div>${meta ? `<div class="film-meta">${meta}</div>` : ""}${film.synopsis ? `<div class="film-synopsis">${film.synopsis}</div>` : ""}</div></div><div class="seances-list">${seancesHtml}</div></div>`;
+}
+
+function nextSeanceKey(film) {
+  const active = film.seances.filter(s => !s.cancelled);
+  const s = active[0] || film.seances[0];
+  return s ? `${s.sessionDate} ${s.sessionTime}` : "9999-12-31 23:59";
+}
+
+async function load() {
+  const content = document.getElementById("content");
+  try {
+    const res  = await fetch("/api/programme");
+    const data = await res.json();
+    programmeFilms = data.ok ? data.films : [];
+    if (currentView === "calendar") renderCalendar();
+    if (!data.ok || data.films.length === 0) { content.innerHTML = `<div class="empty"><div class="icon">🎞️</div>Aucune séance programmée pour le moment.</div>`; return; }
+    const films = [...data.films].sort((a, b) => nextSeanceKey(a).localeCompare(nextSeanceKey(b)));
+    content.innerHTML = films.map(buildFilmCard).join("");
+  } catch {
+    content.innerHTML = `<div class="empty"><div class="icon">⚠️</div>Impossible de charger le programme.</div>`;
+  }
+}
+
+document.getElementById("navToggle").addEventListener("click", () => { document.getElementById("navLinks").classList.toggle("open"); });
+load();
+</script>
+<script src="/nav-auth.js"></script>
+</body>
+</html>

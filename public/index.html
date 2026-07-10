@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CinéPop — Accueil</title>
+<link rel="icon" href="img/favicon.ico">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+    --jaune: #f5b700; --jaune-soft: #ffd84d;
+    --blanc: #ffffff; --gris: #a7b3d1;
+    --ombre: rgba(0, 0, 0, 0.45);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
+    color: var(--blanc);
+    background:
+      radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+      linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+  }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 32px; max-width: 1200px; margin: 0 auto;
+  }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; letter-spacing:0.5px; }
+  .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+  .nav-links { display:flex; gap:8px; align-items:center; }
+  .nav-links a {
+    color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+    padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
+
+  /* ── BULLE AVATAR ── */
+  .nav-avatar {
+    width: 38px; height: 38px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+    border-radius: 52% 48% 55% 45% / 50% 46% 54% 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; text-decoration: none;
+    box-shadow: 0 0 16px rgba(245,183,0,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid rgba(245,183,0,0.6);
+  }
+  .nav-avatar:hover { transform: scale(1.1); box-shadow: 0 0 24px rgba(245,183,0,0.55); }
+  .nav-link-connexion { color: var(--gris) !important; }
+
+  .nav-toggle {
+    display: none;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--blanc); font-size: 1.3rem; line-height: 1;
+    padding: 8px 14px; border-radius: 12px; cursor: pointer;
+  }
+
+  .hero {
+    max-width: 1100px; margin: 40px auto 0; padding: 0 24px;
+    display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; align-items: center;
+  }
+
+  .brand-pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 999px;
+    background: rgba(245, 183, 0, 0.12); color: var(--jaune-soft);
+    font-weight: 700; border: 1px solid rgba(245, 183, 0, 0.22); margin-bottom: 22px;
+  }
+  .brand-pill .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+
+  h1 { font-size: clamp(2.4rem, 5vw, 4.2rem); line-height: 1.04; font-weight: 900; letter-spacing: -0.04em; max-width: 12ch; }
+  .subtitle { margin-top: 18px; max-width: 50ch; color: var(--gris); font-size: 1.08rem; line-height: 1.7; }
+
+  .cta-row { display:flex; flex-wrap:wrap; gap:14px; margin-top: 30px; }
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    padding: 16px 26px; border-radius: 14px; font-weight: 900; font-size: 1rem;
+    text-decoration:none; cursor:pointer; border:none; transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color:#111; box-shadow: 0 12px 28px rgba(245,183,0,0.24); }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-ghost { background: rgba(255,255,255,0.06); color: var(--blanc); border:1px solid rgba(255,255,255,0.12); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+  .chips { display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; }
+  .chip { padding:10px 14px; border-radius:999px; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#dbe6ff; font-size:0.92rem; }
+
+  .poster {
+    border-radius: 28px; min-height: 380px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
+      radial-gradient(circle at 20% 20%, rgba(245,183,0,0.22), transparent 30%),
+      radial-gradient(circle at 80% 30%, rgba(255,255,255,0.08), transparent 22%),
+      linear-gradient(135deg, #132743, #08101d);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 70px var(--ombre);
+    position: relative; overflow: hidden;
+    display:flex; align-items:flex-end;
+  }
+  .poster img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:0.9; }
+  .poster-badge {
+    position: relative; margin: 18px; padding: 10px 14px; border-radius: 14px;
+    background: rgba(7, 17, 31, 0.75); border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px); color: var(--jaune-soft); font-weight: 700; z-index: 1;
+  }
+
+  .section { max-width: 1100px; margin: 90px auto 0; padding: 0 24px; }
+  .section-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; }
+  .section-subtitle { color: var(--gris); margin-bottom: 32px; max-width: 60ch; line-height: 1.6; }
+
+  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .info-card { background: rgba(17, 34, 64, 0.78); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 22px; padding: 26px; }
+  .info-card .icon { font-size: 1.8rem; margin-bottom: 14px; }
+  .info-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+  .info-card p { color: var(--gris); font-size: 0.95rem; line-height: 1.6; }
+
+  footer {
+    max-width: 1100px; margin: 90px auto 0; padding: 28px 24px 40px;
+    display:flex; justify-content:space-between; align-items:center;
+    color: var(--gris); font-size: 0.85rem; flex-wrap: wrap; gap: 12px;
+  }
+  footer a { color: var(--gris); text-decoration: none; }
+  footer a:hover { color: var(--blanc); }
+
+  @media (max-width: 920px) {
+    .hero { grid-template-columns: 1fr; }
+    .grid3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 680px) {
+    nav { flex-wrap: wrap; }
+    .nav-toggle { display: block; }
+    .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
+    .nav-links.open { display: flex; }
+    .nav-links a { text-align: center; padding: 12px 16px; }
+    .nav-avatar { display: none !important; }
+    .nav-auth-mobile {
+      display: flex !important; align-items: center; justify-content: center; gap: 8px;
+      background: rgba(245,183,0,0.1) !important; color: var(--blanc) !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/index.html" class="active">Accueil</a>
+    <a href="/programme.html">Programme</a>
+    <a href="/check.html">Mes réservations</a>
+    <a href="/historique.html">Historique</a>
+    <a href="/support.html">Support</a>
+    <a href="/connexion.html" id="navAuthMobile" class="nav-auth-mobile" style="display:none;">
+      <span class="nav-emoji-mobile">👤</span> Mon compte
+    </a>
+  </div>
+  <a href="/connexion.html" class="nav-avatar" id="navAuthLink" title="Connexion">👤</a>
+</nav>
+
+<div class="hero">
+  <div>
+    <div class="brand-pill"><span class="dot"></span> Votre cinéma préféré !</div>
+    <h1>Et POP, voilà votre ciné !</h1>
+    <p class="subtitle">
+      CinéPop, c'est du cinéma simple, chaleureux et accessible. Découvrez le programme
+      de la semaine et réservez votre séance en quelques clics, sans file d'attente.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/programme.html">🎬 Voir le programme</a>
+      <a class="btn btn-ghost" href="/check.html">Mes réservations</a>
+    </div>
+    <div class="chips">
+      <div class="chip">Sécurisé</div>
+      <div class="chip">Rapide</div>
+      <div class="chip">Gratuit</div>
+    </div>
+  </div>
+
+  <div class="poster">
+    <img src="img/acp.png" alt="CinéPop">
+    <div class="poster-badge">🍿 Bienvenue chez CinéPop</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Comment ça marche ?</div>
+  <div class="section-subtitle">Trois étapes, zéro complication.</div>
+  <div class="grid3">
+    <div class="info-card"><div class="icon">📅</div><h3>1. Choisissez votre séance</h3><p>Consultez le programme : films, salles et horaires disponibles, mis à jour en direct.</p></div>
+    <div class="info-card"><div class="icon">✍️</div><h3>2. Réservez en ligne</h3><p>Indiquez votre nom, votre email et le nombre de places.</p></div>
+    <div class="info-card"><div class="icon">🎟️</div><h3>3. Récupérez votre ticket</h3><p>Une fois votre réservation validée, votre billet avec QR code vous est remis.</p></div>
+  </div>
+</div>
+
+<div class="section" id="infos">
+  <div class="section-title">ℹ️ Infos pratiques</div>
+  <div class="section-subtitle">Tout ce qu'il faut savoir avant de venir.</div>
+  <div class="info-card" id="infoContent" style="white-space: pre-wrap; line-height: 1.8; color: var(--gris); font-size: 0.95rem; max-width: 700px;"></div>
+</div>
+
+<footer>
+  <div>© CinéPop — Tous droits réservés</div>
+  <div><a href="/admin.html">Espace administration</a></div>
+</footer>
+
+<script>
+async function loadInfo() {
+  const res = await fetch("/api/info");
+  const data = await res.json();
+  const el = document.getElementById("infoContent");
+  if (data.ok && data.content) {
+    el.textContent = data.content;
+    document.getElementById("infos").style.display = "";
+  } else {
+    document.getElementById("infos").style.display = "none";
+  }
+}
+loadInfo();
+document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("navLinks").classList.toggle("open");
+});
+</script>
+<script src="/nav-auth.js"></script>
+</body>
+</html>

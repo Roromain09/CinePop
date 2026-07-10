@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Réservation CinéPop</title>
+  <link rel="icon" href="img/favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    :root {
+      --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+      --jaune: #f5b700; --jaune-soft: #ffd84d;
+      --blanc: #ffffff; --gris: #a7b3d1;
+      --vert: #39d98a; --rouge: #ff6b6b;
+      --ombre: rgba(0, 0, 0, 0.45);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      min-height: 100vh; color: var(--blanc);
+      background:
+        radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+        linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+      overflow-x: hidden;
+    }
+
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 32px; max-width: 1200px; margin: 0 auto;
+    }
+    .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+    .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+    .nav-links { display:flex; gap:8px; align-items:center; }
+    .nav-links a {
+      color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+      padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
+
+    .nav-avatar {
+      width: 38px; height: 38px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+      border-radius: 52% 48% 55% 45% / 50% 46% 54% 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; text-decoration: none;
+      box-shadow: 0 0 16px rgba(245,183,0,0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 2px solid rgba(245,183,0,0.6);
+    }
+    .nav-avatar:hover { transform: scale(1.1); box-shadow: 0 0 24px rgba(245,183,0,0.55); }
+    .nav-link-connexion { color: var(--gris) !important; }
+
+    .nav-toggle {
+      display: none;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      color: var(--blanc); font-size: 1.3rem; line-height: 1;
+      padding: 8px 14px; border-radius: 12px; cursor: pointer;
+    }
+
+    .page {
+      width: 100%; max-width: 1100px; margin: 0 auto; padding: 20px 24px 60px;
+      display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: stretch;
+    }
+
+    .hero {
+      background: linear-gradient(145deg, rgba(17, 34, 64, 0.88), rgba(7, 17, 31, 0.92));
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; padding: 32px;
+      box-shadow: 0 24px 70px var(--ombre); position: relative; overflow: hidden;
+      min-height: 440px; display: flex; flex-direction: column;
+    }
+    .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; opacity: 0; transition: opacity 0.5s ease; }
+    .hero-bg.show { opacity: 1; }
+    .hero-overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background:
+        radial-gradient(circle at top, rgba(245,183,0,0.16), transparent 45%),
+        linear-gradient(180deg, rgba(7,17,31,0.55) 0%, rgba(7,17,31,0.82) 55%, rgba(7,17,31,0.95) 100%);
+    }
+    .hero-content { position: relative; z-index: 2; }
+
+    .brand { display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px;
+      background: rgba(245,183,0,0.12); color: var(--jaune-soft); font-weight:700;
+      border:1px solid rgba(245,183,0,0.22); margin-bottom: 22px; }
+    .brand .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+
+    h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 14px; }
+    .subtitle { color: var(--gris); font-size: 1.02rem; line-height: 1.7; max-width: 50ch; }
+
+    .selected-seance {
+      margin-top: 26px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 18px;
+      display: none; backdrop-filter: blur(6px);
+    }
+    .selected-seance.show { display: block; }
+    .selected-seance .row { display:flex; justify-content:space-between; font-size:0.92rem; padding: 6px 0; color: var(--gris); }
+    .selected-seance .row b { color: var(--blanc); }
+
+    .form-card {
+      background: rgba(17, 34, 64, 0.78); border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px; padding: 30px; box-shadow: 0 24px 70px var(--ombre);
+      position: relative; overflow: hidden;
+    }
+    .form-card::before {
+      content: ""; position: absolute; top:0; left:0; right:0; height: 5px;
+      background: linear-gradient(90deg, var(--jaune), var(--jaune-soft));
+    }
+    .form-title { font-size: 1.45rem; font-weight: 800; margin-bottom: 8px; }
+    .form-subtitle { color: var(--gris); margin-bottom: 22px; line-height: 1.5; font-size: 0.98rem; }
+
+    form { display: grid; gap: 12px; }
+    .field { position: relative; }
+    label.field-label { display:block; font-size:0.78rem; color: var(--gris); margin-bottom: 4px; }
+
+    input, select {
+      width: 100%; padding: 15px 16px; border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.05); color: var(--blanc);
+      font-size: 1rem; outline: none;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    select { color-scheme: dark; }
+    select option { background: var(--bleu2); color: var(--blanc); }
+    input::placeholder { color: rgba(255, 255, 255, 0.45); }
+    input:focus, select:focus {
+      border-color: var(--jaune); background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(245, 183, 0, 0.14); transform: translateY(-1px);
+    }
+
+    button {
+      width: 100%; padding: 15px 18px; margin-top: 6px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
+      font-size: 1rem; font-weight: 900; letter-spacing: 0.4px; cursor: pointer;
+      box-shadow: 0 12px 28px rgba(245, 183, 0, 0.24); transition: transform 0.2s ease;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform:none; }
+
+    form.hidden { display: none; }
+
+    .error-card {
+      display: none; margin-top: 16px; padding: 14px 16px; border-radius: 14px;
+      background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3);
+      color: #ffd6d6; font-size: 0.92rem;
+    }
+    .error-card.show { display: block; }
+
+    .success-card { display: none; margin-top: 4px; }
+    .success-card.show { display: block; }
+    .success-top { display:flex; gap: 14px; align-items:flex-start; margin-bottom: 18px; }
+    .check-icon {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--vert);
+      color: #06281a; display:flex; align-items:center; justify-content:center;
+      font-weight: 900; flex-shrink: 0;
+    }
+    .success-title { font-weight: 800; font-size: 1.1rem; }
+    .success-subtitle { color: var(--gris); font-size: 0.92rem; margin-top: 4px; line-height:1.5; }
+
+    .ticket { background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; }
+    .ticket-row { display:grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.08); }
+    .ticket-row:last-child { border-bottom: none; }
+    .ticket-label { color: var(--gris); font-size: 0.82rem; }
+    .ticket-value { font-weight: 700; font-size: 0.92rem; text-align: right; }
+
+    .status-pill {
+      margin-top: 16px; display:inline-flex; align-items:center; gap:8px;
+      background: rgba(57,217,138,0.12); color: var(--vert); padding: 8px 14px;
+      border-radius: 999px; font-size: 0.85rem; font-weight: 700;
+    }
+    .status-dot { width:8px; height:8px; border-radius:50%; background: var(--vert); }
+
+    .info-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: rgba(77, 166, 255, 0.12); border: 1px solid rgba(77, 166, 255, 0.3);
+      border-radius: 12px; padding: 11px 14px; margin-top: 10px;
+      color: #9ecfff; font-size: 0.88rem; line-height: 1.5;
+    }
+    .info-banner .info-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
+
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(7,17,31,0.85); display:none;
+      align-items:center; justify-content:center; z-index: 999;
+    }
+    .loading-overlay.show { display:flex; }
+    .loading-box { text-align:center; }
+    .spinner {
+      width: 50px; height:50px; margin: 0 auto 16px; border-radius:50%;
+      border: 4px solid rgba(255,255,255,0.1); border-top:4px solid var(--jaune);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-title { font-weight: 800; margin-bottom: 6px; }
+    .loading-text  { color: var(--gris); font-size: 0.9rem; }
+
+    @media (max-width: 920px) { .page { grid-template-columns: 1fr; } }
+    @media (max-width: 680px) {
+      nav { flex-wrap: wrap; }
+      .nav-toggle { display: block; }
+      .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
+      .nav-links.open { display: flex; }
+      .nav-links a { text-align: center; padding: 12px 16px; }
+      .nav-avatar { display: none !important; }
+      .nav-auth-mobile {
+        display: flex !important; align-items: center; justify-content: center; gap: 8px;
+        background: rgba(245,183,0,0.1) !important; color: var(--blanc) !important;
+      }
+    }
+    @media (max-width: 540px) {
+      .hero, .form-card { padding: 22px; border-radius: 22px; }
+      .hero { min-height: 360px; }
+      .ticket-row { grid-template-columns: 1fr; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html">Programme</a>
+    <a href="/check.html">Mes réservations</a>
+    <a href="/historique.html">Historique</a>
+    <a href="/support.html">Support</a>
+    <a href="/connexion.html" id="navAuthMobile" class="nav-auth-mobile" style="display:none;">
+      <span class="nav-emoji-mobile">👤</span> Mon compte
+    </a>
+  </div>
+  <a href="/connexion.html" class="nav-avatar" id="navAuthLink" title="Connexion">👤</a>
+</nav>
+
+<div class="page">
+  <section class="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="brand"><span class="dot"></span> CINEPOP — Réservation</div>
+      <h1>Réserve ton billet en quelques clics.</h1>
+      <p class="subtitle">Choisis ta séance, indique tes informations, et c'est réservé.</p>
+      <div class="selected-seance" id="selectedSeanceBox">
+        <div class="row"><span>Film</span><b id="ssFilm"></b></div>
+        <div class="row"><span>Date</span><b id="ssDate"></b></div>
+        <div class="row"><span>Heure</span><b id="ssTime"></b></div>
+        <div class="row"><span>Salle</span><b id="ssRoom"></b></div>
+        <div class="row"><span>Places restantes</span><b id="ssRemaining"></b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-card">
+    <div class="form-title">Réserve ta séance</div>
+    <div class="form-subtitle">Remplis les infos ci-dessous, puis valide ta séance.</div>
+
+    <form id="resaForm">
+      <div class="field">
+        <label class="field-label">Séance</label>
+        <select id="seanceId" required><option value="">Chargement des séances…</option></select>
+      </div>
+      <div class="field">
+        <input type="text" id="clientName" placeholder="Nom Prénom" required>
+      </div>
+      <div class="field">
+        <input type="email" id="email" placeholder="Email" required>
+      </div>
+      <div class="field">
+        <input type="number" id="peopleNumber" min="1" max="10" placeholder="Nombre de personnes" required>
+      </div>
+      <button id="submitBtn" type="submit">Réserver</button>
+    </form>
+
+    <div id="errorCard" class="error-card"></div>
+
+    <div id="successCard" class="success-card">
+      <div class="success-top">
+        <div class="check-icon">✓</div>
+        <div>
+          <div class="success-title">Réservation confirmée</div>
+          <div class="success-subtitle">Ton billet a bien été enregistré. Nos équipes traiterons ta demande au plus vite ! Tu recevras tes billets par mail.</div>
+        </div>
+      </div>
+      <div class="ticket">
+        <div class="ticket-row"><div class="ticket-label">Client</div><div class="ticket-value" id="confirmClient"></div></div>
+        <div class="ticket-row"><div class="ticket-label">Film</div><div class="ticket-value" id="confirmFilm"></div></div>
+        <div class="ticket-row"><div class="ticket-label">Salle</div><div class="ticket-value" id="confirmRoom"></div></div>
+        <div class="ticket-row"><div class="ticket-label">Séance à</div><div class="ticket-value" id="confirmSession"></div></div>
+        <div class="ticket-row"><div class="ticket-label">Nombre</div><div class="ticket-value" id="confirmNumber"></div></div>
+        <div class="ticket-row"><div class="ticket-label">Email</div><div class="ticket-value" id="confirmEmail"></div></div>
+      </div>
+      <div class="status-pill"><span class="status-dot"></span> Réservation envoyée avec succès</div>
+    </div>
+  </section>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div class="loading-title">Réservation en cours...</div>
+    <div class="loading-text">On vérifie ta demande et on prépare tes tickets.</div>
+  </div>
+</div>
+
+<script>
+  const form          = document.getElementById("resaForm");
+  const submitBtn     = document.getElementById("submitBtn");
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const successCard   = document.getElementById("successCard");
+  const errorCard     = document.getElementById("errorCard");
+  const seanceSelect  = document.getElementById("seanceId");
+
+  let seancesFlat = [];
+
+  function showLoading() { loadingOverlay.classList.add("show"); submitBtn.disabled = true; form.querySelectorAll("input, select").forEach(el => el.disabled = true); }
+  function hideLoading() { loadingOverlay.classList.remove("show"); submitBtn.disabled = false; form.querySelectorAll("input, select").forEach(el => el.disabled = false); }
+  function showError(msg) { errorCard.textContent = msg; errorCard.classList.add("show"); }
+  function hideError()    { errorCard.classList.remove("show"); errorCard.textContent = ""; }
+
+  function formatDate(d) {
+    const date = new Date(d + "T00:00:00");
+    return date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+  }
+
+  function updatePoster(seance) {
+    const bg = document.getElementById("heroBg");
+    if (seance?.posterUrl) { bg.style.backgroundImage = `url('${seance.posterUrl}')`; bg.classList.add("show"); }
+    else { bg.classList.remove("show"); bg.style.backgroundImage = ""; }
+  }
+
+  function updateSelectedSeanceBox() {
+    const seance = seancesFlat.find(s => s.id === seanceSelect.value);
+    const box = document.getElementById("selectedSeanceBox");
+    updatePoster(seance);
+    if (!seance) { box.classList.remove("show"); return; }
+    document.getElementById("ssFilm").textContent      = seance.filmTitle;
+    document.getElementById("ssDate").textContent      = formatDate(seance.sessionDate);
+    document.getElementById("ssTime").textContent      = seance.sessionTime;
+    document.getElementById("ssRoom").textContent      = seance.roomNumber || "—";
+    document.getElementById("ssRemaining").textContent = seance.remaining + " place(s)";
+    box.classList.add("show");
+    const existingBanner = box.querySelector(".info-banner");
+    if (existingBanner) existingBanner.remove();
+    if (seance.infoMessage) {
+      const banner = document.createElement("div");
+      banner.className = "info-banner";
+      banner.innerHTML = `<span class="info-icon">ℹ️</span><span>${seance.infoMessage}</span>`;
+      box.appendChild(banner);
+    }
+    document.getElementById("peopleNumber").max = Math.min(10, seance.remaining);
+  }
+
+  async function loadSeances() {
+    try {
+      const res  = await fetch("/api/programme");
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+
+      seancesFlat = [];
+      data.films.forEach(film => {
+        film.seances.forEach(s => {
+          seancesFlat.push({
+            id: s.id, filmTitle: film.title, roomNumber: s.roomNumber,
+            sessionDate: s.sessionDate, sessionTime: s.sessionTime,
+            remaining: s.remaining, posterUrl: film.posterUrl,
+            cancelled: s.cancelled || false, infoMessage: s.infoMessage || null
+          });
+        });
+      });
+      seancesFlat.sort((a, b) => `${a.sessionDate} ${a.sessionTime}`.localeCompare(`${b.sessionDate} ${b.sessionTime}`));
+
+      if (seancesFlat.length === 0) { seanceSelect.innerHTML = `<option value="">Aucune séance disponible</option>`; return; }
+
+      seanceSelect.innerHTML = seancesFlat.map(s => {
+        const unavailable = s.remaining <= 0 || s.cancelled;
+        const label = `${s.filmTitle} — ${formatDate(s.sessionDate)} à ${s.sessionTime}${s.roomNumber ? " (" + s.roomNumber + ")" : ""}${s.cancelled ? " — annulée" : (s.remaining <= 0 ? " — complet" : "")}`;
+        return `<option value="${s.id}" ${unavailable ? "disabled" : ""}>${label}</option>`;
+      }).join("");
+
+      const params = new URLSearchParams(window.location.search);
+      const preselect = params.get("seance");
+      if (preselect && seancesFlat.some(s => s.id === preselect)) seanceSelect.value = preselect;
+      updateSelectedSeanceBox();
+    } catch {
+      seanceSelect.innerHTML = `<option value="">Erreur de chargement</option>`;
+    }
+  }
+
+  seanceSelect.addEventListener("change", updateSelectedSeanceBox);
+
+  function showSuccess(data, seance) {
+    document.getElementById("confirmClient").textContent  = data.clientName;
+    document.getElementById("confirmFilm").textContent    = seance.filmTitle;
+    document.getElementById("confirmRoom").textContent    = seance.roomNumber || "—";
+    document.getElementById("confirmNumber").textContent  = data.peopleNumber;
+    document.getElementById("confirmSession").textContent = `${seance.sessionDate} à ${seance.sessionTime}`;
+    document.getElementById("confirmEmail").textContent   = data.email;
+    successCard.classList.add("show");
+    form.classList.add("hidden");
+    document.querySelector(".form-subtitle").textContent = "Résumé de ta commande :";
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideError();
+    successCard.classList.remove("show");
+
+    const seance = seancesFlat.find(s => s.id === seanceSelect.value);
+    const data = {
+      seanceId:     seanceSelect.value,
+      clientName:   document.getElementById("clientName").value.trim(),
+      email:        document.getElementById("email").value.trim(),
+      peopleNumber: document.getElementById("peopleNumber").value.trim()
+    };
+
+    if (!data.seanceId) { showError("⛔ Merci de choisir une séance."); return; }
+    if (seance?.cancelled) { showError("⛔ Cette séance a été annulée."); return; }
+    if (parseInt(data.peopleNumber) > 10 || parseInt(data.peopleNumber) < 1) { showError("⛔ Le nombre de personnes doit être entre 1 et 10."); return; }
+    if (seance && parseInt(data.peopleNumber) > seance.remaining) { showError(`⛔ Il ne reste que ${seance.remaining} place(s) pour cette séance.`); return; }
+
+    showLoading();
+    const delay = new Promise(resolve => setTimeout(resolve, 1500));
+
+    try {
+      const request = fetch("/api/reserver", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, userId: window._navAuthUserId || null })
+      });
+      const [res] = await Promise.all([request, delay]);
+      if (!res.ok) { const text = await res.text(); throw new Error(text || "Erreur lors de la réservation."); }
+      await res.text();
+      hideLoading();
+      showSuccess(data, seance);
+    } catch (err) {
+      hideLoading();
+      showError(err.message || "Impossible de finaliser la réservation.");
+    }
+  });
+
+  document.getElementById("navToggle").addEventListener("click", () => { document.getElementById("navLinks").classList.toggle("open"); });
+  loadSeances();
+</script>
+<script src="/nav-auth.js"></script>
+</body>
+</html>
