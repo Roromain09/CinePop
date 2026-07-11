@@ -514,7 +514,29 @@ app.post("/api/admin/ticket", async (req, res) => {
 
         const qrBuffer = await QRCode.toBuffer(qrData);
         const qrBase64 = qrBuffer.toString("base64");
+        // Couleur du niveau fidélité
+let levelColor = "#000000";
+let levelBg    = "#f9f9f9";
+let levelLabel = "";
 
+if (resa.user_id) {
+    const { data: profil } = await supabase
+        .from("profiles")
+        .select("level")
+        .eq("user_id", resa.user_id)
+        .maybeSingle();
+
+    const level = profil?.level || "bronze";
+    const LEVELS = {
+        bronze: { color: "#cd7f32", bg: "#fdf5ee", label: "🥉 Bronze" },
+        argent: { color: "#a8b8cc", bg: "#f2f5f8", label: "🥈 Argent" },
+        or:     { color: "#f5b700", bg: "#fffbe6", label: "🥇 Or"     },
+    };
+    const lv = LEVELS[level] || LEVELS.bronze;
+    levelColor = lv.color;
+    levelBg    = lv.bg;
+    levelLabel = lv.label;
+}
         const html = `
 <!DOCTYPE html>
 <html>
@@ -524,33 +546,52 @@ app.post("/api/admin/ticket", async (req, res) => {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 300px; height: 500px; overflow: hidden; font-family: Arial, sans-serif; }
     .ticket {
-        width: 280px; height: 490px; border: 2px dashed black;
-        padding: 12px 16px; text-align: center; margin: 0 auto;
-        display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+        width: 280px; height: 490px;
+        border: 2px solid ${levelColor};
+        border-radius: 10px;
+        background: ${levelBg};
+        margin: 0 auto;
+        display: flex; flex-direction: column; align-items: center;
+        overflow: hidden;
     }
-    h2 { font-size: 14px; }
-    hr { width: 100%; border: none; border-top: 1px solid #ccc; }
-    h1 { font-size: 15px; word-break: break-word; }
-    p { font-size: 12px; line-height: 1.4; }
-    .ticket-id { font-size: 9px; color: #555; }
+    .ticket-header {
+        width: 100%; background: ${levelColor};
+        padding: 12px 16px; text-align: center;
+    }
+    .ticket-header h2 { font-size: 14px; color: #fff; letter-spacing: 1px; }
+    .ticket-header .level { font-size: 11px; color: rgba(255,255,255,0.85); margin-top: 3px; }
+    .ticket-body {
+        flex: 1; width: 100%; padding: 14px 16px;
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: space-between; gap: 4px;
+    }
+    h1 { font-size: 15px; word-break: break-word; text-align: center; color: #111; }
+    .divider { width: 100%; border: none; border-top: 1px dashed ${levelColor}; opacity: 0.5; }
+    p { font-size: 12px; line-height: 1.5; color: #333; text-align: center; }
+    p b { color: #111; }
+    .ticket-id { font-size: 9px; color: #888; }
 </style>
 </head>
 <body>
     <div class="ticket">
-        <h2>TICKET CINEPOP</h2>
-        <hr>
-        <h1>${escapeHtml(film.title)}</h1>
-        <p><b>Salle :</b> ${escapeHtml(seance.room_number)}</p>
-        <p><b>Date :</b> ${escapeHtml(seance.session_date)}</p>
-        <p><b>Heure :</b> ${escapeHtml(sessionTimeShort)}</p>
-        <p><b>Client :</b> ${escapeHtml(resa.client_name)}</p>
-        <p><b>Places :</b> ${escapeHtml(resa.people_number)}</p>
-        <img src="data:image/png;base64,${qrBase64}" style="width:100px;" />
-        <p class="ticket-id">Ticket #${resa.id}</p>
+        <div class="ticket-header">
+            <h2>TICKET CINÉPOP</h2>
+            ${levelLabel ? `<div class="level">${levelLabel}</div>` : ""}
+        </div>
+        <div class="ticket-body">
+            <h1>${escapeHtml(film.title)}</h1>
+            <hr class="divider">
+            <p><b>Salle :</b> ${escapeHtml(seance.room_number)}</p>
+            <p><b>Date :</b> ${escapeHtml(seance.session_date)}</p>
+            <p><b>Heure :</b> ${escapeHtml(sessionTimeShort)}</p>
+            <p><b>Client :</b> ${escapeHtml(resa.client_name)}</p>
+            <p><b>Places :</b> ${escapeHtml(resa.people_number)}</p>
+            <img src="data:image/png;base64,${qrBase64}" style="width:90px;" />
+            <p class="ticket-id">Ticket #${resa.id}</p>
+        </div>
     </div>
 </body>
 </html>`;
-
         const browser = await puppeteer.launch({
             args: [
                 ...chromium.args,
