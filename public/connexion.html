@@ -10,7 +10,7 @@
       --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
       --jaune: #f5b700; --jaune-soft: #ffd84d;
       --blanc: #ffffff; --gris: #a7b3d1;
-      --vert: #39d98a; --rouge: #ff6b6b;
+      --vert: #39d98a; --rouge: #ff6b6b; --orange: #ff8c66;
       --ombre: rgba(0, 0, 0, 0.45);
     }
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -82,7 +82,6 @@
 
     /* ── FORM ── */
     .form-fields { display: flex; flex-direction: column; gap: 14px; }
-
     .field-group { display: flex; flex-direction: column; gap: 5px; }
     .field-label {
       font-size: 0.74rem; font-weight: 700; letter-spacing: 0.5px;
@@ -105,7 +104,6 @@
     }
     input.error { border-color: rgba(255,107,107,0.6); box-shadow: none; }
 
-    /* Bouton afficher/masquer mdp */
     .toggle-pw {
       position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer;
@@ -114,17 +112,13 @@
     }
     .toggle-pw:hover { color: var(--blanc); }
 
-    /* Mot de passe oublié */
-    .forgot-row {
-      display: flex; justify-content: flex-end; margin-top: -6px;
-    }
+    .forgot-row { display: flex; justify-content: flex-end; margin-top: -6px; }
     .forgot-link {
       font-size: 0.78rem; color: var(--gris); text-decoration: none;
       transition: color 0.2s ease;
     }
     .forgot-link:hover { color: var(--jaune-soft); }
 
-    /* Erreur */
     .error-card {
       display: none; padding: 13px 15px; border-radius: 12px;
       background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3);
@@ -132,7 +126,6 @@
     }
     .error-card.show { display: block; }
 
-    /* Bouton submit */
     .btn-submit {
       width: 100%; padding: 15px 18px; border: none; border-radius: 14px;
       background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
@@ -143,7 +136,6 @@
     .btn-submit:hover { transform: translateY(-2px); }
     .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-    /* Séparateur */
     .separator {
       display: flex; align-items: center; gap: 12px; margin: 4px 0;
     }
@@ -152,15 +144,54 @@
     }
     .separator span { color: var(--gris); font-size: 0.78rem; white-space: nowrap; }
 
-    /* Lien inscription */
-    .signup-link {
-      text-align: center; margin-top: 20px;
-      font-size: 0.88rem; color: var(--gris);
+    /* ── BOUTON SANS COMPTE ── */
+    .btn-ghost-resa {
+      width: 100%; padding: 13px 18px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: var(--gris);
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s ease; text-align: center;
     }
-    .signup-link a { color: var(--jaune-soft); font-weight: 700; text-decoration: none; }
-    .signup-link a:hover { text-decoration: underline; }
+    .btn-ghost-resa:hover { background: rgba(255,255,255,0.08); color: var(--blanc); border-color: rgba(255,255,255,0.2); }
 
-    /* Modal mot de passe oublié */
+    /* ── PANNEAU RECHERCHE ── */
+    .resa-search-panel {
+      display: none; flex-direction: column; gap: 12px; margin-top: 4px;
+    }
+    .resa-search-panel.open { display: flex; }
+
+    .search-row { display: flex; gap: 8px; }
+    .search-row input { flex: 1; padding: 13px 16px; }
+    .btn-search {
+      padding: 13px 18px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
+      font-size: 0.9rem; font-weight: 900; cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .btn-search:hover { transform: translateY(-1px); }
+
+    .resa-results { display: flex; flex-direction: column; gap: 10px; }
+
+    .resa-card {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 14px 16px;
+    }
+    .resa-card-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .resa-film { font-weight: 800; font-size: 0.94rem; }
+    .status-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 0.74rem; font-weight: 700; flex-shrink: 0; }
+    .chip-attente { background: rgba(245,183,0,0.14);  color: var(--jaune-soft); }
+    .chip-valide  { background: rgba(57,217,138,0.14); color: var(--vert); }
+    .chip-refuse  { background: rgba(255,107,107,0.14); color: var(--rouge); }
+    .chip-expire  { background: rgba(255,140,102,0.14); color: var(--orange); }
+    .resa-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+    .resa-field { display: flex; flex-direction: column; gap: 1px; }
+    .resa-field-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--gris); }
+    .resa-field-value { font-size: 0.86rem; color: var(--blanc); }
+
+    .resa-empty { text-align: center; padding: 20px; color: var(--gris); font-size: 0.88rem; }
+    .resa-error { padding: 11px 14px; border-radius: 12px; background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3); color: #ffd6d6; font-size: 0.86rem; }
+
+    /* ── MODAL MOT DE PASSE OUBLIÉ ── */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(7,17,31,0.78);
       display: none; align-items: center; justify-content: center;
@@ -186,9 +217,7 @@
     .modal-close:hover { background: rgba(255,255,255,0.16); }
     .modal input { margin-bottom: 12px; }
     .modal .btn-submit { margin-top: 0; }
-    .modal-success {
-      display: none; text-align: center; padding: 10px 0;
-    }
+    .modal-success { display: none; text-align: center; padding: 10px 0; }
     .modal-success.show { display: block; }
     .modal-success .check-icon {
       width: 44px; height: 44px; border-radius: 50%; background: var(--vert);
@@ -199,6 +228,8 @@
 
     @media (max-width: 540px) {
       .form-card { padding: 28px 22px; border-radius: 22px; }
+      .search-row { flex-direction: column; }
+      .resa-card-grid { grid-template-columns: 1fr; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -211,7 +242,6 @@
   <div class="nav-links" id="navLinks">
     <a href="/index.html">Accueil</a>
     <a href="/programme.html">Programme</a>
-    <a href="/check.html">Mes réservations</a>
     <a href="/historique.html">Historique</a>
     <a href="/support.html">Support</a>
   </div>
@@ -251,10 +281,20 @@
         Pas encore de compte ?
         <a href="/inscription.html" style="color:var(--jaune-soft); font-weight:700; text-decoration:none;">Créer un compte →</a>
       </div>
+
+      <div class="separator"><span>réservation sans compte</span></div>
+
+      <button class="btn-ghost-resa" onclick="toggleResaSearch()">🎟 Voir mes réservations sans compte</button>
+
+      <!-- Panneau de recherche -->
+      <div class="resa-search-panel" id="resaSearchPanel">
+        <div class="search-row">
+          <input type="text" id="resaName" placeholder="Nom Prénom" onkeydown="if(event.key==='Enter') searchResa()">
+          <button class="btn-search" onclick="searchResa()">Chercher</button>
+        </div>
+        <div id="resaResults"></div>
+      </div>
     </div>
-  </div>
-  <div class="signup-link" style="margin-top:16px;">
-    Continuer sans compte → <a href="/programme.html">Voir le programme</a>
   </div>
 </div>
 
@@ -262,7 +302,6 @@
 <div class="modal-overlay" id="forgotOverlay" onclick="closeForgot(event)">
   <div class="modal" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeForgot()">✕</button>
-
     <div id="forgotForm">
       <h2>Mot de passe oublié</h2>
       <p>Saisis ton email, on t'envoie un lien pour réinitialiser ton mot de passe.</p>
@@ -270,7 +309,6 @@
       <div id="forgotError" class="error-card" style="margin-bottom:12px;"></div>
       <button class="btn-submit" onclick="envoyerReset()">Envoyer le lien</button>
     </div>
-
     <div class="modal-success" id="forgotSuccess">
       <div class="check-icon">✓</div>
       <p>Un lien de réinitialisation a été envoyé à ton adresse email.</p>
@@ -299,7 +337,7 @@ function togglePw() {
   btn.textContent = pwVisible ? "🙈" : "👁";
 }
 
-/* ── ERREUR ── */
+/* ── ERREUR CONNEXION ── */
 function showError(msg) {
   const el = document.getElementById("errorCard");
   el.textContent = msg;
@@ -314,27 +352,78 @@ async function seConnecter() {
   hideError();
   const email    = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-
-  if (!email || !password) {
-    showError("⛔ Merci de remplir tous les champs.");
-    return;
-  }
-
+  if (!email || !password) { showError("⛔ Merci de remplir tous les champs."); return; }
   const btn = document.getElementById("submitBtn");
   btn.disabled    = true;
   btn.textContent = "Connexion…";
-
   try {
     const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     window.location.href = "/compte.html";
-
   } catch (err) {
     const msg = err.message || "";
     const lisible = msg.includes("Invalid login") ? "Email ou mot de passe incorrect." : msg;
     showError("❌ " + lisible);
     btn.disabled    = false;
     btn.textContent = "Se connecter";
+  }
+}
+
+/* ── RECHERCHE RÉSERVATIONS SANS COMPTE ── */
+let resaPanelOpen = false;
+
+function toggleResaSearch() {
+  resaPanelOpen = !resaPanelOpen;
+  const panel = document.getElementById("resaSearchPanel");
+  panel.classList.toggle("open", resaPanelOpen);
+  if (resaPanelOpen) setTimeout(() => document.getElementById("resaName").focus(), 50);
+}
+
+const STATUS = {
+  "en attente": { icon: "⏳", label: "En attente", chip: "chip-attente" },
+  "validé":     { icon: "✅", label: "Validé",     chip: "chip-valide" },
+  "refusé":     { icon: "❌", label: "Refusé",     chip: "chip-refuse" },
+  "expiré":     { icon: "⏱", label: "Expiré",     chip: "chip-expire" }
+};
+
+function formatDate(d) {
+  const date = new Date(d + "T00:00:00");
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((date - today) / 86400000);
+  if (diff === 0) return "Aujourd'hui";
+  if (diff === 1) return "Demain";
+  return date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+}
+
+function buildResaCard(r) {
+  const st = STATUS[r.status] || { icon: "•", label: r.status, chip: "" };
+  return `
+    <div class="resa-card">
+      <div class="resa-card-header">
+        <span class="resa-film">🎬 ${r.filmTitle}</span>
+        <span class="status-chip ${st.chip}">${st.icon} ${st.label}</span>
+      </div>
+      <div class="resa-card-grid">
+        <div class="resa-field"><span class="resa-field-label">Date</span><span class="resa-field-value">📅 ${formatDate(r.sessionDate)}</span></div>
+        <div class="resa-field"><span class="resa-field-label">Heure</span><span class="resa-field-value">🕐 ${r.sessionTime}</span></div>
+        <div class="resa-field"><span class="resa-field-label">Personnes</span><span class="resa-field-value">🎟 ${r.peopleNumber}</span></div>
+        ${r.roomNumber ? `<div class="resa-field"><span class="resa-field-label">Salle</span><span class="resa-field-value">🏛 ${r.roomNumber}</span></div>` : ""}
+      </div>
+    </div>`;
+}
+
+async function searchResa() {
+  const name = document.getElementById("resaName").value.trim();
+  const results = document.getElementById("resaResults");
+  if (!name) { results.innerHTML = `<div class="resa-error">⚠ Merci d'entrer un nom.</div>`; return; }
+  results.innerHTML = `<div class="resa-empty">⏳ Recherche en cours…</div>`;
+  try {
+    const res  = await fetch(`/api/reservation?name=${encodeURIComponent(name)}`);
+    const data = await res.json();
+    if (!data.ok) { results.innerHTML = `<div class="resa-empty">${data.error || "Aucune réservation trouvée."}</div>`; return; }
+    results.innerHTML = `<div class="resa-results">${data.reservations.map(buildResaCard).join("")}</div>`;
+  } catch {
+    results.innerHTML = `<div class="resa-error">Erreur lors de la recherche. Réessaie.</div>`;
   }
 }
 
@@ -357,13 +446,7 @@ async function envoyerReset() {
   const email = document.getElementById("forgotEmail").value.trim();
   const errEl = document.getElementById("forgotError");
   errEl.classList.remove("show");
-
-  if (!email) {
-    errEl.textContent = "⛔ Saisis ton adresse email.";
-    errEl.classList.add("show");
-    return;
-  }
-
+  if (!email) { errEl.textContent = "⛔ Saisis ton adresse email."; errEl.classList.add("show"); return; }
   try {
     const { error } = await _supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + "/reset-password.html"
@@ -377,14 +460,10 @@ async function envoyerReset() {
   }
 }
 
-/* Entrée clavier */
 document.addEventListener("keydown", e => {
   if (e.key === "Enter") {
-    if (document.getElementById("forgotOverlay").classList.contains("show")) {
-      envoyerReset();
-    } else {
-      seConnecter();
-    }
+    if (document.getElementById("forgotOverlay").classList.contains("show")) envoyerReset();
+    else seConnecter();
   }
   if (e.key === "Escape") closeForgot();
 });
