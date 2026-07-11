@@ -212,7 +212,7 @@
     .stat-value { font-size: 1.6rem; font-weight: 900; }
     .stat-label { color: var(--gris); font-size: 0.78rem; margin-top: 2px; }
 
-    /* ── HISTORIQUE ── */
+    /* ── RÉSERVATIONS COMPTE ── */
     .section-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
     .section-title .count { background: rgba(245,183,0,0.15); color: var(--jaune-soft); font-size: 0.72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
     .resa-card { background: rgba(17,34,64,0.78); border: 1px solid rgba(255,255,255,0.07); border-radius: 18px; padding: 16px 20px; margin-bottom: 10px; box-shadow: 0 8px 20px var(--ombre); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -226,9 +226,57 @@
     .chip-valide  { background: rgba(57,217,138,0.14); color: var(--vert); }
     .chip-attente { background: rgba(245,183,0,0.14);  color: var(--jaune-soft); }
     .chip-refuse  { background: rgba(255,107,107,0.14); color: var(--rouge); }
+    .chip-expire  { background: rgba(255,140,102,0.14); color: var(--orange); }
     .pts-earned { font-size: 0.76rem; font-weight: 700; color: var(--jaune-soft); background: rgba(245,183,0,0.1); padding: 3px 9px; border-radius: 999px; }
     .empty { text-align: center; padding: 50px 20px; color: var(--gris); }
     .empty-icon { font-size: 2rem; margin-bottom: 10px; }
+
+    /* ── SECTION SANS COMPTE ── */
+    .sans-compte-card {
+      background: rgba(17, 34, 64, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px; padding: 26px 30px;
+      box-shadow: 0 14px 40px var(--ombre);
+    }
+    .sans-compte-header {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 0;
+    }
+    .sans-compte-title { font-size: 0.92rem; font-weight: 700; color: var(--gris); }
+    .btn-ghost-resa {
+      padding: 10px 18px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: var(--gris);
+      font-size: 0.86rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-ghost-resa:hover { background: rgba(255,255,255,0.08); color: var(--blanc); border-color: rgba(255,255,255,0.2); }
+
+    .resa-search-panel { display: none; flex-direction: column; gap: 12px; margin-top: 18px; }
+    .resa-search-panel.open { display: flex; }
+    .search-row { display: flex; gap: 8px; }
+    .search-row input {
+      flex: 1; padding: 13px 16px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05); color: var(--blanc);
+      font-size: 0.95rem; outline: none; font-family: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .search-row input::placeholder { color: rgba(255,255,255,0.35); }
+    .search-row input:focus { border-color: var(--jaune); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 4px rgba(245,183,0,0.14); }
+    .btn-search {
+      padding: 13px 18px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
+      font-size: 0.9rem; font-weight: 900; cursor: pointer; transition: transform 0.2s ease;
+    }
+    .btn-search:hover { transform: translateY(-1px); }
+
+    .sans-resa-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .sans-resa-card:last-child { margin-bottom: 0; }
+    .sans-resa-film { font-weight: 800; font-size: 0.92rem; flex: 1; min-width: 120px; }
+    .sans-resa-meta { color: var(--gris); font-size: 0.8rem; display: flex; gap: 10px; flex-wrap: wrap; }
+    .resa-empty { text-align: center; padding: 18px; color: var(--gris); font-size: 0.88rem; }
+    .resa-error { padding: 11px 14px; border-radius: 12px; background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3); color: #ffd6d6; font-size: 0.86rem; }
 
     @media (max-width: 600px) {
       .profile-hero { flex-direction: column; align-items: flex-start; }
@@ -238,6 +286,8 @@
       .points-header { flex-direction: column; }
       .next-level-info { text-align: left; }
       .avatar-grid { grid-template-columns: repeat(5, 1fr); }
+      .search-row { flex-direction: column; }
+      .sans-compte-header { flex-direction: column; align-items: flex-start; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -250,7 +300,6 @@
   <div class="nav-links" id="navLinks">
     <a href="/index.html">Accueil</a>
     <a href="/programme.html">Programme</a>
-    <a href="/check.html">Mes réservations</a>
     <a href="/historique.html">Historique</a>
     <a href="/support.html">Support</a>
     <a href="/compte.html" class="nav-avatar-mobile" id="navAvatarMobile" style="display:none;">
@@ -316,6 +365,21 @@
     <div id="resaList"></div>
   </div>
 
+  <!-- ── SECTION SANS COMPTE ── -->
+  <div class="sans-compte-card">
+    <div class="sans-compte-header">
+      <div class="sans-compte-title">🎟 Réservation effectuée sans compte ?</div>
+      <button class="btn-ghost-resa" onclick="toggleResaSearch()">Voir mes réservations</button>
+    </div>
+    <div class="resa-search-panel" id="resaSearchPanel">
+      <div class="search-row">
+        <input type="text" id="resaName" placeholder="Nom Prénom utilisé lors de la réservation" onkeydown="if(event.key==='Enter') searchResa()">
+        <button class="btn-search" onclick="searchResa()">Chercher</button>
+      </div>
+      <div id="resaResults"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- MODAL AVATAR -->
@@ -359,7 +423,7 @@ const STATUS = {
   "validé":     { label: "Validé",     chip: "chip-valide",  icon: "✅" },
   "en attente": { label: "En attente", chip: "chip-attente", icon: "⏳" },
   "refusé":     { label: "Refusé",     chip: "chip-refuse",  icon: "❌" },
-  "expiré":     { label: "Expiré",     chip: "chip-refuse",  icon: "⏱" },
+  "expiré":     { label: "Expiré",     chip: "chip-expire",  icon: "⏱" },
 };
 
 let selectedAvatar = "🎬";
@@ -368,6 +432,14 @@ let currentUserId  = null;
 function formatDate(d) {
   return new Date(d + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
 }
+function formatDateShort(d) {
+  const date = new Date(d + "T00:00:00");
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((date - today) / 86400000);
+  if (diff === 0) return "Aujourd'hui";
+  if (diff === 1) return "Demain";
+  return date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+}
 
 /* ── MODAL AVATAR ── */
 function buildAvatarGrid(current) {
@@ -375,39 +447,34 @@ function buildAvatarGrid(current) {
     `<div class="avatar-option ${e === current ? "selected" : ""}" onclick="selectAvatar('${e}')">${e}</div>`
   ).join("");
 }
-
 function openAvatarModal() {
   selectedAvatar = document.getElementById("avatarDisplay").textContent.trim();
   buildAvatarGrid(selectedAvatar);
   document.getElementById("avatarModalOverlay").classList.add("show");
 }
-
 function closeAvatarModal(e) {
   if (e && e.target !== e.currentTarget) return;
   document.getElementById("avatarModalOverlay").classList.remove("show");
 }
-
 function selectAvatar(emoji) {
   selectedAvatar = emoji;
   document.querySelectorAll(".avatar-option").forEach(el =>
     el.classList.toggle("selected", el.textContent.trim() === emoji)
   );
 }
-
 async function saveAvatar() {
   if (!currentUserId) return;
   await _supabase.from("profiles").update({ avatar: selectedAvatar }).eq("user_id", currentUserId);
   setAvatar(selectedAvatar);
   closeAvatarModal();
 }
-
 function setAvatar(emoji) {
-  document.getElementById("avatarDisplay").textContent   = emoji;
-  document.getElementById("navAvatar").textContent       = emoji;
-  document.getElementById("navEmojiMobile").textContent  = emoji;
+  document.getElementById("avatarDisplay").textContent  = emoji;
+  document.getElementById("navAvatar").textContent      = emoji;
+  document.getElementById("navEmojiMobile").textContent = emoji;
 }
 
-/* ── RENDU ── */
+/* ── RENDU RÉSERVATIONS COMPTE ── */
 function buildResaCard(r) {
   const st = STATUS[r.status] || STATUS["en attente"];
   const pts = r.pts_gagnes || 0;
@@ -476,6 +543,55 @@ function renderProfil(profil, reservations) {
   list.innerHTML = reservations.length
     ? reservations.map(buildResaCard).join("")
     : `<div class="empty"><div class="empty-icon">🎟</div>Aucune réservation pour le moment.</div>`;
+}
+
+/* ── RECHERCHE SANS COMPTE ── */
+let resaPanelOpen = false;
+
+function toggleResaSearch() {
+  resaPanelOpen = !resaPanelOpen;
+  const panel = document.getElementById("resaSearchPanel");
+  panel.classList.toggle("open", resaPanelOpen);
+  if (resaPanelOpen) setTimeout(() => document.getElementById("resaName").focus(), 50);
+}
+
+const STATUS_SANS = {
+  "en attente": { icon: "⏳", label: "En attente", chip: "chip-attente" },
+  "validé":     { icon: "✅", label: "Validé",     chip: "chip-valide" },
+  "refusé":     { icon: "❌", label: "Refusé",     chip: "chip-refuse" },
+  "expiré":     { icon: "⏱", label: "Expiré",     chip: "chip-expire" }
+};
+
+function buildSansResaCard(r) {
+  const st = STATUS_SANS[r.status] || { icon: "•", label: r.status, chip: "" };
+  return `
+    <div class="sans-resa-card">
+      <div style="flex:1; min-width:120px;">
+        <div class="sans-resa-film">🎬 ${r.filmTitle}</div>
+        <div class="sans-resa-meta" style="margin-top:5px;">
+          <span>📅 ${formatDateShort(r.sessionDate)}</span>
+          <span>🕐 ${r.sessionTime}</span>
+          ${r.roomNumber ? `<span>🏛 ${r.roomNumber}</span>` : ""}
+          <span>🎟 ${r.peopleNumber}</span>
+        </div>
+      </div>
+      <span class="status-chip ${st.chip}">${st.icon} ${st.label}</span>
+    </div>`;
+}
+
+async function searchResa() {
+  const name = document.getElementById("resaName").value.trim();
+  const results = document.getElementById("resaResults");
+  if (!name) { results.innerHTML = `<div class="resa-error">⚠ Merci d'entrer un nom.</div>`; return; }
+  results.innerHTML = `<div class="resa-empty">⏳ Recherche en cours…</div>`;
+  try {
+    const res  = await fetch(`/api/reservation?name=${encodeURIComponent(name)}`);
+    const data = await res.json();
+    if (!data.ok) { results.innerHTML = `<div class="resa-empty">${data.error || "Aucune réservation trouvée."}</div>`; return; }
+    results.innerHTML = data.reservations.map(buildSansResaCard).join("");
+  } catch {
+    results.innerHTML = `<div class="resa-error">Erreur lors de la recherche. Réessaie.</div>`;
+  }
 }
 
 /* ── INIT ── */
