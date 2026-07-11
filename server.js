@@ -528,10 +528,10 @@ if (resa.user_id) {
 
     const level = profil?.level || "bronze";
     const LEVELS = {
-        bronze: { color: "#cd7f32", bg: "#fdf5ee", label: "🥉 Bronze" },
-        argent: { color: "#a8b8cc", bg: "#f2f5f8", label: "🥈 Argent" },
-        or:     { color: "#f5b700", bg: "#fffbe6", label: "🥇 Or"     },
-    };
+    bronze: { color: "#cd7f32", bg: "#fdf5ee", label: "Niveau Bronze" },
+    argent: { color: "#a8b8cc", bg: "#f2f5f8", label: "Niveau Argent" },
+    or:     { color: "#f5b700", bg: "#fffbe6", label: "Niveau Or"     },
+};
     const lv = LEVELS[level] || LEVELS.bronze;
     levelColor = lv.color;
     levelBg    = lv.bg;
