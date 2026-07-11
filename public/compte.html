@@ -493,7 +493,8 @@ async function init() {
     .from("reservations")
     .select("*, seances(room_number, session_date, session_time, films(title, poster_url)), pts_gagnes")
     .eq("user_id", currentUserId)
-    .order("created_at", { ascending: false });
+    .order("session_date", { ascending: true, foreignTable: "seances" })
+    .order("session_time", { ascending: true, foreignTable: "seances" });
 
   renderProfil(profil, reservations || []);
 }
