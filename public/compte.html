@@ -501,15 +501,14 @@ function buildResaCard(r) {
 }
 
 function renderProfil(profil, reservations) {
-  const pts   = profil?.points || 0;
-  const level = profil?.level  || "bronze";
+  const pts    = profil?.points || 0;
+  const films  = profil?.total_films_vus || 0;
+  const level  = profil?.level  || "bronze";
   const avatar = profil?.avatar || "🎬";
 
   setAvatar(avatar);
   document.getElementById("profileName").textContent  = profil?.display_name || "—";
   document.getElementById("pointsValue").textContent  = films;
-
-  const films = profil?.total_films_vus || 0;
   const lv    = LEVELS.find(l => l.key === level) || LEVELS[0];
   const badge = document.getElementById("levelBadge");
   badge.textContent = lv.label;
