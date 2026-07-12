@@ -115,6 +115,7 @@ async function applyExpirations() {
 }
 
 setInterval(applyExpirations, 60 * 1000);
+
 async function applyFidelitePoints() {
     const { data, error } = await supabase
         .from("reservations")
@@ -137,7 +138,6 @@ async function applyFidelitePoints() {
         const pts = (r.people_number || 1) * 10;
         const filmTitle = s.films?.title || null;
 
-        // Lire le profil actuel
         const { data: profil } = await supabase
             .from("profiles")
             .select("points, total_seances, total_personnes, total_films_vus, films_vus_list")
@@ -152,9 +152,9 @@ async function applyFidelitePoints() {
 
         const newPoints = (profil.points || 0) + pts;
         const newFilmsVus = dejaVu ? (profil.total_films_vus || 0) : (profil.total_films_vus || 0) + 1;
-const newLevel =
-    newFilmsVus >= 50 ? "or" :
-    newFilmsVus >= 20 ? "argent" : "bronze";
+        const newLevel =
+            newFilmsVus >= 50 ? "or" :
+            newFilmsVus >= 20 ? "argent" : "bronze";
 
         const { error: upErr } = await supabase
             .from("profiles")
@@ -193,7 +193,7 @@ app.get("/api/programme", async (req, res) => {
         .from("films")
         .select(`
             id, title, poster_url, synopsis, duration_minutes, genre,
-            seances ( id, room_number, session_date, session_time, capacity, cancelled, info_message,
+            seances ( id, room_number, session_date, session_time, capacity, cancelled, info_message, price,
                 reservations ( people_number, status ) )
         `)
         .order("title", { ascending: true });
@@ -223,7 +223,8 @@ app.get("/api/programme", async (req, res) => {
                     capacity: s.capacity,
                     remaining: Math.max(0, s.capacity - taken),
                     cancelled: s.cancelled || false,
-                    infoMessage: s.info_message || null
+                    infoMessage: s.info_message || null,
+                    price: s.price ?? null
                 };
             })
             .sort((a, b) => `${a.sessionDate} ${a.sessionTime}`.localeCompare(`${b.sessionDate} ${b.sessionTime}`));
@@ -326,14 +327,14 @@ app.post("/api/reserver", async (req, res) => {
     }
 
     const newResa = {
-    id: randomUUID(),
-    seance_id: seanceId,
-    client_name: clientName,
-    email: email || "",
-    people_number: parseInt(peopleNumber),
-    status: "en attente",
-    user_id: userId || null
-};
+        id: randomUUID(),
+        seance_id: seanceId,
+        client_name: clientName,
+        email: email || "",
+        people_number: parseInt(peopleNumber),
+        status: "en attente",
+        user_id: userId || null
+    };
 
     const { error: insertError } = await supabase.from("reservations").insert(newResa);
     if (insertError) {
@@ -515,29 +516,30 @@ app.post("/api/admin/ticket", async (req, res) => {
 
         const qrBuffer = await QRCode.toBuffer(qrData);
         const qrBase64 = qrBuffer.toString("base64");
-        // Couleur du niveau fidélité
-let levelColor = "#000000";
-let levelBg    = "#f9f9f9";
-let levelLabel = "";
 
-if (resa.user_id) {
-    const { data: profil } = await supabase
-        .from("profiles")
-        .select("level")
-        .eq("user_id", resa.user_id)
-        .maybeSingle();
+        let levelColor = "#000000";
+        let levelBg    = "#f9f9f9";
+        let levelLabel = "";
 
-    const level = profil?.level || "bronze";
-    const LEVELS = {
-    bronze: { color: "#cd7f32", bg: "#fdf5ee", label: "Niveau Bronze" },
-    argent: { color: "#a8b8cc", bg: "#f2f5f8", label: "Niveau Argent" },
-    or:     { color: "#f5b700", bg: "#fffbe6", label: "Niveau Or"     },
-};
-    const lv = LEVELS[level] || LEVELS.bronze;
-    levelColor = lv.color;
-    levelBg    = lv.bg;
-    levelLabel = lv.label;
-}
+        if (resa.user_id) {
+            const { data: profil } = await supabase
+                .from("profiles")
+                .select("level")
+                .eq("user_id", resa.user_id)
+                .maybeSingle();
+
+            const level = profil?.level || "bronze";
+            const LEVELS = {
+                bronze: { color: "#cd7f32", bg: "#fdf5ee", label: "Niveau Bronze" },
+                argent: { color: "#a8b8cc", bg: "#f2f5f8", label: "Niveau Argent" },
+                or:     { color: "#f5b700", bg: "#fffbe6", label: "Niveau Or"     },
+            };
+            const lv = LEVELS[level] || LEVELS.bronze;
+            levelColor = lv.color;
+            levelBg    = lv.bg;
+            levelLabel = lv.label;
+        }
+
         const html = `
 <!DOCTYPE html>
 <html>
@@ -593,6 +595,7 @@ if (resa.user_id) {
     </div>
 </body>
 </html>`;
+
         const browser = await puppeteer.launch({
             args: [
                 ...chromium.args,
@@ -688,7 +691,7 @@ app.post("/api/admin/films/supprimer", async (req, res) => {
 app.get("/api/admin/seances", async (req, res) => {
     const { data, error } = await supabase
         .from("seances")
-        .select("*, films(title), cancelled, info_message")
+        .select("*, films(title), cancelled, info_message, price")
         .order("session_date", { ascending: true })
         .order("session_time", { ascending: true });
     if (error) return res.status(500).json({ ok: false, error: error.message });
@@ -696,7 +699,7 @@ app.get("/api/admin/seances", async (req, res) => {
 });
 
 app.post("/api/admin/seances/creer", async (req, res) => {
-    const { filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage } = req.body;
+    const { filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage, price } = req.body;
     if (!filmId || !sessionDate || !sessionTime) {
         return res.status(400).send("Film, date et heure sont obligatoires.");
     }
@@ -706,14 +709,15 @@ app.post("/api/admin/seances/creer", async (req, res) => {
         session_date: sessionDate,
         session_time: sessionTime,
         capacity: capacity ? parseInt(capacity) : 50,
-        info_message: infoMessage || null
+        info_message: infoMessage || null,
+        price: price ? parseFloat(price) : null
     });
     if (error) return res.status(500).send(error.message);
     res.json({ ok: true });
 });
 
 app.post("/api/admin/seances/modifier", async (req, res) => {
-    const { id, filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage } = req.body;
+    const { id, filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage, price } = req.body;
     if (!id || !filmId || !sessionDate || !sessionTime) {
         return res.status(400).send("Champs obligatoires manquants.");
     }
@@ -723,7 +727,8 @@ app.post("/api/admin/seances/modifier", async (req, res) => {
         session_date: sessionDate,
         session_time: sessionTime,
         capacity: capacity ? parseInt(capacity) : 50,
-        info_message: infoMessage || null
+        info_message: infoMessage || null,
+        price: price ? parseFloat(price) : null
     }).eq("id", id);
     if (error) return res.status(500).send(error.message);
     res.json({ ok: true });
@@ -961,6 +966,7 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
 </html>
 `);
 });
+
 app.post("/api/supprimer-compte", async (req, res) => {
   const { userId } = req.body;
   if (!userId) return res.status(400).send("userId manquant");
@@ -968,6 +974,7 @@ app.post("/api/supprimer-compte", async (req, res) => {
   if (error) return res.status(500).send(error.message);
   res.json({ ok: true });
 });
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("Serveur lancé sur le port " + PORT);
