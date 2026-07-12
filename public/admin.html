@@ -571,6 +571,16 @@ h1 {
   margin-top: 10px;
 }
 .info-save-msg { font-size: 0.82rem; }
+
+/* Prix badge dans les séances */
+.price-badge {
+  background: rgba(0,232,150,0.13);
+  color: var(--green);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
 </style>
 </head>
 
@@ -657,6 +667,7 @@ h1 {
         <input id="seance-date-to" type="date" style="display:none;">
         <input id="seance-time" type="time">
         <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
+        <input id="seance-price" type="number" placeholder="Prix (€) — ex: 9.50" step="0.01" min="0">
         <input id="seance-info" type="text" placeholder="Message info (facultatif)">
         <div class="form-actions" style="margin-bottom:4px;">
           <button id="mode-single-btn" class="btn btn-validate" style="font-size:0.8rem;padding:7px 14px;" onclick="setSeanceMode('single')">📅 Date unique</button>
@@ -1247,13 +1258,14 @@ function formatDateFr(dateStr) {
 
 function buildSeanceRow(s) {
   const isCancelled = s.cancelled;
+  const priceStr = s.price != null ? `${parseFloat(s.price).toFixed(2)} €` : null;
   return `
     <div class="seance-row" style="${isCancelled ? 'opacity:0.6;' : ''}">
       <div>
         <div class="title">${s.films?.title || "?"} — ${formatDateFr(s.session_date)} ${s.session_time?.slice(0,5)}
           ${isCancelled ? `<span style="background:rgba(255,68,85,0.18);color:#ff4455;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:8px;">ANNULÉE</span>` : ""}
         </div>
-        <div class="meta">${s.room_number || "Salle non précisée"} • Capacité ${s.capacity}${s.info_message ? ` • ℹ️ ${s.info_message}` : ""}</div>
+        <div class="meta">${s.room_number || "Salle non précisée"} • Capacité ${s.capacity}${priceStr ? ` • 💶 ${priceStr}/pers.` : ""}${s.info_message ? ` • ℹ️ ${s.info_message}` : ""}</div>
       </div>
       <div class="row-actions">
         ${isCancelled
@@ -1284,11 +1296,11 @@ function editSeance(id) {
   document.getElementById("seance-date").value = s.session_date || "";
   document.getElementById("seance-time").value = (s.session_time || "").slice(0,5);
   document.getElementById("seance-capacity").value = s.capacity || 50;
+  document.getElementById("seance-price").value = s.price != null ? s.price : "";
   document.getElementById("seance-info").value = s.info_message || "";
   document.getElementById("seance-submit-btn").textContent = "💾 Enregistrer les modifications";
   document.getElementById("seance-cancel-btn").style.display = "inline-block";
   document.getElementById("seance-film").scrollIntoView({ behavior: "smooth", block: "center" });
-  // Forcer le mode single en édition
   setSeanceMode("single");
 }
 
@@ -1317,6 +1329,7 @@ function cancelEditSeance() {
   document.getElementById("seance-date-to").value = "";
   document.getElementById("seance-time").value = "";
   document.getElementById("seance-capacity").value = 50;
+  document.getElementById("seance-price").value = "";
   document.getElementById("seance-info").value = "";
   document.getElementById("seance-submit-btn").textContent = "➕ Ajouter la séance";
   document.getElementById("seance-cancel-btn").style.display = "none";
@@ -1328,8 +1341,8 @@ async function creerSeance() {
   if (!filmId || !sessionTime) { alert("Film et heure sont obligatoires."); return; }
 
   const isEdit = !!editingSeanceId;
+  const price  = document.getElementById("seance-price").value.trim();
 
-  /* ── MODE DATE UNIQUE (ou édition) ── */
   if (seanceMode === "single" || isEdit) {
     const sessionDate = document.getElementById("seance-date").value;
     if (!sessionDate) { alert("La date est obligatoire."); return; }
@@ -1339,7 +1352,8 @@ async function creerSeance() {
       roomNumber:   document.getElementById("seance-room").value.trim(),
       sessionDate, sessionTime,
       capacity:     document.getElementById("seance-capacity").value.trim(),
-      infoMessage:  document.getElementById("seance-info").value.trim()
+      infoMessage:  document.getElementById("seance-info").value.trim(),
+      price:        price !== "" ? price : null
     };
     if (isEdit) payload.id = editingSeanceId;
 
@@ -1385,7 +1399,7 @@ async function creerSeance() {
     try {
       const res = await fetch(`/api/admin/seances/creer`, {
         method: "POST", headers: adminHeaders(),
-        body: JSON.stringify({ filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage })
+        body: JSON.stringify({ filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage, price: price !== "" ? price : null })
       });
       if (!res.ok) errors++;
     } catch { errors++; }
