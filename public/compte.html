@@ -330,9 +330,9 @@
   <div class="points-card">
     <div class="points-header">
       <div>
-        <div class="points-label">Mes films vus</div>
-        <div class="points-value" id="pointsValue">0</div>
-        <div class="points-sub">films vus au total</div>
+       <div class="points-label">Mes points fidélité</div>
+       <div class="points-value" id="pointsValue">0</div>
+       <div class="points-sub">points accumulés</div>
       </div>
       <div class="next-level-info">
         <div class="next-level-label">Prochain niveau</div>
@@ -508,7 +508,7 @@ function renderProfil(profil, reservations) {
 
   setAvatar(avatar);
   document.getElementById("profileName").textContent  = profil?.display_name || "—";
-  document.getElementById("pointsValue").textContent  = films;
+  document.getElementById("pointsValue").textContent = pts;
   const lv    = LEVELS.find(l => l.key === level) || LEVELS[0];
   const badge = document.getElementById("levelBadge");
   badge.textContent = lv.label;
