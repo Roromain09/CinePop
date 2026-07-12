@@ -330,9 +330,9 @@
   <div class="points-card">
     <div class="points-header">
       <div>
-        <div class="points-label">Mes points fidélité</div>
+        <div class="points-label">Mes films vus</div>
         <div class="points-value" id="pointsValue">0</div>
-        <div class="points-sub">points accumulés</div>
+        <div class="points-sub">films vus au total</div>
       </div>
       <div class="next-level-info">
         <div class="next-level-label">Prochain niveau</div>
@@ -344,9 +344,9 @@
       <div class="progress-fill" id="progressFill" style="width:0%"></div>
     </div>
     <div class="progress-labels" id="progressLabels">
-      <span>🥉 Bronze — 0 pts</span>
-      <span>🥈 Argent — 300 pts</span>
-    </div>
+    <span>🥉 Bronze — 0 film</span>
+    <span>🥈 Argent — 20 films</span>
+    </div>  
     <div class="levels-row">
       <div class="level-pill current" id="pill-bronze"><div class="lp-icon">🥉</div><div class="lp-name">Bronze</div><div class="lp-pts">0 film</div></div>
       <div class="level-pill" id="pill-argent"><div class="lp-icon">🥈</div><div class="lp-name">Argent</div><div class="lp-pts">20 films</div></div>
@@ -507,9 +507,8 @@ function renderProfil(profil, reservations) {
 
   setAvatar(avatar);
   document.getElementById("profileName").textContent  = profil?.display_name || "—";
-  document.getElementById("pointsValue").textContent  = pts;
+  document.getElementById("pointsValue").textContent  = films;
 
-   const films = profil?.total_films_vus || 0;
   const films = profil?.total_films_vus || 0;
   const lv    = LEVELS.find(l => l.key === level) || LEVELS[0];
   const badge = document.getElementById("levelBadge");
