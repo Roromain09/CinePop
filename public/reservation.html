@@ -38,7 +38,6 @@
       padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
     }
     .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
-
     .nav-avatar {
       width: 38px; height: 38px; flex-shrink: 0;
       background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
@@ -50,8 +49,6 @@
       border: 2px solid rgba(245,183,0,0.6);
     }
     .nav-avatar:hover { transform: scale(1.1); box-shadow: 0 0 24px rgba(245,183,0,0.55); }
-    .nav-link-connexion { color: var(--gris) !important; }
-
     .nav-toggle {
       display: none;
       background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
@@ -94,8 +91,19 @@
       display: none; backdrop-filter: blur(6px);
     }
     .selected-seance.show { display: block; }
-    .selected-seance .row { display:flex; justify-content:space-between; font-size:0.92rem; padding: 6px 0; color: var(--gris); }
+    .selected-seance .row { display:flex; justify-content:space-between; font-size:0.92rem; padding: 6px 0; color: var(--gris); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .selected-seance .row:last-child { border-bottom: none; }
     .selected-seance .row b { color: var(--blanc); }
+
+    .price-highlight {
+      margin-top: 12px; padding: 12px 16px;
+      background: rgba(245,183,0,0.1); border: 1px solid rgba(245,183,0,0.25);
+      border-radius: 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .price-highlight-label { font-size: 0.8rem; color: var(--gris); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .price-highlight-value { font-size: 1.25rem; font-weight: 900; color: var(--jaune); }
+    .price-per { font-size: 0.72rem; color: var(--gris); margin-top: 2px; }
 
     .form-card {
       background: rgba(17, 34, 64, 0.78); border: 1px solid rgba(255, 255, 255, 0.08);
@@ -178,6 +186,97 @@
     }
     .info-banner .info-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
 
+    /* ══ MODALE PAIEMENT ══ */
+    .payment-overlay {
+      position: fixed; inset: 0;
+      background: rgba(7, 17, 31, 0.85);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+      backdrop-filter: blur(6px);
+    }
+    .payment-overlay.show { display: flex; }
+
+    .payment-modal {
+      background: linear-gradient(145deg, #0f1d33, #09151f);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 28px;
+      width: min(440px, 100%);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+      position: relative; overflow: hidden;
+    }
+    .payment-modal::before {
+      content: ""; position: absolute; top:0; left:0; right:0; height: 4px;
+      background: linear-gradient(90deg, var(--jaune), var(--jaune-soft));
+    }
+
+    .payment-body { padding: 32px 28px 28px; }
+
+    /* Récap */
+    .pay-recap {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px; padding: 18px; margin-bottom: 22px;
+    }
+    .pay-recap-film { font-size: 1.05rem; font-weight: 800; margin-bottom: 10px; }
+    .pay-recap-row {
+      display: flex; justify-content: space-between;
+      font-size: 0.86rem; padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--gris);
+    }
+    .pay-recap-row:last-child { border-bottom: none; }
+    .pay-recap-row b { color: var(--blanc); }
+    .pay-recap-total {
+      margin-top: 12px; padding: 12px 14px;
+      background: rgba(245,183,0,0.1); border: 1px solid rgba(245,183,0,0.22);
+      border-radius: 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .pay-recap-total-label { font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gris); }
+    .pay-recap-total-value { font-size: 1.4rem; font-weight: 900; color: var(--jaune); }
+
+    /* Message confirmation */
+    .pay-confirm-msg {
+      font-size: 0.88rem; color: var(--gris); line-height: 1.6;
+      margin-bottom: 22px; text-align: center;
+    }
+
+    /* Boutons */
+    .pay-btn-confirm {
+      width: 100%; padding: 16px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
+      font-size: 1rem; font-weight: 900; cursor: pointer; margin-top: 0;
+      box-shadow: 0 10px 28px rgba(245,183,0,0.24);
+      transition: transform 0.2s ease;
+    }
+    .pay-btn-confirm:hover { transform: translateY(-2px); }
+
+    .pay-btn-cancel {
+      width: 100%; padding: 13px; border-radius: 12px; margin-top: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: var(--gris);
+      font-size: 0.88rem; font-weight: 700; cursor: pointer; box-shadow: none;
+      transition: all 0.2s ease;
+    }
+    .pay-btn-cancel:hover { background: rgba(255,255,255,0.09); color: var(--blanc); transform: none; }
+
+    /* Loader paiement */
+    .pay-loading { display: none; text-align: center; padding: 16px 0 8px; }
+    .pay-loading.show { display: block; }
+    .pay-spinner {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 4px solid rgba(245,183,0,0.15);
+      border-top: 4px solid var(--jaune);
+      animation: spin 0.85s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .pay-loading-title { font-size: 1rem; font-weight: 800; margin-bottom: 5px; }
+    .pay-loading-sub   { font-size: 0.84rem; color: var(--gris); }
+
+    .pay-main { }
+
+    /* Loading overlay global */
     .loading-overlay {
       position: fixed; inset: 0; background: rgba(7,17,31,0.85); display:none;
       align-items:center; justify-content:center; z-index: 999;
@@ -189,7 +288,6 @@
       border: 4px solid rgba(255,255,255,0.1); border-top:4px solid var(--jaune);
       animation: spin 0.8s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
     .loading-title { font-weight: 800; margin-bottom: 6px; }
     .loading-text  { color: var(--gris); font-size: 0.9rem; }
 
@@ -210,6 +308,8 @@
       .hero, .form-card { padding: 22px; border-radius: 22px; }
       .hero { min-height: 360px; }
       .ticket-row { grid-template-columns: 1fr; gap: 4px; }
+      .payment-modal { border-radius: 22px; }
+      .payment-body { padding: 26px 20px 22px; }
     }
   </style>
 </head>
@@ -250,7 +350,7 @@
 
   <section class="form-card">
     <div class="form-title">Réserve ta séance</div>
-    <div class="form-subtitle">Remplis les infos ci-dessous, puis valide ta séance.</div>
+    <div class="form-subtitle" id="formSubtitle">Remplis les infos ci-dessous, puis valide ta séance.</div>
 
     <form id="resaForm">
       <div class="field">
@@ -286,38 +386,95 @@
         <div class="ticket-row"><div class="ticket-label">Séance à</div><div class="ticket-value" id="confirmSession"></div></div>
         <div class="ticket-row"><div class="ticket-label">Nombre</div><div class="ticket-value" id="confirmNumber"></div></div>
         <div class="ticket-row"><div class="ticket-label">Email</div><div class="ticket-value" id="confirmEmail"></div></div>
+        <div class="ticket-row" id="confirmPriceRow" style="display:none;"><div class="ticket-label">Total payé</div><div class="ticket-value" id="confirmPrice"></div></div>
       </div>
       <div class="status-pill"><span class="status-dot"></span> Réservation envoyée avec succès</div>
     </div>
   </section>
 </div>
 
+<!-- ══ MODALE PAIEMENT ══ -->
+<div class="payment-overlay" id="paymentOverlay">
+  <div class="payment-modal">
+    <div class="payment-body">
+
+      <!-- Contenu principal -->
+      <div class="pay-main" id="payMain">
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--gris);margin-bottom:16px;">
+          Récapitulatif de ta commande
+        </div>
+
+        <div class="pay-recap">
+          <div class="pay-recap-film" id="payFilm">—</div>
+          <div class="pay-recap-row"><span>Date</span><b id="payDate">—</b></div>
+          <div class="pay-recap-row"><span>Heure</span><b id="payTime">—</b></div>
+          <div class="pay-recap-row"><span>Salle</span><b id="payRoom">—</b></div>
+          <div class="pay-recap-row"><span>Places</span><b id="payPlaces">—</b></div>
+          <div class="pay-recap-row"><span>Client</span><b id="payClient">—</b></div>
+          <div class="pay-recap-total" id="payTotalBlock">
+            <div>
+              <div class="pay-recap-total-label">Total à payer</div>
+              <div style="font-size:0.72rem;color:var(--gris);margin-top:2px;" id="payPriceDetail"></div>
+            </div>
+            <div class="pay-recap-total-value" id="payTotal">—</div>
+          </div>
+        </div>
+
+        <div class="pay-confirm-msg">
+          En cliquant sur <b style="color:var(--blanc);">Confirmer le paiement</b>, tu valides ta commande et acceptes les conditions générales de vente de CinéPop.
+        </div>
+
+        <button class="pay-btn-confirm" onclick="confirmPayment()">
+          Confirmer le paiement
+        </button>
+        <button class="pay-btn-cancel" onclick="closePayment()">
+          Annuler
+        </button>
+      </div>
+
+      <!-- Loader paiement -->
+      <div class="pay-loading" id="payLoading">
+        <div class="pay-spinner"></div>
+        <div class="pay-loading-title">Paiement en cours…</div>
+        <div class="pay-loading-sub">Merci de ne pas fermer cette fenêtre.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div id="loadingOverlay" class="loading-overlay">
   <div class="loading-box">
     <div class="spinner"></div>
     <div class="loading-title">Réservation en cours...</div>
-    <div class="loading-text">On vérifie ta demande et on prépare tes tickets.</div>
+    <div class="loading-text">On enregistre ta demande.</div>
   </div>
 </div>
 
 <script>
-  const form          = document.getElementById("resaForm");
-  const submitBtn     = document.getElementById("submitBtn");
-  const loadingOverlay = document.getElementById("loadingOverlay");
-  const successCard   = document.getElementById("successCard");
-  const errorCard     = document.getElementById("errorCard");
-  const seanceSelect  = document.getElementById("seanceId");
+  const form            = document.getElementById("resaForm");
+  const submitBtn       = document.getElementById("submitBtn");
+  const loadingOverlay  = document.getElementById("loadingOverlay");
+  const successCard     = document.getElementById("successCard");
+  const errorCard       = document.getElementById("errorCard");
+  const seanceSelect    = document.getElementById("seanceId");
 
-  let seancesFlat = [];
+  let seancesFlat  = [];
+  let pendingData  = null;
+  let pendingSeance = null;
 
-  function showLoading() { loadingOverlay.classList.add("show"); submitBtn.disabled = true; form.querySelectorAll("input, select").forEach(el => el.disabled = true); }
-  function hideLoading() { loadingOverlay.classList.remove("show"); submitBtn.disabled = false; form.querySelectorAll("input, select").forEach(el => el.disabled = false); }
+  function showLoading() { loadingOverlay.classList.add("show"); }
+  function hideLoading() { loadingOverlay.classList.remove("show"); }
   function showError(msg) { errorCard.textContent = msg; errorCard.classList.add("show"); }
   function hideError()    { errorCard.classList.remove("show"); errorCard.textContent = ""; }
 
   function formatDate(d) {
     const date = new Date(d + "T00:00:00");
     return date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+  }
+
+  function formatPrice(p) {
+    return parseFloat(p).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   }
 
   function updatePoster(seance) {
@@ -361,7 +518,8 @@
             id: s.id, filmTitle: film.title, roomNumber: s.roomNumber,
             sessionDate: s.sessionDate, sessionTime: s.sessionTime,
             remaining: s.remaining, posterUrl: film.posterUrl,
-            cancelled: s.cancelled || false, infoMessage: s.infoMessage || null
+            cancelled: s.cancelled || false, infoMessage: s.infoMessage || null,
+            price: s.price ?? null
           });
         });
       });
@@ -393,12 +551,18 @@
     document.getElementById("confirmNumber").textContent  = data.peopleNumber;
     document.getElementById("confirmSession").textContent = `${seance.sessionDate} à ${seance.sessionTime}`;
     document.getElementById("confirmEmail").textContent   = data.email;
+    if (seance.price != null) {
+      const total = seance.price * parseInt(data.peopleNumber);
+      document.getElementById("confirmPrice").textContent = formatPrice(total);
+      document.getElementById("confirmPriceRow").style.display = "grid";
+    }
     successCard.classList.add("show");
     form.classList.add("hidden");
-    document.querySelector(".form-subtitle").textContent = "Résumé de ta commande :";
+    document.getElementById("formSubtitle").textContent = "Résumé de ta commande :";
   }
 
-  form.addEventListener("submit", async (e) => {
+  /* ── SOUMISSION FORMULAIRE ── */
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
     hideError();
     successCard.classList.remove("show");
@@ -411,34 +575,93 @@
       peopleNumber: document.getElementById("peopleNumber").value.trim()
     };
 
-    if (!data.seanceId) { showError("⛔ Merci de choisir une séance."); return; }
+    if (!data.seanceId)    { showError("⛔ Merci de choisir une séance."); return; }
     if (seance?.cancelled) { showError("⛔ Cette séance a été annulée."); return; }
+    if (!data.clientName)  { showError("⛔ Merci d'indiquer ton nom."); return; }
+    if (!data.email)       { showError("⛔ Merci d'indiquer ton email."); return; }
     if (parseInt(data.peopleNumber) > 10 || parseInt(data.peopleNumber) < 1) { showError("⛔ Le nombre de personnes doit être entre 1 et 10."); return; }
     if (seance && parseInt(data.peopleNumber) > seance.remaining) { showError(`⛔ Il ne reste que ${seance.remaining} place(s) pour cette séance.`); return; }
 
-    showLoading();
-    const delay = new Promise(resolve => setTimeout(resolve, 1500));
+    pendingData   = data;
+    pendingSeance = seance;
+    openPayment(seance, data);
+  });
 
+  /* ── MODALE PAIEMENT ── */
+  function openPayment(seance, data) {
+    const nb = parseInt(data.peopleNumber);
+
+    document.getElementById("payFilm").textContent   = seance.filmTitle;
+    document.getElementById("payDate").textContent   = formatDate(seance.sessionDate);
+    document.getElementById("payTime").textContent   = seance.sessionTime;
+    document.getElementById("payRoom").textContent   = seance.roomNumber || "—";
+    document.getElementById("payPlaces").textContent = nb + " place" + (nb > 1 ? "s" : "");
+    document.getElementById("payClient").textContent = data.clientName;
+
+    if (seance.price != null) {
+      const total = seance.price * nb;
+      document.getElementById("payTotal").textContent       = formatPrice(total);
+      document.getElementById("payPriceDetail").textContent = formatPrice(seance.price) + " × " + nb;
+      document.getElementById("payTotalBlock").style.display = "flex";
+    } else {
+      document.getElementById("payTotalBlock").style.display = "none";
+    }
+
+    // Reset état
+    document.getElementById("payMain").style.display    = "block";
+    document.getElementById("payLoading").classList.remove("show");
+
+    document.getElementById("paymentOverlay").classList.add("show");
+  }
+
+  function closePayment() {
+    document.getElementById("paymentOverlay").classList.remove("show");
+  }
+
+  function confirmPayment() {
+    // Afficher loader 3 secondes puis soumettre
+    document.getElementById("payMain").style.display = "none";
+    document.getElementById("payLoading").classList.add("show");
+
+    setTimeout(() => {
+      document.getElementById("paymentOverlay").classList.remove("show");
+      submitReservation();
+    }, 3000);
+  }
+
+  async function submitReservation() {
+    showLoading();
     try {
-      const request = fetch("/api/reserver", {
+      const res = await fetch("/api/reserver", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, userId: window._navAuthUserId || null })
+        body: JSON.stringify({ ...pendingData, userId: window._navAuthUserId || null })
       });
-      const [res] = await Promise.all([request, delay]);
       if (!res.ok) { const text = await res.text(); throw new Error(text || "Erreur lors de la réservation."); }
       await res.text();
       hideLoading();
-      showSuccess(data, seance);
+      showSuccess(pendingData, pendingSeance);
     } catch (err) {
       hideLoading();
       showError(err.message || "Impossible de finaliser la réservation.");
     }
+  }
+
+  // Fermer en cliquant l'overlay (sauf pendant le loader)
+  document.getElementById("paymentOverlay").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget && document.getElementById("payMain").style.display !== "none") {
+      closePayment();
+    }
   });
 
-  document.getElementById("navToggle").addEventListener("click", () => { document.getElementById("navLinks").classList.toggle("open"); });
+  document.getElementById("navToggle").addEventListener("click", () => {
+    document.getElementById("navLinks").classList.toggle("open");
+  });
+
   loadSeances();
 </script>
 <script src="/nav-auth.js"></script>
 </body>
 </html>
+
+
