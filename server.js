@@ -151,9 +151,10 @@ async function applyFidelitePoints() {
         const newFilmsList = (filmTitle && !dejaVu) ? [...filmsVus, filmTitle] : filmsVus;
 
         const newPoints = (profil.points || 0) + pts;
-        const newLevel =
-            newPoints >= 800 ? "or" :
-            newPoints >= 300 ? "argent" : "bronze";
+        const newFilmsVus = dejaVu ? (profil.total_films_vus || 0) : (profil.total_films_vus || 0) + 1;
+const newLevel =
+    newFilmsVus >= 50 ? "or" :
+    newFilmsVus >= 20 ? "argent" : "bronze";
 
         const { error: upErr } = await supabase
             .from("profiles")
