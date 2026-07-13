@@ -56,7 +56,7 @@ function now() {
     return DateTime.now().setZone("Europe/Paris");
 }
 
-function flattenReservation(r) {
+function flattenReservation(r, commande) {
     const seance = r.seances || {};
     const film = seance.films || {};
     return {
@@ -71,7 +71,8 @@ function flattenReservation(r) {
         sessionDate: seance.session_date || "",
         sessionTime: (seance.session_time || "").slice(0, 5),
         seanceId: r.seance_id,
-        createdByAdmin: r.created_by_admin
+        createdByAdmin: r.created_by_admin,
+        commande: commande || null
     };
 }
 
@@ -279,7 +280,6 @@ app.post("/api/reserver", async (req, res) => {
 
     // Traitement panier boutique
     if (panier && Array.isArray(panier) && panier.length > 0) {
-        // Vérifier stock et calculer total
         const produitIds = panier.map(i => i.id);
         const { data: produits, error: prodErr } = await supabase
             .from("boutique_produits")
@@ -300,7 +300,6 @@ app.post("/api/reserver", async (req, res) => {
             }
 
             if (stockOk && itemsValides.length > 0) {
-                // Insérer la commande
                 const { error: cmdErr } = await supabase.from("boutique_commandes").insert({
                     reservation_id: resaId,
                     user_id: userId || null,
@@ -310,7 +309,6 @@ app.post("/api/reserver", async (req, res) => {
                 });
 
                 if (!cmdErr) {
-                    // Décrémenter les stocks
                     for (const ligne of itemsValides) {
                         const prod = produits.find(p => p.id === ligne.id);
                         await supabase
@@ -348,7 +346,7 @@ app.get("/api/reservation", async (req, res) => {
         return res.json({ ok: false, error: "Aucune réservation trouvée" });
     }
 
-    res.json({ ok: true, reservations: data.map(flattenReservation) });
+    res.json({ ok: true, reservations: data.map(r => flattenReservation(r, null)) });
 });
 
 app.post("/api/support", async (req, res) => {
@@ -400,7 +398,20 @@ app.get("/api/admin", async (req, res) => {
         return res.status(500).json({ ok: false, error: "Erreur serveur" });
     }
 
-    res.json(data.map(flattenReservation));
+    // Charger toutes les commandes boutique en une requête
+    const resaIds = data.map(r => r.id);
+    let commandesMap = {};
+    if (resaIds.length > 0) {
+        const { data: commandes } = await supabase
+            .from("boutique_commandes")
+            .select("reservation_id, items, total")
+            .in("reservation_id", resaIds);
+        (commandes || []).forEach(c => {
+            commandesMap[c.reservation_id] = { items: c.items, total: c.total };
+        });
+    }
+
+    res.json(data.map(r => flattenReservation(r, commandesMap[r.id] || null)));
 });
 
 app.post("/api/admin/supprimer", async (req, res) => {
@@ -850,24 +861,43 @@ app.post("/api/admin/boutique/produits/toggle", async (req, res) => {
     res.json({ ok: true });
 });
 
+// +/- stock par 1
+app.post("/api/admin/boutique/produits/stock", async (req, res) => {
+    const { id, delta } = req.body;
+    if (!id || delta == null) return res.status(400).send("ID et delta obligatoires.");
+    const { data: prod, error: fetchErr } = await supabase
+        .from("boutique_produits")
+        .select("stock")
+        .eq("id", id)
+        .single();
+    if (fetchErr || !prod) return res.status(404).send("Produit introuvable.");
+    const newStock = Math.max(0, (prod.stock || 0) + parseInt(delta));
+    const { error } = await supabase.from("boutique_produits").update({ stock: newStock }).eq("id", id);
+    if (error) return res.status(500).send(error.message);
+    res.json({ ok: true, stock: newStock });
+});
+
 // ============================================
-//  ADMIN — BOUTIQUE COMMANDES
+//  ADMIN — BOUTIQUE COMMANDES (lecture seule)
 // ============================================
 app.get("/api/admin/boutique/commandes", async (req, res) => {
     const { data, error } = await supabase
         .from("boutique_commandes")
-        .select("*")
+        .select("*, reservations(status)")
         .order("created_at", { ascending: false });
     if (error) return res.status(500).json({ ok: false, error: error.message });
-    res.json({ ok: true, commandes: data || [] });
-});
 
-app.post("/api/admin/boutique/commandes/statut", async (req, res) => {
-    const { id, statut } = req.body;
-    if (!id || !statut) return res.status(400).send("ID et statut obligatoires.");
-    const { error } = await supabase.from("boutique_commandes").update({ statut }).eq("id", id);
-    if (error) return res.status(500).send(error.message);
-    res.json({ ok: true });
+    // Dériver le statut depuis la réservation
+    const commandes = (data || []).map(c => {
+        const resaStatus = c.reservations?.status || "en attente";
+        let statut;
+        if (resaStatus === "validé") statut = "prête";
+        else if (resaStatus === "expiré" || resaStatus === "refusé") statut = "remise";
+        else statut = "en attente";
+        return { ...c, statut, reservations: undefined };
+    });
+
+    res.json({ ok: true, commandes });
 });
 
 // ============================================
