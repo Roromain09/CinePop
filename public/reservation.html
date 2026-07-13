@@ -61,6 +61,7 @@
       display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: stretch;
     }
 
+    /* ── HERO ── */
     .hero {
       background: linear-gradient(145deg, rgba(17, 34, 64, 0.88), rgba(7, 17, 31, 0.92));
       border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; padding: 32px;
@@ -76,12 +77,10 @@
         linear-gradient(180deg, rgba(7,17,31,0.55) 0%, rgba(7,17,31,0.82) 55%, rgba(7,17,31,0.95) 100%);
     }
     .hero-content { position: relative; z-index: 2; }
-
     .brand { display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px;
       background: rgba(245,183,0,0.12); color: var(--jaune-soft); font-weight:700;
       border:1px solid rgba(245,183,0,0.22); margin-bottom: 22px; }
     .brand .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
-
     h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 14px; }
     .subtitle { color: var(--gris); font-size: 1.02rem; line-height: 1.7; max-width: 50ch; }
 
@@ -94,17 +93,15 @@
     .selected-seance .row { display:flex; justify-content:space-between; font-size:0.92rem; padding: 6px 0; color: var(--gris); border-bottom: 1px solid rgba(255,255,255,0.05); }
     .selected-seance .row:last-child { border-bottom: none; }
     .selected-seance .row b { color: var(--blanc); }
-
-    .price-highlight {
-      margin-top: 12px; padding: 12px 16px;
-      background: rgba(245,183,0,0.1); border: 1px solid rgba(245,183,0,0.25);
-      border-radius: 12px;
-      display: flex; justify-content: space-between; align-items: center;
+    .info-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: rgba(77, 166, 255, 0.12); border: 1px solid rgba(77, 166, 255, 0.3);
+      border-radius: 12px; padding: 11px 14px; margin-top: 10px;
+      color: #9ecfff; font-size: 0.88rem; line-height: 1.5;
     }
-    .price-highlight-label { font-size: 0.8rem; color: var(--gris); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .price-highlight-value { font-size: 1.25rem; font-weight: 900; color: var(--jaune); }
-    .price-per { font-size: 0.72rem; color: var(--gris); margin-top: 2px; }
+    .info-banner .info-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
 
+    /* ── FORM CARD ── */
     .form-card {
       background: rgba(17, 34, 64, 0.78); border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 28px; padding: 30px; box-shadow: 0 24px 70px var(--ombre);
@@ -117,10 +114,26 @@
     .form-title { font-size: 1.45rem; font-weight: 800; margin-bottom: 8px; }
     .form-subtitle { color: var(--gris); margin-bottom: 22px; line-height: 1.5; font-size: 0.98rem; }
 
+    /* ── STEPS ── */
+    .step-indicator {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 22px;
+    }
+    .step-dot {
+      width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.04); color: var(--gris);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 800; flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+    .step-dot.active { background: var(--jaune); border-color: var(--jaune); color: #111; }
+    .step-dot.done   { background: var(--vert);  border-color: var(--vert);  color: #06281a; }
+    .step-line { flex: 1; height: 2px; background: rgba(255,255,255,0.08); border-radius: 999px; }
+    .step-line.done { background: var(--vert); }
+
+    /* ── FORM FIELDS ── */
     form { display: grid; gap: 12px; }
     .field { position: relative; }
     label.field-label { display:block; font-size:0.78rem; color: var(--gris); margin-bottom: 4px; }
-
     input, select {
       width: 100%; padding: 15px 16px; border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.10);
@@ -136,14 +149,14 @@
       box-shadow: 0 0 0 4px rgba(245, 183, 0, 0.14); transform: translateY(-1px);
     }
 
-    button {
+    .btn-primary {
       width: 100%; padding: 15px 18px; margin-top: 6px; border: none; border-radius: 14px;
       background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
       font-size: 1rem; font-weight: 900; letter-spacing: 0.4px; cursor: pointer;
       box-shadow: 0 12px 28px rgba(245, 183, 0, 0.24); transition: transform 0.2s ease;
     }
-    button:hover { transform: translateY(-2px); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; transform:none; }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform:none; }
 
     form.hidden { display: none; }
 
@@ -154,6 +167,7 @@
     }
     .error-card.show { display: block; }
 
+    /* ── SUCCÈS ── */
     .success-card { display: none; margin-top: 4px; }
     .success-card.show { display: block; }
     .success-top { display:flex; gap: 14px; align-items:flex-start; margin-bottom: 18px; }
@@ -164,13 +178,11 @@
     }
     .success-title { font-weight: 800; font-size: 1.1rem; }
     .success-subtitle { color: var(--gris); font-size: 0.92rem; margin-top: 4px; line-height:1.5; }
-
     .ticket { background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; }
     .ticket-row { display:grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.08); }
     .ticket-row:last-child { border-bottom: none; }
     .ticket-label { color: var(--gris); font-size: 0.82rem; }
     .ticket-value { font-weight: 700; font-size: 0.92rem; text-align: right; }
-
     .status-pill {
       margin-top: 16px; display:inline-flex; align-items:center; gap:8px;
       background: rgba(57,217,138,0.12); color: var(--vert); padding: 8px 14px;
@@ -178,13 +190,81 @@
     }
     .status-dot { width:8px; height:8px; border-radius:50%; background: var(--vert); }
 
-    .info-banner {
-      display: flex; align-items: flex-start; gap: 10px;
-      background: rgba(77, 166, 255, 0.12); border: 1px solid rgba(77, 166, 255, 0.3);
-      border-radius: 12px; padding: 11px 14px; margin-top: 10px;
-      color: #9ecfff; font-size: 0.88rem; line-height: 1.5;
+    /* ══ ÉTAPE BOUTIQUE ══ */
+    .boutique-step { display: none; }
+    .boutique-step.show { display: block; }
+
+    .boutique-header { margin-bottom: 18px; }
+    .boutique-header-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 4px; }
+    .boutique-header-sub { color: var(--gris); font-size: 0.88rem; line-height: 1.5; }
+
+    .boutique-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+
+    .produit-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      transition: border-color 0.2s ease, background 0.2s ease;
     }
-    .info-banner .info-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
+    .produit-card.in-panier {
+      border-color: rgba(245,183,0,0.4);
+      background: rgba(245,183,0,0.05);
+    }
+
+    .produit-img {
+      width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; overflow: hidden;
+    }
+    .produit-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+
+    .produit-info { flex: 1; min-width: 0; }
+    .produit-nom  { font-weight: 800; font-size: 0.94rem; margin-bottom: 2px; }
+    .produit-desc { color: var(--gris); font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .produit-prix { font-weight: 900; color: var(--jaune); font-size: 0.92rem; margin-top: 3px; }
+
+    .produit-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .qte-btn {
+      width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06); color: var(--blanc);
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s ease; padding: 0;
+    }
+    .qte-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.3); }
+    .qte-btn.plus { background: rgba(245,183,0,0.15); border-color: rgba(245,183,0,0.4); color: var(--jaune); }
+    .qte-btn.plus:hover { background: rgba(245,183,0,0.28); }
+    .qte-val { width: 24px; text-align: center; font-weight: 800; font-size: 0.95rem; }
+
+    .boutique-empty {
+      text-align: center; padding: 28px 20px; color: var(--gris); font-size: 0.88rem;
+    }
+
+    .panier-recap {
+      background: rgba(245,183,0,0.08);
+      border: 1px solid rgba(245,183,0,0.2);
+      border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+      display: none;
+    }
+    .panier-recap.show { display: block; }
+    .panier-recap-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gris); margin-bottom: 8px; }
+    .panier-recap-row { display: flex; justify-content: space-between; font-size: 0.86rem; padding: 3px 0; color: var(--gris); }
+    .panier-recap-row b { color: var(--blanc); }
+    .panier-total-row { display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(245,183,0,0.2); }
+    .panier-total-label { font-size: 0.8rem; font-weight: 700; color: var(--gris); }
+    .panier-total-val { font-size: 1.1rem; font-weight: 900; color: var(--jaune); }
+
+    .boutique-actions { display: flex; flex-direction: column; gap: 10px; }
+    .btn-skip {
+      width: 100%; padding: 13px 18px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: var(--gris);
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-skip:hover { background: rgba(255,255,255,0.08); color: var(--blanc); }
 
     /* ══ MODALE PAIEMENT ══ */
     .payment-overlay {
@@ -195,12 +275,12 @@
       backdrop-filter: blur(6px);
     }
     .payment-overlay.show { display: flex; }
-
     .payment-modal {
       background: linear-gradient(145deg, #0f1d33, #09151f);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 28px;
-      width: min(440px, 100%);
+      width: min(460px, 100%);
+      max-height: 90vh; overflow-y: auto;
       box-shadow: 0 40px 100px rgba(0,0,0,0.7);
       position: relative; overflow: hidden;
     }
@@ -208,14 +288,16 @@
       content: ""; position: absolute; top:0; left:0; right:0; height: 4px;
       background: linear-gradient(90deg, var(--jaune), var(--jaune-soft));
     }
+    .payment-body { padding: 32px 28px 28px; overflow-y: auto; max-height: 90vh; }
 
-    .payment-body { padding: 32px 28px 28px; }
-
-    /* Récap */
+    .pay-section-title {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.6px;
+      text-transform: uppercase; color: var(--gris); margin-bottom: 12px;
+    }
     .pay-recap {
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 18px; padding: 18px; margin-bottom: 22px;
+      border-radius: 18px; padding: 18px; margin-bottom: 16px;
     }
     .pay-recap-film { font-size: 1.05rem; font-weight: 800; margin-bottom: 10px; }
     .pay-recap-row {
@@ -226,41 +308,45 @@
     }
     .pay-recap-row:last-child { border-bottom: none; }
     .pay-recap-row b { color: var(--blanc); }
-    .pay-recap-total {
-      margin-top: 12px; padding: 12px 14px;
+
+    .pay-boutique-recap {
+      background: rgba(245,183,0,0.06);
+      border: 1px solid rgba(245,183,0,0.18);
+      border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;
+    }
+    .pay-boutique-item { display: flex; justify-content: space-between; font-size: 0.84rem; padding: 3px 0; color: var(--gris); }
+    .pay-boutique-item b { color: var(--blanc); }
+
+    .pay-total-block {
       background: rgba(245,183,0,0.1); border: 1px solid rgba(245,183,0,0.22);
-      border-radius: 12px;
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .pay-recap-total-label { font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gris); }
-    .pay-recap-total-value { font-size: 1.4rem; font-weight: 900; color: var(--jaune); }
+    .pay-total-label { font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gris); }
+    .pay-total-detail { font-size: 0.72rem; color: var(--gris); margin-top: 2px; }
+    .pay-total-value { font-size: 1.5rem; font-weight: 900; color: var(--jaune); }
 
-    /* Message confirmation */
     .pay-confirm-msg {
       font-size: 0.88rem; color: var(--gris); line-height: 1.6;
-      margin-bottom: 22px; text-align: center;
+      margin-bottom: 20px; text-align: center;
     }
-
-    /* Boutons */
     .pay-btn-confirm {
       width: 100%; padding: 16px; border: none; border-radius: 14px;
       background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color: #111;
-      font-size: 1rem; font-weight: 900; cursor: pointer; margin-top: 0;
+      font-size: 1rem; font-weight: 900; cursor: pointer;
       box-shadow: 0 10px 28px rgba(245,183,0,0.24);
       transition: transform 0.2s ease;
     }
     .pay-btn-confirm:hover { transform: translateY(-2px); }
-
     .pay-btn-cancel {
       width: 100%; padding: 13px; border-radius: 12px; margin-top: 10px;
       border: 1px solid rgba(255,255,255,0.1);
       background: rgba(255,255,255,0.04); color: var(--gris);
-      font-size: 0.88rem; font-weight: 700; cursor: pointer; box-shadow: none;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
       transition: all 0.2s ease;
     }
-    .pay-btn-cancel:hover { background: rgba(255,255,255,0.09); color: var(--blanc); transform: none; }
+    .pay-btn-cancel:hover { background: rgba(255,255,255,0.09); color: var(--blanc); }
 
-    /* Loader paiement */
     .pay-loading { display: none; text-align: center; padding: 16px 0 8px; }
     .pay-loading.show { display: block; }
     .pay-spinner {
@@ -274,9 +360,7 @@
     .pay-loading-title { font-size: 1rem; font-weight: 800; margin-bottom: 5px; }
     .pay-loading-sub   { font-size: 0.84rem; color: var(--gris); }
 
-    .pay-main { }
-
-    /* Loading overlay global */
+    /* Loading global */
     .loading-overlay {
       position: fixed; inset: 0; background: rgba(7,17,31,0.85); display:none;
       align-items:center; justify-content:center; z-index: 999;
@@ -331,6 +415,7 @@
 </nav>
 
 <div class="page">
+  <!-- HERO -->
   <section class="hero">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-overlay"></div>
@@ -348,10 +433,21 @@
     </div>
   </section>
 
+  <!-- FORM CARD -->
   <section class="form-card">
-    <div class="form-title">Réserve ta séance</div>
+    <div class="form-title" id="formTitle">Réserve ta séance</div>
     <div class="form-subtitle" id="formSubtitle">Remplis les infos ci-dessous, puis valide ta séance.</div>
 
+    <!-- Indicateur d'étapes -->
+    <div class="step-indicator" id="stepIndicator">
+      <div class="step-dot active" id="step1dot">1</div>
+      <div class="step-line" id="stepLine1"></div>
+      <div class="step-dot" id="step2dot">2</div>
+      <div class="step-line" id="stepLine2"></div>
+      <div class="step-dot" id="step3dot">3</div>
+    </div>
+
+    <!-- ÉTAPE 1 : Formulaire réservation -->
     <form id="resaForm">
       <div class="field">
         <label class="field-label">Séance</label>
@@ -366,17 +462,45 @@
       <div class="field">
         <input type="number" id="peopleNumber" min="1" max="10" placeholder="Nombre de personnes" required>
       </div>
-      <button id="submitBtn" type="submit">Réserver</button>
+      <button class="btn-primary" id="submitBtn" type="submit">Continuer →</button>
     </form>
 
+    <!-- ÉTAPE 2 : Boutique -->
+    <div class="boutique-step" id="boutiqueStep">
+      <div class="boutique-header">
+        <div class="boutique-header-title">🍿 Ajouter des snacks ?</div>
+        <div class="boutique-header-sub">Commandez vos snacks et boissons à retirer en caisse à votre arrivée.</div>
+      </div>
+
+      <div class="boutique-grid" id="boutiqueProduits">
+        <div class="boutique-empty">Chargement…</div>
+      </div>
+
+      <div class="panier-recap" id="panierRecap">
+        <div class="panier-recap-title">Votre panier</div>
+        <div id="panierRecapItems"></div>
+        <div class="panier-total-row">
+          <span class="panier-total-label">Total snacks</span>
+          <span class="panier-total-val" id="panierTotalVal">0,00 €</span>
+        </div>
+      </div>
+
+      <div class="boutique-actions">
+        <button class="btn-primary" id="btnValiderBoutique" onclick="validerBoutique()">Continuer vers le paiement</button>
+        <button class="btn-skip" onclick="skipBoutique()">Passer sans snacks →</button>
+      </div>
+    </div>
+
+    <!-- Erreur -->
     <div id="errorCard" class="error-card"></div>
 
+    <!-- ÉTAPE 3 : Succès -->
     <div id="successCard" class="success-card">
       <div class="success-top">
         <div class="check-icon">✓</div>
         <div>
           <div class="success-title">Réservation confirmée</div>
-          <div class="success-subtitle">Ton billet a bien été enregistré. Nos équipes traiterons ta demande au plus vite ! Tu recevras tes billets par mail.</div>
+          <div class="success-subtitle">Ton billet a bien été enregistré. Nos équipes traiterons ta demande au plus vite !</div>
         </div>
       </div>
       <div class="ticket">
@@ -386,7 +510,8 @@
         <div class="ticket-row"><div class="ticket-label">Séance à</div><div class="ticket-value" id="confirmSession"></div></div>
         <div class="ticket-row"><div class="ticket-label">Nombre</div><div class="ticket-value" id="confirmNumber"></div></div>
         <div class="ticket-row"><div class="ticket-label">Email</div><div class="ticket-value" id="confirmEmail"></div></div>
-        <div class="ticket-row" id="confirmPriceRow" style="display:none;"><div class="ticket-label">Total payé</div><div class="ticket-value" id="confirmPrice"></div></div>
+        <div class="ticket-row" id="confirmPriceRow" style="display:none;"><div class="ticket-label">Total billets</div><div class="ticket-value" id="confirmPrice"></div></div>
+        <div class="ticket-row" id="confirmSnacksRow" style="display:none;"><div class="ticket-label">Snacks</div><div class="ticket-value" id="confirmSnacks"></div></div>
       </div>
       <div class="status-pill"><span class="status-dot"></span> Réservation envoyée avec succès</div>
     </div>
@@ -398,12 +523,10 @@
   <div class="payment-modal">
     <div class="payment-body">
 
-      <!-- Contenu principal -->
       <div class="pay-main" id="payMain">
-        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--gris);margin-bottom:16px;">
-          Récapitulatif de ta commande
-        </div>
+        <div class="pay-section-title">Récapitulatif de ta commande</div>
 
+        <!-- Récap séance -->
         <div class="pay-recap">
           <div class="pay-recap-film" id="payFilm">—</div>
           <div class="pay-recap-row"><span>Date</span><b id="payDate">—</b></div>
@@ -411,28 +534,32 @@
           <div class="pay-recap-row"><span>Salle</span><b id="payRoom">—</b></div>
           <div class="pay-recap-row"><span>Places</span><b id="payPlaces">—</b></div>
           <div class="pay-recap-row"><span>Client</span><b id="payClient">—</b></div>
-          <div class="pay-recap-total" id="payTotalBlock">
-            <div>
-              <div class="pay-recap-total-label">Total à payer</div>
-              <div style="font-size:0.72rem;color:var(--gris);margin-top:2px;" id="payPriceDetail"></div>
-            </div>
-            <div class="pay-recap-total-value" id="payTotal">—</div>
+        </div>
+
+        <!-- Récap snacks (si panier non vide) -->
+        <div class="pay-boutique-recap" id="payBoutiqueRecap" style="display:none;">
+          <div class="pay-section-title" style="margin-bottom:8px;">🍿 Snacks & boissons</div>
+          <div id="payBoutiqueItems"></div>
+        </div>
+
+        <!-- Total -->
+        <div class="pay-total-block" id="payTotalBlock" style="display:none;">
+          <div>
+            <div class="pay-total-label">Total à payer</div>
+            <div class="pay-total-detail" id="payTotalDetail"></div>
           </div>
+          <div class="pay-total-value" id="payTotal">—</div>
         </div>
 
         <div class="pay-confirm-msg">
           En cliquant sur <b style="color:var(--blanc);">Confirmer le paiement</b>, tu valides ta commande et acceptes les conditions générales de vente de CinéPop.
         </div>
 
-        <button class="pay-btn-confirm" onclick="confirmPayment()">
-          Confirmer le paiement
-        </button>
-        <button class="pay-btn-cancel" onclick="closePayment()">
-          Annuler
-        </button>
+        <button class="pay-btn-confirm" onclick="confirmPayment()">Confirmer le paiement</button>
+        <button class="pay-btn-cancel" onclick="closePayment()">Annuler</button>
       </div>
 
-      <!-- Loader paiement -->
+      <!-- Loader -->
       <div class="pay-loading" id="payLoading">
         <div class="pay-spinner"></div>
         <div class="pay-loading-title">Paiement en cours…</div>
@@ -443,6 +570,7 @@
   </div>
 </div>
 
+<!-- Loading global -->
 <div id="loadingOverlay" class="loading-overlay">
   <div class="loading-box">
     <div class="spinner"></div>
@@ -452,37 +580,54 @@
 </div>
 
 <script>
-  const form            = document.getElementById("resaForm");
-  const submitBtn       = document.getElementById("submitBtn");
-  const loadingOverlay  = document.getElementById("loadingOverlay");
-  const successCard     = document.getElementById("successCard");
-  const errorCard       = document.getElementById("errorCard");
-  const seanceSelect    = document.getElementById("seanceId");
+  const resaForm       = document.getElementById("resaForm");
+  const submitBtn      = document.getElementById("submitBtn");
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const successCard    = document.getElementById("successCard");
+  const errorCard      = document.getElementById("errorCard");
+  const seanceSelect   = document.getElementById("seanceId");
 
   let seancesFlat  = [];
+  let produitsCache = [];
+  let panier       = {}; // { produitId: qte }
   let pendingData  = null;
   let pendingSeance = null;
 
+  // ── UTILS ──
   function showLoading() { loadingOverlay.classList.add("show"); }
   function hideLoading() { loadingOverlay.classList.remove("show"); }
   function showError(msg) { errorCard.textContent = msg; errorCard.classList.add("show"); }
   function hideError()    { errorCard.classList.remove("show"); errorCard.textContent = ""; }
 
   function formatDate(d) {
-    const date = new Date(d + "T00:00:00");
-    return date.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+    return new Date(d + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
   }
-
   function formatPrice(p) {
     return parseFloat(p).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   }
 
+  // ── STEPS ──
+  function setStep(n) {
+    [1,2,3].forEach(i => {
+      const dot  = document.getElementById(`step${i}dot`);
+      dot.classList.remove("active","done");
+      if (i < n)  dot.classList.add("done");
+      if (i === n) dot.classList.add("active");
+    });
+    [1,2].forEach(i => {
+      const line = document.getElementById(`stepLine${i}`);
+      line.classList.toggle("done", i < n);
+    });
+  }
+
+  // ── POSTER ──
   function updatePoster(seance) {
     const bg = document.getElementById("heroBg");
     if (seance?.posterUrl) { bg.style.backgroundImage = `url('${seance.posterUrl}')`; bg.classList.add("show"); }
     else { bg.classList.remove("show"); bg.style.backgroundImage = ""; }
   }
 
+  // ── SÉANCE BOX ──
   function updateSelectedSeanceBox() {
     const seance = seancesFlat.find(s => s.id === seanceSelect.value);
     const box = document.getElementById("selectedSeanceBox");
@@ -494,8 +639,8 @@
     document.getElementById("ssRoom").textContent      = seance.roomNumber || "—";
     document.getElementById("ssRemaining").textContent = seance.remaining + " place(s)";
     box.classList.add("show");
-    const existingBanner = box.querySelector(".info-banner");
-    if (existingBanner) existingBanner.remove();
+    const existing = box.querySelector(".info-banner");
+    if (existing) existing.remove();
     if (seance.infoMessage) {
       const banner = document.createElement("div");
       banner.className = "info-banner";
@@ -505,12 +650,12 @@
     document.getElementById("peopleNumber").max = Math.min(10, seance.remaining);
   }
 
+  // ── CHARGEMENT SÉANCES ──
   async function loadSeances() {
     try {
       const res  = await fetch("/api/programme");
       const data = await res.json();
       if (!data.ok) throw new Error();
-
       seancesFlat = [];
       data.films.forEach(film => {
         film.seances.forEach(s => {
@@ -524,15 +669,12 @@
         });
       });
       seancesFlat.sort((a, b) => `${a.sessionDate} ${a.sessionTime}`.localeCompare(`${b.sessionDate} ${b.sessionTime}`));
-
       if (seancesFlat.length === 0) { seanceSelect.innerHTML = `<option value="">Aucune séance disponible</option>`; return; }
-
       seanceSelect.innerHTML = seancesFlat.map(s => {
         const unavailable = s.remaining <= 0 || s.cancelled;
         const label = `${s.filmTitle} — ${formatDate(s.sessionDate)} à ${s.sessionTime}${s.roomNumber ? " (" + s.roomNumber + ")" : ""}${s.cancelled ? " — annulée" : (s.remaining <= 0 ? " — complet" : "")}`;
         return `<option value="${s.id}" ${unavailable ? "disabled" : ""}>${label}</option>`;
       }).join("");
-
       const params = new URLSearchParams(window.location.search);
       const preselect = params.get("seance");
       if (preselect && seancesFlat.some(s => s.id === preselect)) seanceSelect.value = preselect;
@@ -544,28 +686,82 @@
 
   seanceSelect.addEventListener("change", updateSelectedSeanceBox);
 
-  function showSuccess(data, seance) {
-    document.getElementById("confirmClient").textContent  = data.clientName;
-    document.getElementById("confirmFilm").textContent    = seance.filmTitle;
-    document.getElementById("confirmRoom").textContent    = seance.roomNumber || "—";
-    document.getElementById("confirmNumber").textContent  = data.peopleNumber;
-    document.getElementById("confirmSession").textContent = `${seance.sessionDate} à ${seance.sessionTime}`;
-    document.getElementById("confirmEmail").textContent   = data.email;
-    if (seance.price != null) {
-      const total = seance.price * parseInt(data.peopleNumber);
-      document.getElementById("confirmPrice").textContent = formatPrice(total);
-      document.getElementById("confirmPriceRow").style.display = "grid";
+  // ── CHARGEMENT BOUTIQUE ──
+  async function loadProduits() {
+    try {
+      const res  = await fetch("/api/boutique/produits");
+      const data = await res.json();
+      produitsCache = data.produits || [];
+    } catch {
+      produitsCache = [];
     }
-    successCard.classList.add("show");
-    form.classList.add("hidden");
-    document.getElementById("formSubtitle").textContent = "Résumé de ta commande :";
   }
 
-  /* ── SOUMISSION FORMULAIRE ── */
-  form.addEventListener("submit", (e) => {
+  function renderBoutique() {
+    const grid = document.getElementById("boutiqueProduits");
+    if (produitsCache.length === 0) {
+      grid.innerHTML = `<div class="boutique-empty">Aucun produit disponible pour le moment.</div>`;
+      return;
+    }
+    grid.innerHTML = produitsCache.map(p => `
+      <div class="produit-card" id="pcard-${p.id}">
+        <div class="produit-img">
+          ${p.image_url ? `<img src="${p.image_url}" alt="${p.nom}">` : "🍿"}
+        </div>
+        <div class="produit-info">
+          <div class="produit-nom">${p.nom}</div>
+          ${p.description ? `<div class="produit-desc">${p.description}</div>` : ""}
+          <div class="produit-prix">${formatPrice(p.prix)}</div>
+        </div>
+        <div class="produit-controls">
+          <button class="qte-btn minus" onclick="changeQte('${p.id}', -1)" id="minus-${p.id}">−</button>
+          <span class="qte-val" id="qte-${p.id}">0</span>
+          <button class="qte-btn plus" onclick="changeQte('${p.id}', 1)">+</button>
+        </div>
+      </div>`).join("");
+  }
+
+  function changeQte(id, delta) {
+    const prod = produitsCache.find(p => p.id === id);
+    if (!prod) return;
+    const current = panier[id] || 0;
+    const next = Math.max(0, Math.min(prod.stock, current + delta));
+    if (next === 0) delete panier[id];
+    else panier[id] = next;
+    document.getElementById(`qte-${id}`).textContent = next;
+    document.getElementById(`pcard-${id}`).classList.toggle("in-panier", next > 0);
+    updatePanierRecap();
+  }
+
+  function getPanierArray() {
+    return Object.entries(panier).map(([id, qte]) => ({ id, qte }));
+  }
+
+  function getPanierTotal() {
+    return Object.entries(panier).reduce((sum, [id, qte]) => {
+      const prod = produitsCache.find(p => p.id === id);
+      return sum + (prod ? prod.prix * qte : 0);
+    }, 0);
+  }
+
+  function updatePanierRecap() {
+    const items = getPanierArray();
+    const recap = document.getElementById("panierRecap");
+    if (items.length === 0) { recap.classList.remove("show"); return; }
+    const html = items.map(({ id, qte }) => {
+      const prod = produitsCache.find(p => p.id === id);
+      if (!prod) return "";
+      return `<div class="panier-recap-row"><span><b>${prod.nom}</b> × ${qte}</span><span>${formatPrice(prod.prix * qte)}</span></div>`;
+    }).join("");
+    document.getElementById("panierRecapItems").innerHTML = html;
+    document.getElementById("panierTotalVal").textContent = formatPrice(getPanierTotal());
+    recap.classList.add("show");
+  }
+
+  // ── ÉTAPE 1 → 2 ──
+  resaForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     hideError();
-    successCard.classList.remove("show");
 
     const seance = seancesFlat.find(s => s.id === seanceSelect.value);
     const data = {
@@ -579,17 +775,47 @@
     if (seance?.cancelled) { showError("⛔ Cette séance a été annulée."); return; }
     if (!data.clientName)  { showError("⛔ Merci d'indiquer ton nom."); return; }
     if (!data.email)       { showError("⛔ Merci d'indiquer ton email."); return; }
-    if (parseInt(data.peopleNumber) > 10 || parseInt(data.peopleNumber) < 1) { showError("⛔ Le nombre de personnes doit être entre 1 et 10."); return; }
-    if (seance && parseInt(data.peopleNumber) > seance.remaining) { showError(`⛔ Il ne reste que ${seance.remaining} place(s) pour cette séance.`); return; }
+    if (parseInt(data.peopleNumber) > 10 || parseInt(data.peopleNumber) < 1) {
+      showError("⛔ Le nombre de personnes doit être entre 1 et 10."); return;
+    }
+    if (seance && parseInt(data.peopleNumber) > seance.remaining) {
+      showError(`⛔ Il ne reste que ${seance.remaining} place(s) pour cette séance.`); return;
+    }
 
     pendingData   = data;
     pendingSeance = seance;
-    openPayment(seance, data);
+
+    // Charger produits si pas encore fait
+    if (produitsCache.length === 0) await loadProduits();
+
+    // Passer à l'étape boutique
+    resaForm.classList.add("hidden");
+    document.getElementById("boutiqueStep").classList.add("show");
+    document.getElementById("formTitle").textContent    = "Snacks & boissons";
+    document.getElementById("formSubtitle").textContent = "";
+    setStep(2);
+    renderBoutique();
+    panier = {};
+    updatePanierRecap();
   });
 
-  /* ── MODALE PAIEMENT ── */
-  function openPayment(seance, data) {
-    const nb = parseInt(data.peopleNumber);
+  // ── ÉTAPE 2 → PAIEMENT ──
+  function validerBoutique() {
+    openPayment();
+  }
+
+  function skipBoutique() {
+    panier = {};
+    openPayment();
+  }
+
+  // ── MODALE PAIEMENT ──
+  function openPayment() {
+    const seance = pendingSeance;
+    const data   = pendingData;
+    const nb     = parseInt(data.peopleNumber);
+    const panierItems = getPanierArray();
+    const panierTotal = getPanierTotal();
 
     document.getElementById("payFilm").textContent   = seance.filmTitle;
     document.getElementById("payDate").textContent   = formatDate(seance.sessionDate);
@@ -598,19 +824,38 @@
     document.getElementById("payPlaces").textContent = nb + " place" + (nb > 1 ? "s" : "");
     document.getElementById("payClient").textContent = data.clientName;
 
-    if (seance.price != null) {
-      const total = seance.price * nb;
-      document.getElementById("payTotal").textContent       = formatPrice(total);
-      document.getElementById("payPriceDetail").textContent = formatPrice(seance.price) + " × " + nb;
-      document.getElementById("payTotalBlock").style.display = "flex";
+    // Snacks
+    const boutiqueRecap = document.getElementById("payBoutiqueRecap");
+    if (panierItems.length > 0) {
+      const html = panierItems.map(({ id, qte }) => {
+        const prod = produitsCache.find(p => p.id === id);
+        if (!prod) return "";
+        return `<div class="pay-boutique-item"><span><b>${prod.nom}</b> × ${qte}</span><span>${formatPrice(prod.prix * qte)}</span></div>`;
+      }).join("");
+      document.getElementById("payBoutiqueItems").innerHTML = html;
+      boutiqueRecap.style.display = "block";
     } else {
-      document.getElementById("payTotalBlock").style.display = "none";
+      boutiqueRecap.style.display = "none";
     }
 
-    // Reset état
-    document.getElementById("payMain").style.display    = "block";
-    document.getElementById("payLoading").classList.remove("show");
+    // Total
+    const totalBlock = document.getElementById("payTotalBlock");
+    const seanceTotal = seance.price != null ? seance.price * nb : null;
+    const grandTotal  = (seanceTotal ?? 0) + panierTotal;
 
+    if (seanceTotal != null || panierTotal > 0) {
+      let detail = [];
+      if (seanceTotal != null) detail.push(`Billets : ${formatPrice(seanceTotal)}`);
+      if (panierTotal > 0)     detail.push(`Snacks : ${formatPrice(panierTotal)}`);
+      document.getElementById("payTotalDetail").textContent = detail.join(" + ");
+      document.getElementById("payTotal").textContent = formatPrice(grandTotal);
+      totalBlock.style.display = "flex";
+    } else {
+      totalBlock.style.display = "none";
+    }
+
+    document.getElementById("payMain").style.display = "block";
+    document.getElementById("payLoading").classList.remove("show");
     document.getElementById("paymentOverlay").classList.add("show");
   }
 
@@ -619,35 +864,72 @@
   }
 
   function confirmPayment() {
-    // Afficher loader 3 secondes puis soumettre
     document.getElementById("payMain").style.display = "none";
     document.getElementById("payLoading").classList.add("show");
-
     setTimeout(() => {
       document.getElementById("paymentOverlay").classList.remove("show");
       submitReservation();
     }, 3000);
   }
 
+  // ── SOUMISSION FINALE ──
   async function submitReservation() {
     showLoading();
     try {
+      const panierArray = getPanierArray();
       const res = await fetch("/api/reserver", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...pendingData, userId: window._navAuthUserId || null })
+        body: JSON.stringify({
+          ...pendingData,
+          userId: window._navAuthUserId || null,
+          panier: panierArray.length > 0 ? panierArray : null
+        })
       });
       if (!res.ok) { const text = await res.text(); throw new Error(text || "Erreur lors de la réservation."); }
-      await res.text();
       hideLoading();
-      showSuccess(pendingData, pendingSeance);
+      showSuccess();
     } catch (err) {
       hideLoading();
       showError(err.message || "Impossible de finaliser la réservation.");
     }
   }
 
-  // Fermer en cliquant l'overlay (sauf pendant le loader)
+  // ── AFFICHAGE SUCCÈS ──
+  function showSuccess() {
+    const data   = pendingData;
+    const seance = pendingSeance;
+    const panierItems = getPanierArray();
+    const panierTotal = getPanierTotal();
+
+    document.getElementById("confirmClient").textContent  = data.clientName;
+    document.getElementById("confirmFilm").textContent    = seance.filmTitle;
+    document.getElementById("confirmRoom").textContent    = seance.roomNumber || "—";
+    document.getElementById("confirmNumber").textContent  = data.peopleNumber;
+    document.getElementById("confirmSession").textContent = `${seance.sessionDate} à ${seance.sessionTime}`;
+    document.getElementById("confirmEmail").textContent   = data.email;
+
+    if (seance.price != null) {
+      document.getElementById("confirmPrice").textContent = formatPrice(seance.price * parseInt(data.peopleNumber));
+      document.getElementById("confirmPriceRow").style.display = "grid";
+    }
+    if (panierItems.length > 0) {
+      const snackLabel = panierItems.map(({ id, qte }) => {
+        const prod = produitsCache.find(p => p.id === id);
+        return prod ? `${prod.nom} ×${qte}` : "";
+      }).filter(Boolean).join(", ");
+      document.getElementById("confirmSnacks").textContent = `${snackLabel} (${formatPrice(panierTotal)})`;
+      document.getElementById("confirmSnacksRow").style.display = "grid";
+    }
+
+    document.getElementById("boutiqueStep").classList.remove("show");
+    successCard.classList.add("show");
+    document.getElementById("formTitle").textContent    = "Récapitulatif";
+    document.getElementById("formSubtitle").textContent = "";
+    setStep(3);
+  }
+
+  // Fermer modale en cliquant l'overlay
   document.getElementById("paymentOverlay").addEventListener("click", (e) => {
     if (e.target === e.currentTarget && document.getElementById("payMain").style.display !== "none") {
       closePayment();
@@ -663,5 +945,3 @@
 <script src="/nav-auth.js"></script>
 </body>
 </html>
-
-
