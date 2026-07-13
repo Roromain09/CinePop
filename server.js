@@ -402,9 +402,13 @@ app.get("/api/admin", async (req, res) => {
     res.json(data.map(flattenReservation));
 });
 
+// APRÈS
 app.post("/api/admin/supprimer", async (req, res) => {
     const { id } = req.body;
     if (!id) return res.status(400).send("ID manquant");
+
+    // Tenter de créditer les points avant suppression (si validée + 1h passée)
+    await applyFidelitePoints();
 
     const { error } = await supabase.from("reservations").delete().eq("id", id);
     if (error) {
