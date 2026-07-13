@@ -25,6 +25,7 @@
   --orange: #ff8c00;
   --blue: #4da6ff;
   --purple: #b388ff;
+  --teal: #00d4b4;
   --text: #e8eaf0;
   --text-muted: #7b8ba0;
   --border: rgba(245,183,0,0.12);
@@ -96,7 +97,7 @@ h1 {
 
 .tab-btn {
   flex: 1;
-  min-width: 110px;
+  min-width: 100px;
   padding: 10px 14px;
   border: none;
   border-radius: 10px;
@@ -128,15 +129,12 @@ h1 {
 .tab-btn.active-valide   { background: rgba(0,232,150,0.13);  color: var(--green);  }
 .tab-btn.active-refuse   { background: rgba(255,68,85,0.13);  color: var(--red);    }
 .tab-btn.active-expire   { background: rgba(255,140,0,0.13);  color: var(--orange); }
-.tab-btn.active-programme{ background: rgba(77,166,255,0.13); color: var(--blue);   }
-.tab-btn.active-support { background: rgba(179,136,255,0.15); color: var(--purple); }
-.tab-btn.active-support .badge { background: var(--purple); color: var(--bg); }
+.tab-btn.active-gestion  { background: rgba(77,166,255,0.13); color: var(--blue);   }
 
 .tab-btn.active-attente  .badge { background: var(--gold);   color: var(--bg); }
 .tab-btn.active-valide   .badge { background: var(--green);  color: var(--bg); }
 .tab-btn.active-refuse   .badge { background: var(--red);    color: #fff; }
 .tab-btn.active-expire   .badge { background: var(--orange); color: #fff; }
-.tab-btn.active-programme.badge { background: var(--blue);   color: #fff; }
 
 .tab-panel { display: none; flex-direction: column; gap: 14px; }
 .tab-panel.visible { display: flex; }
@@ -243,6 +241,8 @@ h1 {
 .chip-expire  { background: rgba(255,140,0,0.12);  color: var(--orange); }
 .chip-nouveau { background: rgba(245,183,0,0.12); color: var(--gold); }
 .chip-traite  { background: rgba(0,232,150,0.12); color: var(--green); }
+.chip-pret    { background: rgba(0,212,180,0.12); color: var(--teal); }
+.chip-remis   { background: rgba(77,166,255,0.12); color: var(--blue); }
 
 .btn {
   padding: 8px 14px;
@@ -264,6 +264,8 @@ h1 {
 .btn-reprint:hover   { background: rgba(77,166,255,0.28); }
 .btn-edit      { background: rgba(77,166,255,0.12); color: var(--blue); border: 1px solid rgba(77,166,255,0.25); }
 .btn-edit:hover      { background: rgba(77,166,255,0.24); }
+.btn-teal      { background: rgba(0,212,180,0.12); color: var(--teal); border: 1px solid rgba(0,212,180,0.25); }
+.btn-teal:hover      { background: rgba(0,212,180,0.24); }
 
 .empty {
   text-align: center;
@@ -362,7 +364,7 @@ h1 {
   padding: 14px;
   margin-bottom: 16px;
 }
-.inline-form input, .inline-form select {
+.inline-form input, .inline-form select, .inline-form textarea {
   padding: 9px 12px;
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.08);
@@ -370,7 +372,9 @@ h1 {
   color: var(--text);
   font-size: 0.84rem;
   outline: none;
+  font-family: 'DM Sans', sans-serif;
 }
+.inline-form input:focus, .inline-form select:focus, .inline-form textarea:focus { border-color: var(--gold); }
 .inline-form button {
   grid-column: 1 / -1;
 }
@@ -381,7 +385,7 @@ h1 {
   flex-wrap: wrap;
 }
 .inline-form .form-actions .btn { flex: 1; min-width: 140px; }
-.film-row, .seance-row {
+.film-row, .seance-row, .produit-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -393,9 +397,9 @@ h1 {
   padding: 12px 16px;
   margin-bottom: 8px;
 }
-.film-row .title, .seance-row .title { font-weight: 700; font-size: 0.92rem; }
-.film-row .meta, .seance-row .meta { font-size: 0.78rem; color: var(--text-muted); }
-.row-actions { display: flex; gap: 6px; }
+.film-row .title, .seance-row .title, .produit-row .title { font-weight: 700; font-size: 0.92rem; }
+.film-row .meta, .seance-row .meta, .produit-row .meta { font-size: 0.78rem; color: var(--text-muted); }
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
 #loader {
   position: fixed;
@@ -452,64 +456,7 @@ h1 {
 }
 #admin-pass:focus { border-color: var(--gold); }
 
-@media (max-width: 600px) {
-  body { padding: 14px; }
-  h1 { font-size: 1.35rem; }
-  .admin-topbar { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .card-grid { grid-template-columns: 1fr; }
-  .card-actions { flex-direction: column; }
-  .card-actions .btn { width: 100%; text-align: center; }
-  #creer-panel { width: calc(100vw - 32px); right: 16px; }
-  .film-row, .seance-row { flex-direction: column; align-items: stretch; }
-  .row-actions { width: 100%; }
-  .row-actions .btn { flex: 1; }
-  .tabs {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    overflow-x: visible;
-  }
-}
-
-.seance-group { margin-bottom: 10px; border-radius: 14px; overflow: hidden; }
-.seance-group-header {
-  display: flex; justify-content: space-between; align-items: center;
-  gap: 10px; flex-wrap: wrap;
-  background: var(--surface2);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 14px 18px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  user-select: none;
-}
-.seance-group-header:hover { background: rgba(245,183,0,0.08); border-color: rgba(245,183,0,0.25); }
-.seance-group-header.open { border-radius: 14px 14px 0 0; border-bottom-color: transparent; }
-.seance-group-title { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 1px; color: var(--gold); }
-.seance-group-meta { font-size: 0.78rem; color: var(--text-muted); }
-.seance-group-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.seance-badge { background: rgba(0,232,150,0.13); color: var(--green); font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-.seance-chevron { color: var(--text-muted); font-size: 0.9rem; transition: transform 0.25s ease; }
-.seance-chevron.open { transform: rotate(90deg); }
-.seance-group-body {
-  display: none;
-  flex-direction: column;
-  gap: 0;
-  background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-top: none;
-  border-radius: 0 0 14px 14px;
-  overflow: hidden;
-}
-.seance-group-body.open { display: flex; }
-.seance-group-body .resa-card {
-  border-radius: 0; border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  box-shadow: none;
-}
-.seance-group-body .resa-card:last-child { border-bottom: none; border-radius: 0 0 14px 14px; }
-.seance-group-body .resa-card:hover { transform: none; }
-
+/* ── SOUS-TABS ── */
 .sub-tabs {
   display: flex;
   gap: 4px;
@@ -524,7 +471,7 @@ h1 {
 .sub-tabs::-webkit-scrollbar { display: none; }
 .sub-tab-btn {
   flex: 1;
-  min-width: 100px;
+  min-width: 90px;
   padding: 8px 12px;
   border: none;
   border-radius: 7px;
@@ -541,7 +488,9 @@ h1 {
 .sub-tab-btn.active-programme { background: rgba(77,166,255,0.13); color: var(--blue); }
 .sub-tab-btn.active-support   { background: rgba(179,136,255,0.15); color: var(--purple); }
 .sub-tab-btn.active-info      { background: rgba(0,232,150,0.12); color: var(--green); }
+.sub-tab-btn.active-boutique  { background: rgba(0,212,180,0.13); color: var(--teal); }
 
+/* ── INFO EDITOR ── */
 .info-editor {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -572,7 +521,100 @@ h1 {
 }
 .info-save-msg { font-size: 0.82rem; }
 
-/* Prix badge dans les séances */
+/* ── SÉANCES GROUPÉES ── */
+.seance-group { margin-bottom: 10px; border-radius: 14px; overflow: hidden; }
+.seance-group-header {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 10px; flex-wrap: wrap;
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  user-select: none;
+}
+.seance-group-header:hover { background: rgba(245,183,0,0.08); border-color: rgba(245,183,0,0.25); }
+.seance-group-header.open { border-radius: 14px 14px 0 0; border-bottom-color: transparent; }
+.seance-group-title { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 1px; color: var(--gold); }
+.seance-group-meta { font-size: 0.78rem; color: var(--text-muted); }
+.seance-group-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.seance-badge { background: rgba(0,232,150,0.13); color: var(--green); font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.seance-chevron { color: var(--text-muted); font-size: 0.9rem; transition: transform 0.25s ease; }
+.seance-group-body {
+  display: none;
+  flex-direction: column;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  overflow: hidden;
+}
+.seance-group-body.open { display: flex; }
+.seance-group-body .resa-card {
+  border-radius: 0; border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  box-shadow: none;
+}
+.seance-group-body .resa-card:last-child { border-bottom: none; border-radius: 0 0 14px 14px; }
+.seance-group-body .resa-card:hover { transform: none; }
+
+/* ── BOUTIQUE ── */
+.boutique-section { margin-bottom: 28px; }
+.boutique-section h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 1.5px;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+
+.stock-badge {
+  font-size: 0.72rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+}
+.stock-ok   { background: rgba(0,232,150,0.13); color: var(--green); }
+.stock-low  { background: rgba(255,140,0,0.13); color: var(--orange); }
+.stock-zero { background: rgba(255,68,85,0.13); color: var(--red); }
+
+.actif-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; font-weight: 700; cursor: pointer;
+  padding: 4px 10px; border-radius: 20px; border: none;
+  transition: all 0.2s;
+}
+.actif-on  { background: rgba(0,232,150,0.12); color: var(--green); }
+.actif-off { background: rgba(255,68,85,0.10); color: var(--red); }
+
+.commande-card {
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+}
+.commande-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
+}
+.commande-id { font-size: 0.72rem; color: var(--text-muted); font-family: monospace; }
+.commande-items { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.commande-item {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.84rem; padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.commande-item:last-child { border-bottom: none; }
+.commande-total {
+  font-size: 0.9rem; font-weight: 800;
+  color: var(--teal); text-align: right; margin-bottom: 10px;
+}
+.commande-resa {
+  font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px; font-family: monospace;
+}
+
+/* ── PRIX BADGE ── */
 .price-badge {
   background: rgba(0,232,150,0.13);
   color: var(--green);
@@ -580,6 +622,35 @@ h1 {
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 20px;
+}
+
+.seance-section-header {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 1.2px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+@media (max-width: 600px) {
+  body { padding: 14px; }
+  h1 { font-size: 1.35rem; }
+  .admin-topbar { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .card-grid { grid-template-columns: 1fr; }
+  .card-actions { flex-direction: column; }
+  .card-actions .btn { width: 100%; text-align: center; }
+  #creer-panel { width: calc(100vw - 32px); right: 16px; }
+  .film-row, .seance-row, .produit-row { flex-direction: column; align-items: stretch; }
+  .row-actions { width: 100%; }
+  .row-actions .btn { flex: 1; }
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    overflow-x: visible;
+  }
+  .sub-tabs { flex-wrap: wrap; }
+  .sub-tab-btn { flex: unset; }
 }
 </style>
 </head>
@@ -626,7 +697,7 @@ h1 {
   </button>
 </div>
 
-<!-- PANELS -->
+<!-- PANELS RÉSERVATIONS -->
 <div class="tab-panel visible" id="panel-attente"></div>
 <div class="tab-panel" id="panel-valide"></div>
 <div class="tab-panel" id="panel-refuse"></div>
@@ -636,6 +707,7 @@ h1 {
 <div class="tab-panel" id="panel-gestion">
   <div class="sub-tabs">
     <button class="sub-tab-btn active-programme" id="subtab-programme" onclick="switchSubTab('programme')">🎞 Programme</button>
+    <button class="sub-tab-btn" id="subtab-boutique" onclick="switchSubTab('boutique')">🛒 Boutique</button>
     <button class="sub-tab-btn" id="subtab-support" onclick="switchSubTab('support')">📩 Support</button>
     <button class="sub-tab-btn" id="subtab-info" onclick="switchSubTab('info')">ℹ️ Infos pratiques</button>
   </div>
@@ -657,6 +729,7 @@ h1 {
       </div>
       <div id="films-list"></div>
     </div>
+
     <div class="programme-section">
       <h2>🗓 Séances</h2>
       <div class="inline-form">
@@ -682,6 +755,30 @@ h1 {
     </div>
   </div>
 
+  <!-- Sous-panel Boutique -->
+  <div id="subpanel-boutique" style="display:none;">
+    <div class="boutique-section">
+      <h2>🍿 Produits</h2>
+      <div class="inline-form">
+        <input id="prod-nom" type="text" placeholder="Nom du produit *">
+        <input id="prod-desc" type="text" placeholder="Description (facultatif)">
+        <input id="prod-prix" type="number" placeholder="Prix (€) *" step="0.01" min="0">
+        <input id="prod-stock" type="number" placeholder="Stock initial *" min="0">
+        <input id="prod-image" type="text" placeholder="URL image (facultatif)">
+        <div class="form-actions">
+          <button id="prod-submit-btn" class="btn btn-validate" onclick="creerProduit()">➕ Ajouter le produit</button>
+          <button id="prod-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditProduit()">✖ Annuler</button>
+        </div>
+      </div>
+      <div id="produits-list"></div>
+    </div>
+
+    <div class="boutique-section">
+      <h2>📦 Commandes</h2>
+      <div id="commandes-list"></div>
+    </div>
+  </div>
+
   <!-- Sous-panel Support -->
   <div id="subpanel-support" style="display:none;">
     <div id="panel-support"></div>
@@ -690,7 +787,7 @@ h1 {
   <!-- Sous-panel Infos pratiques -->
   <div id="subpanel-info" style="display:none;">
     <div class="info-editor">
-      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Ce texte s'affiche en bas de la page d'accueil. Tu peux y mettre les horaires, l'adresse, les tarifs, etc.</p>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Ce texte s'affiche en bas de la page d'accueil.</p>
       <textarea id="info-content" placeholder="Ex : Ouvert du mardi au dimanche — Tarifs : 8€ adulte, 5€ enfant…"></textarea>
       <div class="save-row">
         <button class="btn btn-validate" onclick="saveInfo()">💾 Enregistrer</button>
@@ -726,8 +823,10 @@ h1 {
 <script>
 let ADMIN_PASS = "";
 let currentTab = "attente";
+let currentSubTab = "programme";
 let seancesCache = [];
 let filmsCache = [];
+let produitsCache = [];
 
 /* ── AUTH ── */
 async function checkPassword() {
@@ -763,8 +862,11 @@ async function refreshAll() {
   btn.style.transition = "transform 0.5s ease";
   setTimeout(() => { btn.style.transform = ""; btn.style.transition = ""; }, 500);
   await Promise.all([load(), loadSupport()]);
-  if (currentTab === "gestion" && currentSubTab === "programme") loadProgramme();
-  if (currentTab === "gestion" && currentSubTab === "info") loadInfo();
+  if (currentTab === "gestion") {
+    if (currentSubTab === "programme") loadProgramme();
+    if (currentSubTab === "boutique") loadBoutique();
+    if (currentSubTab === "info") loadInfo();
+  }
 }
 
 /* ── TABS ── */
@@ -780,19 +882,19 @@ function switchTab(tab) {
   if (tab === "gestion") switchSubTab(currentSubTab || "programme");
 }
 
-let currentSubTab = "programme";
-
 function switchSubTab(sub) {
   currentSubTab = sub;
-  ["programme","support","info"].forEach(s => {
+  ["programme","boutique","support","info"].forEach(s => {
     document.getElementById(`subpanel-${s}`).style.display = s === sub ? "" : "none";
     const btn = document.getElementById(`subtab-${s}`);
     btn.className = "sub-tab-btn";
     if (s === sub) btn.classList.add(`active-${s}`);
   });
-  if (sub === "info") loadInfo();
+  if (sub === "info")     loadInfo();
+  if (sub === "boutique") loadBoutique();
 }
 
+/* ── INFO ── */
 async function loadInfo() {
   const res = await fetch("/api/info");
   const data = await res.json();
@@ -806,16 +908,10 @@ async function saveInfo() {
     const res = await fetch("/api/admin/info", {
       method: "POST", headers: adminHeaders(), body: JSON.stringify({ content })
     });
-    if (res.ok) {
-      msg.style.color = "var(--green)";
-      msg.textContent = "✅ Enregistré !";
-    } else {
-      msg.style.color = "var(--red)";
-      msg.textContent = "❌ Erreur lors de l'enregistrement.";
-    }
+    msg.style.color = res.ok ? "var(--green)" : "var(--red)";
+    msg.textContent = res.ok ? "✅ Enregistré !" : "❌ Erreur.";
   } catch {
-    msg.style.color = "var(--red)";
-    msg.textContent = "❌ Erreur serveur.";
+    msg.style.color = "var(--red)"; msg.textContent = "❌ Erreur serveur.";
   }
   setTimeout(() => msg.textContent = "", 3000);
 }
@@ -858,26 +954,11 @@ function buildCard(r) {
         <span class="film-badge">${r.filmTitle}</span>
       </div>
       <div class="card-grid">
-        <div class="card-field">
-          <span class="field-label">Personnes</span>
-          <span class="field-value">🎟 ${r.peopleNumber}</span>
-        </div>
-        <div class="card-field">
-          <span class="field-label">Email</span>
-          <span class="field-value">${r.email || '—'}</span>
-        </div>
-        <div class="card-field">
-          <span class="field-label">Date</span>
-          <span class="field-value">📅 ${r.sessionDate}</span>
-        </div>
-        <div class="card-field">
-          <span class="field-label">Heure</span>
-          <span class="field-value">🕐 ${r.sessionTime}</span>
-        </div>
-        ${r.roomNumber ? `<div class="card-field">
-          <span class="field-label">Salle</span>
-          <span class="field-value">🏛 ${r.roomNumber}</span>
-        </div>` : ""}
+        <div class="card-field"><span class="field-label">Personnes</span><span class="field-value">🎟 ${r.peopleNumber}</span></div>
+        <div class="card-field"><span class="field-label">Email</span><span class="field-value">${r.email || '—'}</span></div>
+        <div class="card-field"><span class="field-label">Date</span><span class="field-value">📅 ${r.sessionDate}</span></div>
+        <div class="card-field"><span class="field-label">Heure</span><span class="field-value">🕐 ${r.sessionTime}</span></div>
+        ${r.roomNumber ? `<div class="card-field"><span class="field-label">Salle</span><span class="field-value">🏛 ${r.roomNumber}</span></div>` : ""}
       </div>
       <div class="card-id">ID : ${r.id}</div>
       <div class="card-actions">${actions}</div>
@@ -888,26 +969,20 @@ function emptyState(icon, msg) {
   return `<div class="empty"><div class="empty-icon">${icon}</div>${msg}</div>`;
 }
 
-/* ── PANEL VALIDÉ : GROUPÉ PAR SÉANCE ── */
+/* ── PANEL VALIDÉ GROUPÉ ── */
 function renderValideGrouped(reservations) {
   const el = document.getElementById("panel-valide");
-  if (!reservations.length) {
-    el.innerHTML = emptyState("✅", "Aucune réservation validée");
-    return;
-  }
+  if (!reservations.length) { el.innerHTML = emptyState("✅", "Aucune réservation validée"); return; }
 
   const map = {};
   reservations.forEach(r => {
-    const key = r.seanceId;
-    if (!map[key]) map[key] = { seanceId: key, filmTitle: r.filmTitle, sessionDate: r.sessionDate, sessionTime: r.sessionTime, roomNumber: r.roomNumber, items: [] };
-    map[key].items.push(r);
+    if (!map[r.seanceId]) map[r.seanceId] = { seanceId: r.seanceId, filmTitle: r.filmTitle, sessionDate: r.sessionDate, sessionTime: r.sessionTime, roomNumber: r.roomNumber, items: [] };
+    map[r.seanceId].items.push(r);
   });
 
- const groups = Object.values(map).sort((a, b) => {
-  const dateA = new Date(`${a.sessionDate}T${a.sessionTime}`);
-  const dateB = new Date(`${b.sessionDate}T${b.sessionTime}`);
-  return dateA - dateB;
-});
+  const groups = Object.values(map).sort((a, b) =>
+    `${b.sessionDate} ${b.sessionTime}`.localeCompare(`${a.sessionDate} ${a.sessionTime}`)
+  );
 
   el.innerHTML = groups.map((g, gi) => {
     const room = g.roomNumber ? ` · ${g.roomNumber}` : "";
@@ -952,15 +1027,13 @@ function toggleSeanceGroup(gi) {
   const isOpen  = body.classList.contains("open");
   body.classList.toggle("open", !isOpen);
   header.classList.toggle("open", !isOpen);
-  chevron.classList.toggle("open", !isOpen);
-  if (!isOpen) chevron.textContent = "▼";
-  else chevron.textContent = "▶";
+  chevron.textContent = !isOpen ? "▼" : "▶";
 }
 
 /* ── LOAD RÉSERVATIONS ── */
 async function load() {
   const res  = await fetch(`/api/admin`, { headers: adminHeaders() });
-  if (res.status === 401) { alert("Session admin invalide, reconnecte-toi."); return; }
+  if (res.status === 401) { alert("Session admin invalide."); return; }
   const data = await res.json();
 
   const groups = { "en attente": [], "validé": [], "refusé": [], "expiré": [] };
@@ -994,9 +1067,7 @@ async function supprimer(id) {
   if (!confirm("Supprimer définitivement cette réservation ?")) return;
   showLoader();
   try {
-    const res  = await fetch(`/api/admin/supprimer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
+    const res  = await fetch(`/api/admin/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) });
     alert(await res.text());
   } catch { alert("Erreur serveur !"); }
   hideLoader(); load();
@@ -1005,9 +1076,7 @@ async function supprimer(id) {
 async function valider(id) {
   showLoader();
   try {
-    const res = await fetch(`/api/admin/valider`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
+    const res = await fetch(`/api/admin/valider`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) });
     if (!res.ok) { alert(await res.text()); hideLoader(); return; }
   } catch { alert("Erreur serveur !"); hideLoader(); return; }
   hideLoader(); load();
@@ -1016,9 +1085,7 @@ async function valider(id) {
 async function reimprimerTicket(id) {
   showLoader();
   try {
-    const res = await fetch(`/api/admin/ticket`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
+    const res = await fetch(`/api/admin/ticket`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) });
     if (!res.ok) { alert(await res.text()); hideLoader(); return; }
     const blob = await res.blob();
     const url  = window.URL.createObjectURL(blob);
@@ -1032,9 +1099,7 @@ async function reimprimerTicket(id) {
 async function refuser(id) {
   showLoader();
   try {
-    const res  = await fetch(`/api/admin/refuser`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
+    const res  = await fetch(`/api/admin/refuser`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) });
     alert(await res.text());
   } catch { alert("Erreur serveur !"); }
   hideLoader(); load();
@@ -1050,74 +1115,37 @@ function toggleForm() {
 }
 
 function fillSeanceSelect(selectEl) {
-  if (seancesCache.length === 0) {
-    selectEl.innerHTML = `<option value="">Aucune séance disponible</option>`;
-    return;
-  }
-  selectEl.innerHTML = seancesCache.map(s =>
-    `<option value="${s.id}">${s.films?.title || "?"} — ${s.session_date} ${s.session_time?.slice(0,5)} (${s.room_number || "—"})</option>`
-  ).join("");
+  selectEl.innerHTML = seancesCache.length
+    ? seancesCache.map(s => `<option value="${s.id}">${s.films?.title || "?"} — ${s.session_date} ${s.session_time?.slice(0,5)} (${s.room_number || "—"})</option>`).join("")
+    : `<option value="">Aucune séance disponible</option>`;
 }
 
 async function creer() {
   const get = id => document.getElementById(id).value.trim();
   const msg = document.getElementById("f-msg");
-  const payload = {
-    id:           get("f-id"),
-    clientName:   get("f-clientName"),
-    email:        get("f-email"),
-    seanceId:     document.getElementById("f-seanceId").value,
-    peopleNumber: get("f-peopleNumber")
-  };
-  if (!payload.id || !payload.clientName || !payload.seanceId || !payload.peopleNumber) {
-    msg.style.color = "var(--red)";
-    msg.textContent = "⚠ Champs obligatoires manquants.";
-    return;
-  }
+  const payload = { id: get("f-id"), clientName: get("f-clientName"), email: get("f-email"), seanceId: document.getElementById("f-seanceId").value, peopleNumber: get("f-peopleNumber") };
+  if (!payload.id || !payload.clientName || !payload.seanceId || !payload.peopleNumber) { msg.style.color = "var(--red)"; msg.textContent = "⚠ Champs obligatoires manquants."; return; }
   showLoader();
   try {
-    const res  = await fetch(`/api/admin/creer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify(payload)
-    });
+    const res  = await fetch(`/api/admin/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify(payload) });
     const text = await res.text();
-    if (res.ok) {
-      msg.style.color = "var(--green)";
-      msg.textContent = "✅ Réservation créée !";
-      ["f-id","f-clientName","f-email","f-peopleNumber"].forEach(id => document.getElementById(id).value = "");
-    } else {
-      msg.style.color = "var(--red)";
-      msg.textContent = "❌ " + text;
-    }
-  } catch {
-    msg.style.color = "var(--red)";
-    msg.textContent = "❌ Erreur serveur.";
-  }
+    if (res.ok) { msg.style.color = "var(--green)"; msg.textContent = "✅ Réservation créée !"; ["f-id","f-clientName","f-email","f-peopleNumber"].forEach(id => document.getElementById(id).value = ""); }
+    else { msg.style.color = "var(--red)"; msg.textContent = "❌ " + text; }
+  } catch { msg.style.color = "var(--red)"; msg.textContent = "❌ Erreur serveur."; }
   hideLoader(); load();
 }
 
 /* ── SUPPORT ── */
 function buildSupportCard(m) {
   const isNouveau = m.status === "nouveau";
-  const chip = isNouveau
-    ? `<span class="status-chip chip-nouveau">🆕 Nouveau</span>`
-    : `<span class="status-chip chip-traite">✅ Traité</span>`;
+  const chip = isNouveau ? `<span class="status-chip chip-nouveau">🆕 Nouveau</span>` : `<span class="status-chip chip-traite">✅ Traité</span>`;
   const date = new Date(m.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
-
   return `
     <div class="resa-card">
-      <div class="card-header">
-        <span class="client-name">✉️ ${m.email}</span>
-        ${chip}
-      </div>
+      <div class="card-header"><span class="client-name">✉️ ${m.email}</span>${chip}</div>
       <div class="card-grid">
-        <div class="card-field">
-          <span class="field-label">Objet</span>
-          <span class="field-value">${m.subject}</span>
-        </div>
-        <div class="card-field">
-          <span class="field-label">Reçu le</span>
-          <span class="field-value">🕐 ${date}</span>
-        </div>
+        <div class="card-field"><span class="field-label">Objet</span><span class="field-value">${m.subject}</span></div>
+        <div class="card-field"><span class="field-label">Reçu le</span><span class="field-value">🕐 ${date}</span></div>
       </div>
       <div class="support-message">${m.message}</div>
       <div class="card-actions" style="margin-top:14px;">
@@ -1131,34 +1159,22 @@ async function loadSupport() {
   const res = await fetch(`/api/admin/support`, { headers: adminHeaders() });
   const data = await res.json();
   const messages = data.messages || [];
-
   document.getElementById("count-support").textContent = messages.filter(m => m.status === "nouveau").length;
-
-  document.getElementById("panel-support").innerHTML = messages.length
-    ? messages.map(buildSupportCard).join("")
-    : emptyState("📩", "Aucun message de support.");
+  document.getElementById("panel-support").innerHTML = messages.length ? messages.map(buildSupportCard).join("") : emptyState("📩", "Aucun message de support.");
 }
 
 async function marquerTraite(id) {
   showLoader();
-  try {
-    const res = await fetch(`/api/admin/support/traiter`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
-    if (!res.ok) alert(await res.text());
-  } catch { alert("Erreur serveur !"); }
+  try { const res = await fetch(`/api/admin/support/traiter`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
+  catch { alert("Erreur serveur !"); }
   hideLoader(); loadSupport();
 }
 
 async function supprimerSupport(id) {
   if (!confirm("Supprimer définitivement ce message ?")) return;
   showLoader();
-  try {
-    const res = await fetch(`/api/admin/support/supprimer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
-    if (!res.ok) alert(await res.text());
-  } catch { alert("Erreur serveur !"); }
+  try { const res = await fetch(`/api/admin/support/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
+  catch { alert("Erreur serveur !"); }
   hideLoader(); loadSupport();
 }
 
@@ -1169,10 +1185,7 @@ function buildFilmRow(f) {
   const meta = [f.genre, f.duration_minutes ? `${f.duration_minutes} min` : null].filter(Boolean).join(" • ");
   return `
     <div class="film-row">
-      <div>
-        <div class="title">${f.title}</div>
-        <div class="meta">${meta || "—"}</div>
-      </div>
+      <div><div class="title">${f.title}</div><div class="meta">${meta || "—"}</div></div>
       <div class="row-actions">
         <button class="btn btn-edit" onclick="editFilm('${f.id}')">✏️ Modifier</button>
         <button class="btn btn-delete" onclick="supprimerFilm('${f.id}')">🗑 Supprimer</button>
@@ -1184,10 +1197,10 @@ function editFilm(id) {
   const f = filmsCache.find(x => x.id === id);
   if (!f) return;
   editingFilmId = id;
-  document.getElementById("film-title").value = f.title || "";
-  document.getElementById("film-genre").value = f.genre || "";
+  document.getElementById("film-title").value    = f.title || "";
+  document.getElementById("film-genre").value    = f.genre || "";
   document.getElementById("film-duration").value = f.duration_minutes || "";
-  document.getElementById("film-poster").value = f.poster_url || "";
+  document.getElementById("film-poster").value   = f.poster_url || "";
   document.getElementById("film-synopsis").value = f.synopsis || "";
   document.getElementById("film-submit-btn").textContent = "💾 Enregistrer les modifications";
   document.getElementById("film-cancel-btn").style.display = "inline-block";
@@ -1204,20 +1217,12 @@ function cancelEditFilm() {
 async function creerFilm() {
   const title = document.getElementById("film-title").value.trim();
   if (!title) { alert("Le titre est obligatoire."); return; }
-  const payload = {
-    title,
-    genre: document.getElementById("film-genre").value.trim(),
-    durationMinutes: document.getElementById("film-duration").value.trim(),
-    posterUrl: document.getElementById("film-poster").value.trim(),
-    synopsis: document.getElementById("film-synopsis").value.trim()
-  };
+  const payload = { title, genre: document.getElementById("film-genre").value.trim(), durationMinutes: document.getElementById("film-duration").value.trim(), posterUrl: document.getElementById("film-poster").value.trim(), synopsis: document.getElementById("film-synopsis").value.trim() };
   const isEdit = !!editingFilmId;
   if (isEdit) payload.id = editingFilmId;
   showLoader();
   try {
-    const res = await fetch(isEdit ? `/api/admin/films/modifier` : `/api/admin/films/creer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify(payload)
-    });
+    const res = await fetch(isEdit ? `/api/admin/films/modifier` : `/api/admin/films/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify(payload) });
     if (!res.ok) { alert(await res.text()); hideLoader(); return; }
     cancelEditFilm();
   } catch { alert("Erreur serveur !"); }
@@ -1228,30 +1233,22 @@ async function loadFilms() {
   const res = await fetch(`/api/admin/films`, { headers: adminHeaders() });
   const data = await res.json();
   filmsCache = data.films || [];
-  document.getElementById("films-list").innerHTML = filmsCache.length
-    ? filmsCache.map(buildFilmRow).join("")
-    : emptyState("🎬", "Aucun film pour le moment.");
-
+  document.getElementById("films-list").innerHTML = filmsCache.length ? filmsCache.map(buildFilmRow).join("") : emptyState("🎬", "Aucun film pour le moment.");
   const filmSelect = document.getElementById("seance-film");
-  filmSelect.innerHTML = filmsCache.length
-    ? filmsCache.map(f => `<option value="${f.id}">${f.title}</option>`).join("")
-    : `<option value="">Crée d'abord un film</option>`;
+  filmSelect.innerHTML = filmsCache.length ? filmsCache.map(f => `<option value="${f.id}">${f.title}</option>`).join("") : `<option value="">Crée d'abord un film</option>`;
 }
 
 async function supprimerFilm(id) {
   if (!confirm("Supprimer ce film ? Ses séances seront aussi supprimées.")) return;
   showLoader();
-  try {
-    const res = await fetch(`/api/admin/films/supprimer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
-    if (!res.ok) alert(await res.text());
-  } catch { alert("Erreur serveur !"); }
+  try { const res = await fetch(`/api/admin/films/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
+  catch { alert("Erreur serveur !"); }
   hideLoader(); loadProgramme();
 }
 
 /* ── PROGRAMME : SÉANCES ── */
 let editingSeanceId = null;
+let seanceMode = "single";
 
 function formatDateFr(dateStr) {
   const [y, m, d] = dateStr.split("-");
@@ -1284,7 +1281,7 @@ function buildSeanceSection(title, seances, color) {
   if (!seances.length) return "";
   return `
     <div style="margin-bottom:18px;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:1.2px;color:${color};margin-bottom:8px;padding:0 4px;">${title} <span style="font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;opacity:0.7;">(${seances.length})</span></div>
+      <div class="seance-section-header" style="color:${color};">${title} <span style="font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;opacity:0.7;">(${seances.length})</span></div>
       ${seances.map(buildSeanceRow).join("")}
     </div>`;
 }
@@ -1293,30 +1290,25 @@ function editSeance(id) {
   const s = seancesCache.find(x => x.id === id);
   if (!s) return;
   editingSeanceId = id;
-  document.getElementById("seance-film").value = s.film_id;
-  document.getElementById("seance-room").value = s.room_number || "";
-  document.getElementById("seance-date").value = s.session_date || "";
-  document.getElementById("seance-time").value = (s.session_time || "").slice(0,5);
+  document.getElementById("seance-film").value    = s.film_id;
+  document.getElementById("seance-room").value    = s.room_number || "";
+  document.getElementById("seance-date").value    = s.session_date || "";
+  document.getElementById("seance-time").value    = (s.session_time || "").slice(0,5);
   document.getElementById("seance-capacity").value = s.capacity || 50;
-  document.getElementById("seance-price").value = s.price != null ? s.price : "";
-  document.getElementById("seance-info").value = s.info_message || "";
+  document.getElementById("seance-price").value   = s.price != null ? s.price : "";
+  document.getElementById("seance-info").value    = s.info_message || "";
   document.getElementById("seance-submit-btn").textContent = "💾 Enregistrer les modifications";
   document.getElementById("seance-cancel-btn").style.display = "inline-block";
   document.getElementById("seance-film").scrollIntoView({ behavior: "smooth", block: "center" });
   setSeanceMode("single");
 }
 
-/* ── MODE SÉANCE ── */
-let seanceMode = "single";
-
 function setSeanceMode(mode) {
   seanceMode = mode;
   document.getElementById("mode-single-btn").className = mode === "single" ? "btn btn-validate" : "btn btn-edit";
   document.getElementById("mode-period-btn").className = mode === "period" ? "btn btn-validate" : "btn btn-edit";
-  document.getElementById("mode-single-btn").style.fontSize = "0.8rem";
-  document.getElementById("mode-single-btn").style.padding = "7px 14px";
-  document.getElementById("mode-period-btn").style.fontSize = "0.8rem";
-  document.getElementById("mode-period-btn").style.padding = "7px 14px";
+  document.getElementById("mode-single-btn").style.cssText = "font-size:0.8rem;padding:7px 14px;";
+  document.getElementById("mode-period-btn").style.cssText = "font-size:0.8rem;padding:7px 14px;";
   document.getElementById("seance-date").style.display      = mode === "single" ? "block" : "none";
   document.getElementById("seance-date-from").style.display = mode === "period" ? "block" : "none";
   document.getElementById("seance-date-to").style.display   = mode === "period" ? "block" : "none";
@@ -1325,14 +1317,8 @@ function setSeanceMode(mode) {
 
 function cancelEditSeance() {
   editingSeanceId = null;
-  document.getElementById("seance-room").value = "";
-  document.getElementById("seance-date").value = "";
-  document.getElementById("seance-date-from").value = "";
-  document.getElementById("seance-date-to").value = "";
-  document.getElementById("seance-time").value = "";
+  ["seance-room","seance-date","seance-date-from","seance-date-to","seance-time","seance-price","seance-info"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("seance-capacity").value = 50;
-  document.getElementById("seance-price").value = "";
-  document.getElementById("seance-info").value = "";
   document.getElementById("seance-submit-btn").textContent = "➕ Ajouter la séance";
   document.getElementById("seance-cancel-btn").style.display = "none";
 }
@@ -1348,73 +1334,42 @@ async function creerSeance() {
   if (seanceMode === "single" || isEdit) {
     const sessionDate = document.getElementById("seance-date").value;
     if (!sessionDate) { alert("La date est obligatoire."); return; }
-
-    const payload = {
-      filmId,
-      roomNumber:   document.getElementById("seance-room").value.trim(),
-      sessionDate, sessionTime,
-      capacity:     document.getElementById("seance-capacity").value.trim(),
-      infoMessage:  document.getElementById("seance-info").value.trim(),
-      price:        price !== "" ? price : null
-    };
+    const payload = { filmId, roomNumber: document.getElementById("seance-room").value.trim(), sessionDate, sessionTime, capacity: document.getElementById("seance-capacity").value.trim(), infoMessage: document.getElementById("seance-info").value.trim(), price: price !== "" ? price : null };
     if (isEdit) payload.id = editingSeanceId;
-
     showLoader();
     try {
-      const res = await fetch(isEdit ? `/api/admin/seances/modifier` : `/api/admin/seances/creer`, {
-        method: "POST", headers: adminHeaders(), body: JSON.stringify(payload)
-      });
+      const res = await fetch(isEdit ? `/api/admin/seances/modifier` : `/api/admin/seances/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify(payload) });
       if (!res.ok) { alert(await res.text()); hideLoader(); return; }
       cancelEditSeance();
     } catch { alert("Erreur serveur !"); }
-    hideLoader();
-    await loadSeances();
-    return;
+    hideLoader(); await loadSeances(); return;
   }
 
-  /* ── MODE PÉRIODE ── */
   const from = document.getElementById("seance-date-from").value;
   const to   = document.getElementById("seance-date-to").value;
-  if (!from || !to) { alert("Merci de renseigner les dates de début et de fin."); return; }
-  if (from > to) { alert("La date de début doit être antérieure ou égale à la date de fin."); return; }
+  if (!from || !to) { alert("Dates de début et de fin obligatoires."); return; }
+  if (from > to) { alert("La date de début doit être antérieure à la date de fin."); return; }
 
   const dates = [];
   const cur = new Date(from + "T00:00:00");
   const end = new Date(to   + "T00:00:00");
   while (cur <= end) {
-    const y = cur.getFullYear();
-    const m = String(cur.getMonth() + 1).padStart(2, "0");
-    const d = String(cur.getDate()).padStart(2, "0");
-    dates.push(`${y}-${m}-${d}`);
+    dates.push(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,"0")}-${String(cur.getDate()).padStart(2,"0")}`);
     cur.setDate(cur.getDate() + 1);
   }
-
   if (dates.length > 60) { alert("La période ne peut pas dépasser 60 jours."); return; }
-
-  const roomNumber  = document.getElementById("seance-room").value.trim();
-  const capacity    = document.getElementById("seance-capacity").value.trim();
-  const infoMessage = document.getElementById("seance-info").value.trim();
 
   showLoader();
   let errors = 0;
   for (const sessionDate of dates) {
     try {
-      const res = await fetch(`/api/admin/seances/creer`, {
-        method: "POST", headers: adminHeaders(),
-        body: JSON.stringify({ filmId, roomNumber, sessionDate, sessionTime, capacity, infoMessage, price: price !== "" ? price : null })
-      });
+      const res = await fetch(`/api/admin/seances/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ filmId, roomNumber: document.getElementById("seance-room").value.trim(), sessionDate, sessionTime, capacity: document.getElementById("seance-capacity").value.trim(), infoMessage: document.getElementById("seance-info").value.trim(), price: price !== "" ? price : null }) });
       if (!res.ok) errors++;
     } catch { errors++; }
   }
   hideLoader();
-
-  if (errors > 0) {
-    alert(`${dates.length - errors} séance(s) créée(s), ${errors} erreur(s).`);
-  } else {
-    alert(`✅ ${dates.length} séance(s) créée(s) avec succès !`);
-  }
-  cancelEditSeance();
-  await loadSeances();
+  alert(errors > 0 ? `${dates.length - errors} séance(s) créée(s), ${errors} erreur(s).` : `✅ ${dates.length} séance(s) créée(s) !`);
+  cancelEditSeance(); await loadSeances();
 }
 
 async function loadSeances() {
@@ -1422,15 +1377,11 @@ async function loadSeances() {
   const data = await res.json();
   seancesCache = data.seances || [];
 
-  const nowTs = new Date();
+  const nowTs   = new Date();
   const limit30 = new Date(nowTs.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-  const aVenir   = seancesCache.filter(s => new Date(`${s.session_date}T${s.session_time}`) >= nowTs);
-  const termine  = seancesCache.filter(s => {
-    const dt = new Date(`${s.session_date}T${s.session_time}`);
-    return dt < nowTs && dt >= limit30;
-  });
-  const vieux    = seancesCache.filter(s => new Date(`${s.session_date}T${s.session_time}`) < limit30);
+  const aVenir  = seancesCache.filter(s => new Date(`${s.session_date}T${s.session_time}`) >= nowTs);
+  const termine = seancesCache.filter(s => { const dt = new Date(`${s.session_date}T${s.session_time}`); return dt < nowTs && dt >= limit30; });
+  const vieux   = seancesCache.filter(s => new Date(`${s.session_date}T${s.session_time}`) < limit30);
 
   const html = [
     buildSeanceSection("🟢 À venir", aVenir, "var(--green)"),
@@ -1443,14 +1394,25 @@ async function loadSeances() {
 }
 
 async function supprimerSeance(id) {
-  if (!confirm("Supprimer cette séance ? Les réservations associées seront aussi supprimées.")) return;
+  if (!confirm("Supprimer cette séance ?")) return;
   showLoader();
-  try {
-    const res = await fetch(`/api/admin/seances/supprimer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
-    if (!res.ok) alert(await res.text());
-  } catch { alert("Erreur serveur !"); }
+  try { const res = await fetch(`/api/admin/seances/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
+  catch { alert("Erreur serveur !"); }
+  hideLoader(); loadSeances();
+}
+
+async function annulerSeance(id) {
+  if (!confirm("Annuler cette séance ? Les réservations en attente et validées seront refusées.")) return;
+  showLoader();
+  try { const res = await fetch(`/api/admin/seances/annuler`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
+  catch { alert("Erreur serveur !"); }
+  hideLoader(); loadSeances(); load();
+}
+
+async function restaurerSeance(id) {
+  showLoader();
+  try { const res = await fetch(`/api/admin/seances/restaurer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
+  catch { alert("Erreur serveur !"); }
   hideLoader(); loadSeances();
 }
 
@@ -1459,27 +1421,166 @@ async function loadProgramme() {
   await loadSeances();
 }
 
-async function annulerSeance(id) {
-  if (!confirm("Annuler cette séance ? Les réservations en attente et validées seront refusées.")) return;
-  showLoader();
-  try {
-    const res = await fetch(`/api/admin/seances/annuler`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
-    if (!res.ok) alert(await res.text());
-  } catch { alert("Erreur serveur !"); }
-  hideLoader(); loadSeances(); load();
+/* ══════════════════════════════════
+   BOUTIQUE
+══════════════════════════════════ */
+let editingProduitId = null;
+
+function stockBadge(stock) {
+  if (stock <= 0)  return `<span class="stock-badge stock-zero">Rupture</span>`;
+  if (stock <= 5)  return `<span class="stock-badge stock-low">${stock} restants</span>`;
+  return `<span class="stock-badge stock-ok">${stock} en stock</span>`;
 }
 
-async function restaurerSeance(id) {
+function buildProduitRow(p) {
+  const actifClass = p.actif ? "actif-on" : "actif-off";
+  const actifLabel = p.actif ? "✅ Actif" : "❌ Inactif";
+  return `
+    <div class="produit-row">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+        ${p.image_url ? `<img src="${p.image_url}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🍿</div>`}
+        <div>
+          <div class="title">${p.nom}</div>
+          <div class="meta">${p.description || ""} · <b style="color:var(--teal)">${parseFloat(p.prix).toFixed(2)} €</b> · ${stockBadge(p.stock)}</div>
+        </div>
+      </div>
+      <div class="row-actions">
+        <button class="actif-toggle ${actifClass}" onclick="toggleActif('${p.id}', ${!p.actif})">${actifLabel}</button>
+        <button class="btn btn-edit" onclick="editProduit('${p.id}')">✏️</button>
+        <button class="btn btn-delete" onclick="supprimerProduit('${p.id}')">🗑</button>
+      </div>
+    </div>`;
+}
+
+function editProduit(id) {
+  const p = produitsCache.find(x => x.id === id);
+  if (!p) return;
+  editingProduitId = id;
+  document.getElementById("prod-nom").value   = p.nom || "";
+  document.getElementById("prod-desc").value  = p.description || "";
+  document.getElementById("prod-prix").value  = p.prix || "";
+  document.getElementById("prod-stock").value = p.stock || 0;
+  document.getElementById("prod-image").value = p.image_url || "";
+  document.getElementById("prod-submit-btn").textContent = "💾 Enregistrer les modifications";
+  document.getElementById("prod-cancel-btn").style.display = "inline-block";
+  document.getElementById("prod-nom").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function cancelEditProduit() {
+  editingProduitId = null;
+  ["prod-nom","prod-desc","prod-prix","prod-stock","prod-image"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("prod-submit-btn").textContent = "➕ Ajouter le produit";
+  document.getElementById("prod-cancel-btn").style.display = "none";
+}
+
+async function creerProduit() {
+  const nom  = document.getElementById("prod-nom").value.trim();
+  const prix = document.getElementById("prod-prix").value.trim();
+  if (!nom || prix === "") { alert("Nom et prix sont obligatoires."); return; }
+
+  const payload = {
+    nom,
+    description: document.getElementById("prod-desc").value.trim(),
+    prix,
+    stock: document.getElementById("prod-stock").value.trim() || 0,
+    image_url: document.getElementById("prod-image").value.trim()
+  };
+  const isEdit = !!editingProduitId;
+  if (isEdit) payload.id = editingProduitId;
+
   showLoader();
   try {
-    const res = await fetch(`/api/admin/seances/restaurer`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id })
-    });
-    if (!res.ok) alert(await res.text());
+    const res = await fetch(isEdit ? `/api/admin/boutique/produits/modifier` : `/api/admin/boutique/produits/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify(payload) });
+    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
+    cancelEditProduit();
   } catch { alert("Erreur serveur !"); }
-  hideLoader(); loadSeances();
+  hideLoader(); loadBoutique();
+}
+
+async function supprimerProduit(id) {
+  if (!confirm("Supprimer ce produit ?")) return;
+  showLoader();
+  try { const res = await fetch(`/api/admin/boutique/produits/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
+  catch { alert("Erreur serveur !"); }
+  hideLoader(); loadBoutique();
+}
+
+async function toggleActif(id, actif) {
+  showLoader();
+  try { await fetch(`/api/admin/boutique/produits/toggle`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id, actif }) }); }
+  catch { alert("Erreur serveur !"); }
+  hideLoader(); loadBoutique();
+}
+
+/* ── COMMANDES ── */
+const STATUTS_COMMANDE = {
+  "en attente": { chip: "chip-nouveau", label: "⏳ En attente" },
+  "prêt":       { chip: "chip-pret",    label: "✅ Prêt" },
+  "remis":      { chip: "chip-remis",   label: "🎉 Remis" }
+};
+
+function buildCommandeCard(c) {
+  const st = STATUTS_COMMANDE[c.statut] || STATUTS_COMMANDE["en attente"];
+  const items = (c.items || []);
+  const date  = new Date(c.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+
+  const nextActions = c.statut === "en attente"
+    ? `<button class="btn btn-teal" onclick="changerStatutCommande('${c.id}','prêt')">✅ Marquer prêt</button>`
+    : c.statut === "prêt"
+    ? `<button class="btn btn-reprint" onclick="changerStatutCommande('${c.id}','remis')">🎉 Marquer remis</button>`
+    : "";
+
+  return `
+    <div class="commande-card">
+      <div class="commande-header">
+        <div>
+          <span class="status-chip ${st.chip}">${st.label}</span>
+          <div class="commande-resa" style="margin-top:6px;">Réservation : ${c.reservation_id}</div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted);">🕐 ${date}</div>
+      </div>
+      <div class="commande-items">
+        ${items.map(it => `
+          <div class="commande-item">
+            <span>${it.nom} × ${it.qte}</span>
+            <span style="color:var(--teal);font-weight:700;">${(it.prix * it.qte).toFixed(2)} €</span>
+          </div>`).join("")}
+      </div>
+      <div class="commande-total">Total : ${parseFloat(c.total).toFixed(2)} €</div>
+      <div class="card-actions">
+        ${nextActions}
+      </div>
+    </div>`;
+}
+
+async function changerStatutCommande(id, statut) {
+  showLoader();
+  try { await fetch(`/api/admin/boutique/commandes/statut`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id, statut }) }); }
+  catch { alert("Erreur serveur !"); }
+  hideLoader(); loadBoutique();
+}
+
+async function loadBoutique() {
+  const [resProd, resCmd] = await Promise.all([
+    fetch(`/api/admin/boutique/produits`, { headers: adminHeaders() }),
+    fetch(`/api/admin/boutique/commandes`, { headers: adminHeaders() })
+  ]);
+  const dataProd = await resProd.json();
+  const dataCmd  = await resCmd.json();
+
+  produitsCache = dataProd.produits || [];
+  document.getElementById("produits-list").innerHTML = produitsCache.length
+    ? produitsCache.map(buildProduitRow).join("")
+    : emptyState("🍿", "Aucun produit pour le moment.");
+
+  const commandes = dataCmd.commandes || [];
+  // Trier : en attente > prêt > remis
+  const ordre = { "en attente": 0, "prêt": 1, "remis": 2 };
+  commandes.sort((a, b) => (ordre[a.statut] ?? 9) - (ordre[b.statut] ?? 9));
+
+  document.getElementById("commandes-list").innerHTML = commandes.length
+    ? commandes.map(buildCommandeCard).join("")
+    : emptyState("📦", "Aucune commande pour le moment.");
 }
 </script>
 </body>
