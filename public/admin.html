@@ -903,9 +903,11 @@ function renderValideGrouped(reservations) {
     map[key].items.push(r);
   });
 
-  const groups = Object.values(map).sort((a, b) =>
-    `${b.sessionDate} ${b.sessionTime}`.localeCompare(`${a.sessionDate} ${a.sessionTime}`)
-  );
+ const groups = Object.values(map).sort((a, b) => {
+  const dateA = new Date(`${a.sessionDate}T${a.sessionTime}`);
+  const dateB = new Date(`${b.sessionDate}T${b.sessionTime}`);
+  return dateA - dateB;
+});
 
   el.innerHTML = groups.map((g, gi) => {
     const room = g.roomNumber ? ` · ${g.roomNumber}` : "";
