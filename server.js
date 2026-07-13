@@ -75,7 +75,7 @@ function flattenReservation(r) {
     };
 }
 
-const RESA_SELECT = "*, seances(room_number, session_date, session_time, films(title))";
+const RESA_SELECT = "*, seances(room_number, session_date, session_time, films(title, poster_url))";
 
 async function applyExpirations() {
     const { data, error } = await supabase
@@ -113,73 +113,6 @@ async function applyExpirations() {
         console.log(`[${new Date().toISOString()}] ${toExpire.length} réservation(s) expirée(s).`);
     }
 }
-
-setInterval(applyExpirations, 60 * 1000);
-
-async function applyFidelitePoints() {
-    const { data, error } = await supabase
-        .from("reservations")
-        .select("id, people_number, user_id, seances(session_date, session_time, films(title))")
-        .eq("status", "validé")
-        .eq("points_credited", false)
-        .not("user_id", "is", null);
-
-    if (error) { console.error("Erreur fidelite lecture :", error.message); return; }
-
-    const nowTime = now();
-
-    for (const r of (data || [])) {
-        const s = r.seances;
-        if (!s?.session_date || !s?.session_time) continue;
-
-        const dt = sessionDateTimeOf(s.session_date, (s.session_time || "").slice(0, 5));
-        if (!dt.isValid || nowTime < dt.plus({ hours: 1 })) continue;
-
-        const pts = (r.people_number || 1) * 10;
-        const filmTitle = s.films?.title || null;
-
-        const { data: profil } = await supabase
-            .from("profiles")
-            .select("points, total_seances, total_personnes, total_films_vus, films_vus_list")
-            .eq("user_id", r.user_id)
-            .maybeSingle();
-
-        if (!profil) continue;
-
-        const filmsVus = profil.films_vus_list || [];
-        const dejaVu = filmTitle && filmsVus.includes(filmTitle);
-        const newFilmsList = (filmTitle && !dejaVu) ? [...filmsVus, filmTitle] : filmsVus;
-
-        const newPoints = (profil.points || 0) + pts;
-        const newFilmsVus = dejaVu ? (profil.total_films_vus || 0) : (profil.total_films_vus || 0) + 1;
-        const newLevel =
-            newFilmsVus >= 50 ? "or" :
-            newFilmsVus >= 20 ? "argent" : "bronze";
-
-        const { error: upErr } = await supabase
-            .from("profiles")
-            .update({
-                points: newPoints,
-                level: newLevel,
-                total_seances:    (profil.total_seances || 0) + 1,
-                total_personnes:  (profil.total_personnes || 0) + (r.people_number || 1),
-                total_films_vus:  dejaVu ? (profil.total_films_vus || 0) : (profil.total_films_vus || 0) + 1,
-                films_vus_list:   newFilmsList
-            })
-            .eq("user_id", r.user_id);
-
-        if (upErr) { console.error("Erreur update profil :", upErr.message); continue; }
-
-        await supabase
-            .from("reservations")
-            .update({ points_credited: true, pts_gagnes: pts })
-            .eq("id", r.id);
-
-        console.log(`[Fidélité] +${pts} pts → user ${r.user_id}`);
-    }
-}
-
-setInterval(applyFidelitePoints, 60 * 1000);
 
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/public/index.html");
@@ -406,10 +339,6 @@ app.get("/api/admin", async (req, res) => {
 app.post("/api/admin/supprimer", async (req, res) => {
     const { id } = req.body;
     if (!id) return res.status(400).send("ID manquant");
-
-    // Tenter de créditer les points avant suppression (si validée + 1h passée)
-    await applyFidelitePoints();
-
     const { error } = await supabase.from("reservations").delete().eq("id", id);
     if (error) {
         console.error(error);
@@ -857,11 +786,45 @@ app.get("/verify", async (req, res) => {
         if (nowDate < startWindow || nowDate > endWindow) {
             return res.json({ status: "invalid", reason: "Hors délai" });
         }
-
         const newScanCount = (resa.scan_count || 0) + 1;
         await supabase.from("reservations").update({ scan_count: newScanCount }).eq("id", id);
 
-        return res.json({
+        // Premier scan valide → crédit points fidélité immédiat
+        if (newScanCount === 1 && resa.user_id && !resa.points_credited) {
+            const pts = (resa.people_number || 1) * 10;
+            const filmTitle = resa.seances?.films?.title || null;
+
+            const { data: profil } = await supabase
+                .from("profiles")
+                .select("points, total_seances, total_personnes, total_films_vus, films_vus_list")
+                .eq("user_id", resa.user_id)
+                .maybeSingle();
+
+            if (profil) {
+                const filmsVus = profil.films_vus_list || [];
+                const dejaVu = filmTitle && filmsVus.includes(filmTitle);
+                const newFilmsList = (filmTitle && !dejaVu) ? [...filmsVus, filmTitle] : filmsVus;
+                const newFilmsVus = dejaVu ? (profil.total_films_vus || 0) : (profil.total_films_vus || 0) + 1;
+                const newLevel = newFilmsVus >= 50 ? "or" : newFilmsVus >= 20 ? "argent" : "bronze";
+
+                await supabase.from("profiles").update({
+                    points:          (profil.points || 0) + pts,
+                    level:           newLevel,
+                    total_seances:   (profil.total_seances || 0) + 1,
+                    total_personnes: (profil.total_personnes || 0) + (resa.people_number || 1),
+                    total_films_vus: newFilmsVus,
+                    films_vus_list:  newFilmsList
+                }).eq("user_id", resa.user_id);
+
+                await supabase.from("reservations")
+                    .update({ points_credited: true, pts_gagnes: pts })
+                    .eq("id", id);
+
+                console.log(`[Fidélité scan] +${pts} pts → user ${resa.user_id}`);
+            }
+        }
+
+         return res.json({
             status: "valid",
             scanCount: newScanCount,
             client: resa.client_name,
