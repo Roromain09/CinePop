@@ -512,7 +512,7 @@ app.post("/api/admin/valider", async (req, res) => {
 });
 
 // ============================================
-//  ADMIN — TICKET PDF
+//  ADMIN — TICKET PDF (version corrigée)
 // ============================================
 app.post("/api/admin/ticket", async (req, res) => {
     try {
@@ -869,10 +869,15 @@ ${page2Html}
         });
 
         const page = await browser.newPage();
+        await page.setViewport({ width: 300, height: 800 });
         await page.setContent(html, { waitUntil: "networkidle0" });
+
+        // Mesure la hauteur réelle du contenu pour éviter le blanc en bas
+        const contentHeight = await page.evaluate(() => document.body.scrollHeight);
 
         const buffer = await page.pdf({
             width: "300px",
+            height: `${contentHeight + 20}px`,
             printBackground: true
         });
         await browser.close();
