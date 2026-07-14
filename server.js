@@ -511,6 +511,9 @@ app.post("/api/admin/valider", async (req, res) => {
     }
 });
 
+// ============================================
+//  ADMIN — TICKET PDF
+// ============================================
 app.post("/api/admin/ticket", async (req, res) => {
     try {
         const { id } = req.body;
@@ -525,25 +528,26 @@ app.post("/api/admin/ticket", async (req, res) => {
         if (resa.status !== "validé") return res.status(400).send("Cette réservation n'est pas validée.");
 
         const seance = resa.seances || {};
-        const film = seance.films || {};
+        const film   = seance.films || {};
         const sessionTimeShort = (seance.session_time || "").slice(0, 5);
 
-        // Charger la commande boutique si elle existe
+        // Commande boutique
         const { data: commande } = await supabase
             .from("boutique_commandes")
             .select("items, total, statut")
             .eq("reservation_id", id)
             .maybeSingle();
 
+        // QR Code
         const BASE_URL = process.env.BASE_URL || "https://reservation-cinepop.onrender.com";
-        const qrData = `${BASE_URL}/verify?id=${resa.id}`;
-
+        const qrData   = `${BASE_URL}/verify?id=${resa.id}`;
         const qrBuffer = await QRCode.toBuffer(qrData);
         const qrBase64 = qrBuffer.toString("base64");
 
-        let levelColor = "#000000";
-        let levelBg    = "#f9f9f9";
-        let levelLabel = "";
+        // Niveau fidélité
+        let levelColor = "#cd7f32";
+        let levelBg    = "#fdf5ee";
+        let levelLabel = "Niveau Bronze";
 
         if (resa.user_id) {
             const { data: profil } = await supabase
@@ -558,49 +562,48 @@ app.post("/api/admin/ticket", async (req, res) => {
                 argent: { color: "#a8b8cc", bg: "#f2f5f8", label: "Niveau Argent" },
                 or:     { color: "#f5b700", bg: "#fffbe6", label: "Niveau Or"     },
             };
-            const lv = LEVELS[level] || LEVELS.bronze;
+            const lv   = LEVELS[level] || LEVELS.bronze;
             levelColor = lv.color;
             levelBg    = lv.bg;
             levelLabel = lv.label;
         }
 
-        // Page 2 : bon de commande style bonbon
+        // Page 2 : bon de commande (sans emojis)
         let page2Html = "";
         if (commande && commande.items && commande.items.length > 0) {
             const itemsHtml = commande.items.map(it => `
                 <div class="bon-item">
                     <span class="bon-item-nom">${escapeHtml(it.nom)}</span>
                     <span class="bon-item-qte">x${it.qte}</span>
-                    <span class="bon-item-prix">${(it.prix * it.qte).toFixed(2)} €</span>
+                    <span class="bon-item-prix">${(it.prix * it.qte).toFixed(2)} EUR</span>
                 </div>`).join("");
 
             page2Html = `
 <div class="page-break"></div>
 <div class="bon">
     <div class="bon-header">
-        <div class="bon-icon">🍿</div>
-        <div class="bon-title">Bon de commande</div>
-        <div class="bon-sub">A remettre en caisse a ton arrivee</div>
+        <div class="bon-title">BON DE COMMANDE</div>
+        <div class="bon-sub">A remettre en caisse a votre arrivee</div>
     </div>
     <div class="bon-client">
         <span class="bon-client-label">Pour</span>
         <span class="bon-client-name">${escapeHtml(resa.client_name)}</span>
     </div>
-    <div class="bon-film">
-        <span>${escapeHtml(film.title)} - ${escapeHtml(sessionTimeShort)}</span>
-    </div>
+    <div class="bon-film">${escapeHtml(film.title)} - ${escapeHtml(sessionTimeShort)}</div>
     <div class="bon-items">
-        <div class="bon-items-header">Ta commande</div>
+        <div class="bon-items-header">Votre commande</div>
         ${itemsHtml}
     </div>
     <div class="bon-total">
-        <span>Total</span>
+        <span>TOTAL</span>
         <span class="bon-total-val">${parseFloat(commande.total).toFixed(2)} EUR</span>
     </div>
     <div class="bon-footer">Merci et bonne seance !</div>
     <div class="bon-id">Ref : ${resa.id}</div>
 </div>`;
         }
+
+        const salle = seance.room_number ? escapeHtml(seance.room_number) : "—";
 
         const html = `
 <!DOCTYPE html>
@@ -609,129 +612,245 @@ app.post("/api/admin/ticket", async (req, res) => {
 <meta charset="UTF-8">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 300px; font-family: Arial, sans-serif; }
+    html, body {
+        width: 300px;
+        font-family: Arial, sans-serif;
+        background: white;
+    }
 
-    /* PAGE 1 : TICKET */
+    /* ── PAGE 1 : TICKET ── */
     .ticket {
-        width: 280px; height: 490px;
+        width: 280px;
+        margin: 10px auto;
         border: 2px solid ${levelColor};
         border-radius: 10px;
         background: ${levelBg};
-        margin: 0 auto;
-        display: flex; flex-direction: column; align-items: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         overflow: hidden;
     }
     .ticket-header {
-        width: 100%; background: ${levelColor};
-        padding: 12px 16px; text-align: center;
+        width: 100%;
+        background: ${levelColor};
+        padding: 14px 16px;
+        text-align: center;
     }
-    .ticket-header h2 { font-size: 14px; color: #fff; letter-spacing: 1px; }
-    .ticket-header .level { font-size: 11px; color: rgba(255,255,255,0.85); margin-top: 3px; }
+    .ticket-header h2 {
+        font-size: 14px;
+        color: #fff;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+    }
+    .ticket-header .level {
+        font-size: 11px;
+        color: rgba(255,255,255,0.88);
+    }
     .ticket-body {
-        flex: 1; width: 100%; padding: 14px 16px;
-        display: flex; flex-direction: column; align-items: center;
-        justify-content: space-between; gap: 4px;
+        width: 100%;
+        padding: 18px 20px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
     }
-    h1 { font-size: 15px; word-break: break-word; text-align: center; color: #111; }
-    .divider { width: 100%; border: none; border-top: 1px dashed ${levelColor}; opacity: 0.5; }
-    p { font-size: 12px; line-height: 1.5; color: #333; text-align: center; }
-    p b { color: #111; }
-    .ticket-id { font-size: 9px; color: #888; }
+    .ticket-film {
+        font-size: 15px;
+        font-weight: 800;
+        color: #111;
+        text-align: center;
+        word-break: break-word;
+    }
+    .divider {
+        width: 100%;
+        border: none;
+        border-top: 1px dashed ${levelColor};
+        opacity: 0.6;
+    }
+    .ticket-rows {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+    .ticket-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+    }
+    .ticket-row .t-label {
+        color: #777;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 10px;
+        letter-spacing: 0.5px;
+    }
+    .ticket-row .t-value {
+        color: #111;
+        font-weight: 700;
+        font-size: 12px;
+        text-align: right;
+    }
+    .ticket-qr {
+        margin-top: 6px;
+    }
+    .ticket-qr img {
+        width: 90px;
+        height: 90px;
+        display: block;
+    }
+    .ticket-id {
+        font-size: 8px;
+        color: #aaa;
+        font-family: monospace;
+        text-align: center;
+        margin-top: 2px;
+    }
 
-    /* SAUT DE PAGE */
+    /* ── PAGE 2 : BON DE COMMANDE ── */
     .page-break { page-break-after: always; }
 
-    /* PAGE 2 : BON DE COMMANDE BONBON */
     .bon {
         width: 280px;
-        margin: 0 auto;
+        margin: 10px auto;
         background: #fff9fe;
-        border: 2px dashed #ff6eb4;
+        border: 2px dashed #e05599;
         border-radius: 14px;
         overflow: hidden;
     }
     .bon-header {
-        background: linear-gradient(135deg, #ff6eb4, #ffa94d);
+        background: linear-gradient(135deg, #e05599, #f5894d);
         padding: 18px 16px 14px;
         text-align: center;
     }
-    .bon-icon { font-size: 26px; margin-bottom: 4px; }
-    .bon-title { font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 0.5px; }
-    .bon-sub { font-size: 10px; color: rgba(255,255,255,0.88); margin-top: 3px; }
+    .bon-title {
+        font-size: 15px;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: 1px;
+    }
+    .bon-sub {
+        font-size: 10px;
+        color: rgba(255,255,255,0.88);
+        margin-top: 4px;
+    }
     .bon-client {
-        display: flex; align-items: center; gap: 6px;
-        padding: 10px 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 12px 16px 0;
     }
     .bon-client-label {
-        font-size: 10px; font-weight: 700; color: #ff6eb4;
-        text-transform: uppercase; letter-spacing: 0.5px;
+        font-size: 10px;
+        font-weight: 700;
+        color: #e05599;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    .bon-client-name { font-size: 13px; font-weight: 900; color: #2d1a2e; }
+    .bon-client-name {
+        font-size: 13px;
+        font-weight: 900;
+        color: #2d1a2e;
+    }
     .bon-film {
-        padding: 4px 16px 10px;
-        font-size: 11px; color: #7a4a7a;
-        border-bottom: 1.5px dashed #ffc0e0;
+        padding: 4px 16px 12px;
+        font-size: 11px;
+        color: #7a4a7a;
+        border-bottom: 1.5px dashed #f0b8d8;
     }
-    .bon-items { padding: 12px 16px; }
+    .bon-items {
+        padding: 14px 16px;
+    }
     .bon-items-header {
-        font-size: 10px; font-weight: 700; color: #ff6eb4;
-        text-transform: uppercase; letter-spacing: 0.5px;
-        margin-bottom: 8px;
+        font-size: 10px;
+        font-weight: 700;
+        color: #e05599;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
     }
     .bon-item {
-        display: flex; align-items: center;
-        padding: 6px 0;
-        border-bottom: 1px dotted #ffc0e0;
+        display: flex;
+        align-items: center;
+        padding: 7px 0;
+        border-bottom: 1px dotted #f0b8d8;
     }
     .bon-item:last-child { border-bottom: none; }
-    .bon-item-nom { flex: 1; font-size: 12px; font-weight: 700; color: #2d1a2e; }
-    .bon-item-qte {
-        font-size: 11px; font-weight: 900; color: #ff6eb4;
+    .bon-item-nom  { flex: 1; font-size: 12px; font-weight: 700; color: #2d1a2e; }
+    .bon-item-qte  {
+        font-size: 11px; font-weight: 900; color: #e05599;
         background: #ffe0f2; border-radius: 999px;
-        padding: 1px 7px; margin-right: 8px;
+        padding: 1px 8px; margin-right: 10px;
     }
     .bon-item-prix { font-size: 11px; font-weight: 700; color: #7a4a7a; }
     .bon-total {
-        display: flex; justify-content: space-between; align-items: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         background: linear-gradient(135deg, #ffe0f2, #fff0e0);
-        margin: 0 16px 12px; border-radius: 8px;
-        padding: 8px 12px;
-        border: 1.5px solid #ffb0d8;
+        margin: 0 16px 14px;
+        border-radius: 8px;
+        padding: 10px 14px;
+        border: 1.5px solid #f0b0d0;
     }
     .bon-total span:first-child {
-        font-size: 11px; font-weight: 700; color: #7a4a7a;
-        text-transform: uppercase; letter-spacing: 0.5px;
+        font-size: 10px;
+        font-weight: 700;
+        color: #7a4a7a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    .bon-total-val { font-size: 16px; font-weight: 900; color: #ff6eb4; }
+    .bon-total-val {
+        font-size: 16px;
+        font-weight: 900;
+        color: #e05599;
+    }
     .bon-footer {
-        text-align: center; font-size: 11px; color: #ff6eb4;
-        font-weight: 700; padding: 0 16px 8px;
+        text-align: center;
+        font-size: 11px;
+        color: #e05599;
+        font-weight: 700;
+        padding: 0 16px 8px;
     }
     .bon-id {
-        text-align: center; font-size: 8px; color: #cca0cc;
-        padding-bottom: 10px; font-family: monospace;
+        text-align: center;
+        font-size: 8px;
+        color: #cca0cc;
+        padding-bottom: 12px;
+        font-family: monospace;
     }
 </style>
 </head>
 <body>
-    <div class="ticket">
-        <div class="ticket-header">
-            <h2>TICKET CINEPOP</h2>
-            ${levelLabel ? `<div class="level">${levelLabel}</div>` : ""}
-        </div>
-        <div class="ticket-body">
-            <h1>${escapeHtml(film.title)}</h1>
-            <hr class="divider">
-            <p><b>Salle :</b> ${escapeHtml(seance.room_number)}</p>
-            <p><b>Date :</b> ${escapeHtml(seance.session_date)}</p>
-            <p><b>Heure :</b> ${escapeHtml(sessionTimeShort)}</p>
-            <p><b>Client :</b> ${escapeHtml(resa.client_name)}</p>
-            <p><b>Places :</b> ${escapeHtml(resa.people_number)}</p>
-            <img src="data:image/png;base64,${qrBase64}" style="width:90px;" />
-            <p class="ticket-id">Ticket #${resa.id}</p>
-        </div>
+
+<!-- PAGE 1 : TICKET -->
+<div class="ticket">
+    <div class="ticket-header">
+        <h2>TICKET CINEPOP</h2>
+        ${levelLabel ? `<div class="level">${levelLabel}</div>` : ""}
     </div>
-    ${page2Html}
+    <div class="ticket-body">
+        <div class="ticket-film">${escapeHtml(film.title)}</div>
+        <hr class="divider">
+        <div class="ticket-rows">
+            <div class="ticket-row"><span class="t-label">Salle</span><span class="t-value">${salle}</span></div>
+            <div class="ticket-row"><span class="t-label">Date</span><span class="t-value">${escapeHtml(seance.session_date)}</span></div>
+            <div class="ticket-row"><span class="t-label">Heure</span><span class="t-value">${escapeHtml(sessionTimeShort)}</span></div>
+            <div class="ticket-row"><span class="t-label">Client</span><span class="t-value">${escapeHtml(resa.client_name)}</span></div>
+            <div class="ticket-row"><span class="t-label">Places</span><span class="t-value">${escapeHtml(String(resa.people_number))}</span></div>
+        </div>
+        <hr class="divider">
+        <div class="ticket-qr">
+            <img src="data:image/png;base64,${qrBase64}" alt="QR Code">
+        </div>
+        <div class="ticket-id">Ticket #${resa.id}</div>
+    </div>
+</div>
+
+${page2Html}
+
 </body>
 </html>`;
 
