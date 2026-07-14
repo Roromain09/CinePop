@@ -415,6 +415,8 @@ app.get("/api/admin", async (req, res) => {
 app.post("/api/admin/supprimer", async (req, res) => {
     const { id } = req.body;
     if (!id) return res.status(400).send("ID manquant");
+    // Supprimer la commande boutique associée si elle existe
+    await supabase.from("boutique_commandes").delete().eq("reservation_id", id);
     const { error } = await supabase.from("reservations").delete().eq("id", id);
     if (error) {
         console.error(error);
