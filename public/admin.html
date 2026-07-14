@@ -808,10 +808,7 @@ h1 {
       <div id="produits-list"></div>
     </div>
 
-    <div class="boutique-section">
-      <h2>📦 Commandes</h2>
-      <div id="commandes-list"></div>
-    </div>
+
   </div>
 
   <!-- Sous-panel Support -->
@@ -1588,58 +1585,13 @@ async function toggleActif(id, actif) {
   hideLoader(); loadBoutique();
 }
 
-/* ── COMMANDES (lecture seule) ── */
-const STATUTS_COMMANDE = {
-  "en attente": { chip: "chip-nouveau", label: "⏳ En attente" },
-  "prête":      { chip: "chip-pret",    label: "✅ Prête" },
-  "remise":     { chip: "chip-remis",   label: "🎉 Remise" }
-};
-
-function buildCommandeCard(c) {
-  const st = STATUTS_COMMANDE[c.statut] || STATUTS_COMMANDE["en attente"];
-  const items = c.items || [];
-  const date  = new Date(c.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
-
-  return `
-    <div class="commande-card">
-      <div class="commande-header">
-        <div>
-          <span class="status-chip ${st.chip}">${st.label}</span>
-          <div class="commande-resa" style="margin-top:6px;">Réservation : ${c.reservation_id}</div>
-        </div>
-        <div style="font-size:0.78rem;color:var(--text-muted);">🕐 ${date}</div>
-      </div>
-      <div class="commande-items">
-        ${items.map(it => `
-          <div class="commande-item">
-            <span>${it.nom} × ${it.qte}</span>
-            <span style="color:var(--teal);font-weight:700;">${(it.prix * it.qte).toFixed(2)} €</span>
-          </div>`).join("")}
-      </div>
-      <div class="commande-total">Total : ${parseFloat(c.total).toFixed(2)} €</div>
-    </div>`;
-}
-
 async function loadBoutique() {
-  const [resProd, resCmd] = await Promise.all([
-    fetch(`/api/admin/boutique/produits`, { headers: adminHeaders() }),
-    fetch(`/api/admin/boutique/commandes`, { headers: adminHeaders() })
-  ]);
-  const dataProd = await resProd.json();
-  const dataCmd  = await resCmd.json();
-
-  produitsCache = dataProd.produits || [];
+  const res = await fetch(`/api/admin/boutique/produits`, { headers: adminHeaders() });
+  const data = await res.json();
+  produitsCache = data.produits || [];
   document.getElementById("produits-list").innerHTML = produitsCache.length
     ? produitsCache.map(buildProduitRow).join("")
     : emptyState("🍿", "Aucun produit pour le moment.");
-
-  const commandes = dataCmd.commandes || [];
-  const ordre = { "en attente": 0, "prête": 1, "remise": 2 };
-  commandes.sort((a, b) => (ordre[a.statut] ?? 9) - (ordre[b.statut] ?? 9));
-
-  document.getElementById("commandes-list").innerHTML = commandes.length
-    ? commandes.map(buildCommandeCard).join("")
-    : emptyState("📦", "Aucune commande pour le moment.");
 }
 </script>
 </body>
