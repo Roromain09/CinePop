@@ -399,7 +399,7 @@ h1 {
 }
 .film-row .title, .seance-row .title, .produit-row .title { font-weight: 700; font-size: 0.92rem; }
 .film-row .meta, .seance-row .meta, .produit-row .meta { font-size: 0.78rem; color: var(--text-muted); }
-.row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 
 #loader {
   position: fixed;
@@ -560,6 +560,31 @@ h1 {
 .seance-group-body .resa-card:last-child { border-bottom: none; border-radius: 0 0 14px 14px; }
 .seance-group-body .resa-card:hover { transform: none; }
 
+/* ── COMMANDE INLINE (dans card résa validée) ── */
+.commande-inline {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(0,212,180,0.25);
+}
+.commande-inline-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 8px;
+}
+.commande-inline-items { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.commande-inline-item {
+  display: flex; justify-content: space-between;
+  font-size: 0.82rem; color: var(--text-muted);
+}
+.commande-inline-item b { color: var(--text); }
+.commande-inline-total {
+  font-size: 0.84rem; font-weight: 700; color: var(--teal);
+  text-align: right;
+}
+
 /* ── BOUTIQUE ── */
 .boutique-section { margin-bottom: 28px; }
 .boutique-section h2 {
@@ -587,6 +612,26 @@ h1 {
 .actif-on  { background: rgba(0,232,150,0.12); color: var(--green); }
 .actif-off { background: rgba(255,68,85,0.10); color: var(--red); }
 
+/* +/- stock */
+.stock-controls {
+  display: flex; align-items: center; gap: 6px;
+}
+.stock-btn {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05); color: var(--text);
+  font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease; padding: 0; line-height: 1;
+}
+.stock-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.28); }
+.stock-btn.plus { background: rgba(0,212,180,0.12); border-color: rgba(0,212,180,0.3); color: var(--teal); }
+.stock-btn.plus:hover { background: rgba(0,212,180,0.24); }
+.stock-val {
+  min-width: 28px; text-align: center;
+  font-weight: 800; font-size: 0.88rem;
+}
+
 .commande-card {
   background: var(--surface2);
   border: 1px solid rgba(255,255,255,0.06);
@@ -612,16 +657,6 @@ h1 {
 }
 .commande-resa {
   font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px; font-family: monospace;
-}
-
-/* ── PRIX BADGE ── */
-.price-badge {
-  background: rgba(0,232,150,0.13);
-  color: var(--green);
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 20px;
 }
 
 .seance-section-header {
@@ -921,6 +956,22 @@ function sortKey(r) {
   return `${r.sessionDate || ""} ${r.sessionTime || ""}`.trim();
 }
 
+/* ── COMMANDE INLINE ── */
+function buildCommandeInline(commande) {
+  if (!commande) return "";
+  const items = commande.items || [];
+  if (!items.length) return "";
+  const itemsHtml = items.map(it =>
+    `<div class="commande-inline-item"><span><b>${it.nom}</b> × ${it.qte}</span><span>${(it.prix * it.qte).toFixed(2)} €</span></div>`
+  ).join("");
+  return `
+    <div class="commande-inline">
+      <div class="commande-inline-title">🍿 Snacks & boissons</div>
+      <div class="commande-inline-items">${itemsHtml}</div>
+      <div class="commande-inline-total">Total snacks : ${parseFloat(commande.total).toFixed(2)} €</div>
+    </div>`;
+}
+
 /* ── CARD BUILDER (réservations) ── */
 function buildCard(r) {
   const statusChip = {
@@ -961,7 +1012,8 @@ function buildCard(r) {
         ${r.roomNumber ? `<div class="card-field"><span class="field-label">Salle</span><span class="field-value">🏛 ${r.roomNumber}</span></div>` : ""}
       </div>
       <div class="card-id">ID : ${r.id}</div>
-      <div class="card-actions">${actions}</div>
+      ${r.commande ? buildCommandeInline(r.commande) : ""}
+      <div class="card-actions" style="margin-top:14px;">${actions}</div>
     </div>`;
 }
 
@@ -997,7 +1049,8 @@ function renderValideGrouped(reservations) {
           <div class="card-field"><span class="field-label">Email</span><span class="field-value">${r.email || '—'}</span></div>
         </div>
         <div class="card-id">ID : ${r.id}</div>
-        <div class="card-actions">
+        ${r.commande ? buildCommandeInline(r.commande) : ""}
+        <div class="card-actions" style="margin-top:14px;">
           <button class="btn btn-reprint" onclick="reimprimerTicket('${r.id}')">🎫 Obtenir le ticket</button>
           <button class="btn btn-delete" style="margin-left:auto;" onclick="supprimer('${r.id}')">🗑 Supprimer</button>
         </div>
@@ -1441,15 +1494,38 @@ function buildProduitRow(p) {
         ${p.image_url ? `<img src="${p.image_url}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🍿</div>`}
         <div>
           <div class="title">${p.nom}</div>
-          <div class="meta">${p.description || ""} · <b style="color:var(--teal)">${parseFloat(p.prix).toFixed(2)} €</b> · ${stockBadge(p.stock)}</div>
+          <div class="meta">${p.description || ""} · <b style="color:var(--teal)">${parseFloat(p.prix).toFixed(2)} €</b></div>
         </div>
       </div>
       <div class="row-actions">
+        <div class="stock-controls">
+          <button class="stock-btn minus" onclick="ajusterStock('${p.id}', -1, this)">−</button>
+          <span class="stock-val" id="stock-val-${p.id}">${p.stock}</span>
+          <button class="stock-btn plus" onclick="ajusterStock('${p.id}', 1, this)">+</button>
+          ${stockBadge(p.stock)}
+        </div>
         <button class="actif-toggle ${actifClass}" onclick="toggleActif('${p.id}', ${!p.actif})">${actifLabel}</button>
         <button class="btn btn-edit" onclick="editProduit('${p.id}')">✏️</button>
         <button class="btn btn-delete" onclick="supprimerProduit('${p.id}')">🗑</button>
       </div>
     </div>`;
+}
+
+async function ajusterStock(id, delta, btn) {
+  btn.disabled = true;
+  try {
+    const res = await fetch(`/api/admin/boutique/produits/stock`, {
+      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id, delta })
+    });
+    if (!res.ok) { alert(await res.text()); return; }
+    const data = await res.json();
+    const valEl = document.getElementById(`stock-val-${id}`);
+    if (valEl) valEl.textContent = data.stock;
+    // Mettre à jour le cache local
+    const prod = produitsCache.find(p => p.id === id);
+    if (prod) prod.stock = data.stock;
+  } catch { alert("Erreur serveur !"); }
+  btn.disabled = false;
 }
 
 function editProduit(id) {
@@ -1512,23 +1588,17 @@ async function toggleActif(id, actif) {
   hideLoader(); loadBoutique();
 }
 
-/* ── COMMANDES ── */
+/* ── COMMANDES (lecture seule) ── */
 const STATUTS_COMMANDE = {
   "en attente": { chip: "chip-nouveau", label: "⏳ En attente" },
-  "prêt":       { chip: "chip-pret",    label: "✅ Prêt" },
-  "remis":      { chip: "chip-remis",   label: "🎉 Remis" }
+  "prête":      { chip: "chip-pret",    label: "✅ Prête" },
+  "remise":     { chip: "chip-remis",   label: "🎉 Remise" }
 };
 
 function buildCommandeCard(c) {
   const st = STATUTS_COMMANDE[c.statut] || STATUTS_COMMANDE["en attente"];
-  const items = (c.items || []);
+  const items = c.items || [];
   const date  = new Date(c.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
-
-  const nextActions = c.statut === "en attente"
-    ? `<button class="btn btn-teal" onclick="changerStatutCommande('${c.id}','prêt')">✅ Marquer prêt</button>`
-    : c.statut === "prêt"
-    ? `<button class="btn btn-reprint" onclick="changerStatutCommande('${c.id}','remis')">🎉 Marquer remis</button>`
-    : "";
 
   return `
     <div class="commande-card">
@@ -1547,17 +1617,7 @@ function buildCommandeCard(c) {
           </div>`).join("")}
       </div>
       <div class="commande-total">Total : ${parseFloat(c.total).toFixed(2)} €</div>
-      <div class="card-actions">
-        ${nextActions}
-      </div>
     </div>`;
-}
-
-async function changerStatutCommande(id, statut) {
-  showLoader();
-  try { await fetch(`/api/admin/boutique/commandes/statut`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id, statut }) }); }
-  catch { alert("Erreur serveur !"); }
-  hideLoader(); loadBoutique();
 }
 
 async function loadBoutique() {
@@ -1574,8 +1634,7 @@ async function loadBoutique() {
     : emptyState("🍿", "Aucun produit pour le moment.");
 
   const commandes = dataCmd.commandes || [];
-  // Trier : en attente > prêt > remis
-  const ordre = { "en attente": 0, "prêt": 1, "remis": 2 };
+  const ordre = { "en attente": 0, "prête": 1, "remise": 2 };
   commandes.sort((a, b) => (ordre[a.statut] ?? 9) - (ordre[b.statut] ?? 9));
 
   document.getElementById("commandes-list").innerHTML = commandes.length
