@@ -228,6 +228,15 @@
     .chip-refuse  { background: rgba(255,107,107,0.14); color: var(--rouge); }
     .chip-expire  { background: rgba(255,140,102,0.14); color: var(--orange); }
     .pts-earned { font-size: 0.76rem; font-weight: 700; color: var(--jaune-soft); background: rgba(245,183,0,0.1); padding: 3px 9px; border-radius: 999px; }
+    .btn-suivi {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 999px;
+      background: rgba(245,183,0,0.1); color: var(--jaune-soft);
+      border: 1px solid rgba(245,183,0,0.25);
+      font-size: 0.74rem; font-weight: 700; text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-suivi:hover { background: rgba(245,183,0,0.2); border-color: rgba(245,183,0,0.45); }
     .empty { text-align: center; padding: 50px 20px; color: var(--gris); }
     .empty-icon { font-size: 2rem; margin-bottom: 10px; }
 
@@ -496,6 +505,7 @@ function buildResaCard(r) {
       <div class="resa-right">
         <span class="status-chip ${st.chip}">${st.icon} ${st.label}</span>
         ${pts > 0 ? `<span class="pts-earned">+${pts} pts</span>` : ""}
+        <a href="/seance.html?id=${r.id}" class="btn-suivi">▶ Suivre</a>
       </div>
     </div>`;
 }
