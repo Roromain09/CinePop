@@ -611,12 +611,13 @@ app.post("/api/admin/ticket", async (req, res) => {
 <meta charset="UTF-8">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
+   html, body {
         width: 300px;
+        height: auto !important;
+        min-height: 0 !important;
         font-family: Arial, sans-serif;
         background: white;
     }
-
     /* ── PAGE 1 : TICKET ── */
     .ticket {
         width: 280px;
@@ -820,6 +821,8 @@ app.post("/api/admin/ticket", async (req, res) => {
         padding-bottom: 12px;
         font-family: monospace;
     }
+    html { height: auto !important; }
+    body { height: auto !important; min-height: 0 !important; }
 </style>
 </head>
 <body>
@@ -868,19 +871,20 @@ ${page2Html}
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 300, height: 800 });
+        await page.setViewport({ width: 300, height: 600 });
         await page.setContent(html, { waitUntil: "networkidle0" });
 
-        // Mesure la hauteur réelle du contenu pour éviter le blanc en bas
-       const contentHeight = await page.evaluate(() => {
-            const el = document.body.lastElementChild;
-            return Math.ceil(el.getBoundingClientRect().bottom) + 10;
+        const contentHeight = await page.evaluate(() => {
+            document.body.style.height = "auto";
+            document.documentElement.style.height = "auto";
+            return document.body.offsetHeight;
         });
 
         const buffer = await page.pdf({
             width: "300px",
-            height: `${contentHeight + 20}px`,
-            printBackground: true
+            height: `${contentHeight + 10}px`,
+            printBackground: true,
+            pageRanges: "1"
         });
         await browser.close();
 
