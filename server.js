@@ -568,8 +568,7 @@ app.post("/api/admin/ticket", async (req, res) => {
             levelLabel = lv.label;
         }
 
-        // Page 2 : bon de commande (sans emojis)
-        let page2Html = "";
+       let page2Html = "";
         if (commande && commande.items && commande.items.length > 0) {
             const itemsHtml = commande.items.map(it => `
                 <div class="bon-item">
@@ -579,8 +578,8 @@ app.post("/api/admin/ticket", async (req, res) => {
                 </div>`).join("");
 
             page2Html = `
-<div class="page-break"></div>
 <div class="bon">
+    <div class="page-break"></div>
     <div class="bon-header">
         <div class="bon-title">BON DE COMMANDE</div>
         <div class="bon-sub">A remettre en caisse a votre arrivee</div>
@@ -710,7 +709,7 @@ app.post("/api/admin/ticket", async (req, res) => {
     }
 
     /* ── PAGE 2 : BON DE COMMANDE ── */
-    .page-break { page-break-after: always; }
+    .page-break { display: block; height: 0; page-break-before: always; }
 
     .bon {
         width: 280px;
@@ -873,7 +872,10 @@ ${page2Html}
         await page.setContent(html, { waitUntil: "networkidle0" });
 
         // Mesure la hauteur réelle du contenu pour éviter le blanc en bas
-        const contentHeight = await page.evaluate(() => document.body.scrollHeight);
+       const contentHeight = await page.evaluate(() => {
+            const el = document.body.lastElementChild;
+            return Math.ceil(el.getBoundingClientRect().bottom) + 10;
+        });
 
         const buffer = await page.pdf({
             width: "300px",
