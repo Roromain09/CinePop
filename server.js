@@ -1222,26 +1222,22 @@ app.get("/verify", async (req, res) => {
             const filmTitle = resa.seances?.films?.title || null;
 
             const { data: profil } = await supabase
-                .from("profiles")
-                .select("points, total_seances, total_personnes, total_films_vus, films_vus_list")
-                .eq("user_id", resa.user_id)
-                .maybeSingle();
+                    .from("profiles")
+                    .select("points, total_seances, total_personnes, total_films_vus")
+                    .eq("user_id", resa.user_id)
+                    .maybeSingle();
 
-            if (profil) {
-                const filmsVus = profil.films_vus_list || [];
-                const dejaVu = filmTitle && filmsVus.includes(filmTitle);
-                const newFilmsList = (filmTitle && !dejaVu) ? [...filmsVus, filmTitle] : filmsVus;
-                const newFilmsVus = dejaVu ? (profil.total_films_vus || 0) : (profil.total_films_vus || 0) + 1;
-                const newLevel = newFilmsVus >= 50 ? "or" : newFilmsVus >= 20 ? "argent" : "bronze";
+                if (profil) {
+                    const newFilmsVus = (profil.total_films_vus || 0) + 1;
+                    const newLevel = newFilmsVus >= 50 ? "or" : newFilmsVus >= 20 ? "argent" : "bronze";
 
-                await supabase.from("profiles").update({
-                    points:          (profil.points || 0) + pts,
-                    level:           newLevel,
-                    total_seances:   (profil.total_seances || 0) + 1,
-                    total_personnes: (profil.total_personnes || 0) + (resa.people_number || 1),
-                    total_films_vus: newFilmsVus,
-                    films_vus_list:  newFilmsList
-                }).eq("user_id", resa.user_id);
+                    await supabase.from("profiles").update({
+                        points:          (profil.points || 0) + pts,
+                        level:           newLevel,
+                        total_seances:   (profil.total_seances || 0) + 1,
+                        total_personnes: (profil.total_personnes || 0) + (resa.people_number || 1),
+                        total_films_vus: newFilmsVus
+                    }).eq("user_id", resa.user_id);
 
                 await supabase.from("reservations")
                     .update({ points_credited: true, pts_gagnes: pts })
