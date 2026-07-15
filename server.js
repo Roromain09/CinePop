@@ -611,11 +611,13 @@ app.post("/api/admin/ticket", async (req, res) => {
 <meta charset="UTF-8">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-   html, body {
+  html, body {
         width: 300px;
         font-family: Arial, sans-serif;
         background: white;
         height: auto;
+        margin: 0;
+        padding: 0;
     }
     /* ── PAGE 1 : TICKET ── */
     .ticket {
@@ -870,23 +872,16 @@ ${page2Html}
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 320, height: 600 });
+       await page.setViewport({ width: 300, height: 10 });
         await page.setContent(html, { waitUntil: "networkidle0" });
 
-        // Hauteur réelle du contenu rendu
         const contentHeight = await page.evaluate(() => {
-            const allElements = document.querySelectorAll("body *");
-            let maxBottom = 0;
-            allElements.forEach(el => {
-                const rect = el.getBoundingClientRect();
-                if (rect.bottom > maxBottom) maxBottom = rect.bottom;
-            });
-            return Math.ceil(maxBottom) + 20;
+            return document.documentElement.scrollHeight;
         });
 
         const buffer = await page.pdf({
             width: "300px",
-            height: `${contentHeight}px`,
+            height: `${contentHeight + 1}px`,
             printBackground: true
         });
         await browser.close();
