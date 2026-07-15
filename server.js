@@ -613,10 +613,9 @@ app.post("/api/admin/ticket", async (req, res) => {
     * { box-sizing: border-box; margin: 0; padding: 0; }
    html, body {
         width: 300px;
-        height: auto !important;
-        min-height: 0 !important;
         font-family: Arial, sans-serif;
         background: white;
+        height: auto;
     }
     /* ── PAGE 1 : TICKET ── */
     .ticket {
@@ -871,20 +870,24 @@ ${page2Html}
         });
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 300, height: 600 });
+        await page.setViewport({ width: 320, height: 600 });
         await page.setContent(html, { waitUntil: "networkidle0" });
 
+        // Hauteur réelle du contenu rendu
         const contentHeight = await page.evaluate(() => {
-            document.body.style.height = "auto";
-            document.documentElement.style.height = "auto";
-            return document.body.offsetHeight;
+            const allElements = document.querySelectorAll("body *");
+            let maxBottom = 0;
+            allElements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.bottom > maxBottom) maxBottom = rect.bottom;
+            });
+            return Math.ceil(maxBottom) + 20;
         });
 
         const buffer = await page.pdf({
             width: "300px",
-            height: `${contentHeight + 10}px`,
-            printBackground: true,
-            pageRanges: "1"
+            height: `${contentHeight}px`,
+            printBackground: true
         });
         await browser.close();
 
