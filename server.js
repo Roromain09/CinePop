@@ -579,7 +579,6 @@ app.post("/api/admin/ticket", async (req, res) => {
 
             page2Html = `
 <div class="bon">
-    <div class="page-break"></div>
     <div class="bon-header">
         <div class="bon-title">BON DE COMMANDE</div>
         <div class="bon-sub">A remettre en caisse a votre arrivee</div>
@@ -711,7 +710,7 @@ app.post("/api/admin/ticket", async (req, res) => {
     }
 
     /* ── PAGE 2 : BON DE COMMANDE ── */
-    .page-break { display: block; height: 0; page-break-before: always; }
+   .page-break { display: block; height: 20px; }
 
     .bon {
         width: 280px;
