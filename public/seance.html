@@ -112,7 +112,7 @@
     .state-card::before {
       content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
     }
-    .state-card.state-prevu::before  { background: linear-gradient(90deg, var(--gris), rgba(167,179,209,0.4)); }
+    .state-card.state-prevu::before   { background: linear-gradient(90deg, var(--gris), rgba(167,179,209,0.4)); }
     .state-card.state-bientot::before { background: linear-gradient(90deg, var(--jaune), var(--jaune-soft)); }
     .state-card.state-encours::before { background: linear-gradient(90deg, var(--vert), #7fffbe); }
     .state-card.state-termine::before { background: linear-gradient(90deg, var(--orange), #ffb899); }
@@ -132,39 +132,30 @@
     .state-annule  .state-icon-wrap { background: rgba(255,107,107,0.12); border-color: rgba(255,107,107,0.35); }
     .state-refuse  .state-icon-wrap { background: rgba(255,107,107,0.12); border-color: rgba(255,107,107,0.35); }
 
-    .state-label {
-      text-align: center; font-size: 1.5rem; font-weight: 900; margin-bottom: 6px;
-    }
+    .state-label { text-align: center; font-size: 1.5rem; font-weight: 900; margin-bottom: 6px; }
     .state-sublabel { text-align: center; color: var(--gris); font-size: 0.92rem; line-height: 1.6; margin-bottom: 24px; }
 
     /* ── TIMELINE ── */
-    .timeline {
-      display: flex; align-items: center; gap: 0; margin-bottom: 28px;
-    }
-    .tl-step {
-      display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1;
-    }
+    .timeline { display: flex; align-items: center; gap: 0; margin-bottom: 28px; }
+    .tl-step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
     .tl-dot {
       width: 32px; height: 32px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.9rem; border: 2px solid rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.1);
       background: rgba(255,255,255,0.04); color: var(--gris);
       font-weight: 800; font-size: 0.72rem; z-index: 1;
       transition: all 0.3s ease;
     }
     .tl-dot.done   { background: var(--vert);  border-color: var(--vert);  color: #06281a; }
     .tl-dot.active { background: var(--jaune); border-color: var(--jaune); color: #111; box-shadow: 0 0 16px rgba(245,183,0,0.5); }
-    .tl-dot.active.green { background: var(--vert); border-color: var(--vert); color: #06281a; box-shadow: 0 0 16px rgba(57,217,138,0.45); }
-    .tl-dot.active.orange { background: var(--orange); border-color: var(--orange); color: #111; box-shadow: 0 0 16px rgba(255,140,102,0.4); }
+    .tl-dot.active.green  { background: var(--vert);   border-color: var(--vert);   color: #06281a; box-shadow: 0 0 16px rgba(57,217,138,0.45); }
+    .tl-dot.active.orange { background: var(--orange); border-color: var(--orange); color: #111;    box-shadow: 0 0 16px rgba(255,140,102,0.4); }
     .tl-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gris); text-align: center; }
-    .tl-label.done   { color: var(--vert); }
-    .tl-label.active { color: var(--jaune); }
+    .tl-label.done          { color: var(--vert); }
+    .tl-label.active        { color: var(--jaune); }
     .tl-label.active.green  { color: var(--vert); }
     .tl-label.active.orange { color: var(--orange); }
-    .tl-line {
-      flex: 1; height: 2px; background: rgba(255,255,255,0.08); border-radius: 999px;
-      margin-bottom: 20px;
-    }
+    .tl-line { flex: 1; height: 2px; background: rgba(255,255,255,0.08); border-radius: 999px; margin-bottom: 20px; }
     .tl-line.done { background: var(--vert); }
 
     /* ── BARRE PROGRESSION ── */
@@ -204,6 +195,15 @@
       transition: all 0.2s ease; align-self: flex-start;
     }
     .btn-back:hover { background: rgba(255,255,255,0.09); color: var(--blanc); }
+
+    /* ── BADGE MODE PUBLIC ── */
+    .public-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 999px;
+      background: rgba(167,179,209,0.1); color: var(--gris);
+      border: 1px solid rgba(167,179,209,0.2);
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 20px;
+    }
 
     /* ── LOADING / ERROR ── */
     .loading-state { text-align: center; padding: 80px 20px; color: var(--gris); }
@@ -274,47 +274,46 @@ function msToHM(ms) {
   return `${m} min`;
 }
 
+function estimateEndTime(startTime, durationMinutes) {
+  const [h, m] = startTime.split(":").map(Number);
+  const totalMin = h * 60 + m + durationMinutes;
+  return `${pad(Math.floor(totalMin / 60) % 24)}:${pad(totalMin % 60)}`;
+}
+
 // ── ÉTAT ──
 // 1 = prévu (>15 min avant)
-// 2 = bientôt (≤15 min avant et pas encore commencé)
-// 3 = en cours (commencé, pas encore terminé)
+// 2 = bientôt (≤15 min avant)
+// 3 = en cours
 // 4 = terminé
-// 0 = annulé / refusé
-
 function computeState(seanceMs, durationMs, now) {
-  const diff = seanceMs - now; // ms avant début
-
-  if (diff > 15 * 60 * 1000)  return 1; // prévu
-  if (diff > 0)                 return 2; // bientôt (≤15 min)
-  if (now < seanceMs + durationMs) return 3; // en cours
-  return 4; // terminé
+  const diff = seanceMs - now;
+  if (diff > 15 * 60 * 1000)      return 1;
+  if (diff > 0)                    return 2;
+  if (now < seanceMs + durationMs) return 3;
+  return 4;
 }
 
 // ── RENDER ──
-function render(d) {
+function render(d, isPublic) {
   const wrap = document.getElementById("mainWrap");
 
-  const now        = Date.now();
-  const seanceMs   = sessionDateMs(d.sessionDate, d.sessionTime);
-  const durMs      = (d.durationMinutes || 120) * 60 * 1000;
-  const endMs      = seanceMs + durMs;
+  const now      = Date.now();
+  const seanceMs = sessionDateMs(d.sessionDate, d.sessionTime);
+  const durMs    = (d.durationMinutes || 120) * 60 * 1000;
+  const endMs    = seanceMs + durMs;
 
-  // État spécial : annulé ou refusé
   const isCancelled = d.cancelled;
   const isRefused   = d.status === "refusé";
-  const isExpired   = d.status === "expiré";
-  const isAttente   = d.status === "en attente";
 
-  let stateNum = computeState(seanceMs, durMs, now);
+  let stateNum     = computeState(seanceMs, durMs, now);
   let specialState = null;
-  if (isCancelled)     specialState = "annule";
-  else if (isRefused)  specialState = "refuse";
+  if (isCancelled)    specialState = "annule";
+  else if (isRefused) specialState = "refuse";
 
-  // ── HERO POSTER ──
+  // ── HERO ──
   const posterHtml = d.posterUrl
     ? `<img class="poster-hero-img" src="${d.posterUrl}" alt="${d.filmTitle}">`
     : "";
-
   const genreHtml = d.genre ? `<span>${d.genre}</span> <span>·</span>` : "";
   const dureeHtml = d.durationMinutes ? `<span>${d.durationMinutes} min</span>` : "";
 
@@ -333,16 +332,15 @@ function render(d) {
       </div>
     </div>`;
 
-  // ── TIMELINE HTML ──
-  // étapes : Réservé · Salle ouverte · En séance · Terminé
+  // ── TIMELINE ──
   function tlDot(step, activeClass) {
     const icons = ["✓", "🚪", "🎬", "★"];
-    if (step < stateNum)  return `<div class="tl-dot done">${icons[step - 1]}</div>`;
+    if (step < stateNum)   return `<div class="tl-dot done">${icons[step - 1]}</div>`;
     if (step === stateNum) return `<div class="tl-dot active ${activeClass}">${icons[step - 1]}</div>`;
     return `<div class="tl-dot">${icons[step - 1]}</div>`;
   }
   function tlLabel(step, label, activeClass) {
-    if (step < stateNum)  return `<div class="tl-label done">${label}</div>`;
+    if (step < stateNum)   return `<div class="tl-label done">${label}</div>`;
     if (step === stateNum) return `<div class="tl-label active ${activeClass}">${label}</div>`;
     return `<div class="tl-label">${label}</div>`;
   }
@@ -350,10 +348,29 @@ function render(d) {
     return `<div class="tl-line ${afterStep < stateNum ? "done" : ""}"></div>`;
   }
 
-  const activeClassMap = { 1: "", 2: "", 3: "green", 4: "orange" };
-  const ac = activeClassMap[stateNum] || "";
-
-  const timeline = `
+  // En mode public, la première étape est "Séance" (pas "Réservé")
+  const timeline = isPublic ? `
+    <div class="timeline">
+      <div class="tl-step">
+        ${tlDot(1, "")}
+        ${tlLabel(1, "Prévu", "")}
+      </div>
+      ${tlLine(1)}
+      <div class="tl-step">
+        ${tlDot(2, "")}
+        ${tlLabel(2, "Salle ouverte", "")}
+      </div>
+      ${tlLine(2)}
+      <div class="tl-step">
+        ${tlDot(3, "green")}
+        ${tlLabel(3, "En séance", "green")}
+      </div>
+      ${tlLine(3)}
+      <div class="tl-step">
+        ${tlDot(4, "orange")}
+        ${tlLabel(4, "Terminé", "orange")}
+      </div>
+    </div>` : `
     <div class="timeline">
       <div class="tl-step">
         ${tlDot(1, "")}
@@ -377,6 +394,10 @@ function render(d) {
     </div>`;
 
   // ── INFO GRID ──
+  const placesCell = (!isPublic && d.peopleNumber)
+    ? `<div class="info-cell"><div class="info-cell-label">Places</div><div class="info-cell-value">🎟 ${d.peopleNumber} personne${d.peopleNumber > 1 ? "s" : ""}</div></div>`
+    : "";
+
   const infoGrid = `
     <div class="info-grid">
       <div class="info-cell">
@@ -391,13 +412,10 @@ function render(d) {
         <div class="info-cell-label">Salle</div>
         <div class="info-cell-value">🏛 ${d.roomNumber || "—"}</div>
       </div>
-      <div class="info-cell">
-        <div class="info-cell-label">Places</div>
-        <div class="info-cell-value">🎟 ${d.peopleNumber} personne${d.peopleNumber > 1 ? "s" : ""}</div>
-      </div>
+      ${placesCell}
     </div>`;
 
-  // ── ÉTAT CONTENT ──
+  // ── ÉTAT ──
   let stateClass = "";
   let iconHtml   = "";
   let stateLabel = "";
@@ -412,20 +430,17 @@ function render(d) {
       ? "Cette séance a été annulée. Contacte le support si tu as des questions."
       : "Ta réservation a été refusée. Contacte le support si tu as des questions.";
     extraHtml  = `<div class="alert-banner alert-rouge">Si tu penses qu'il s'agit d'une erreur, contacte-nous via la page <a href="/support.html" style="color:var(--jaune-soft);font-weight:700;">Support</a>.</div>`;
+
   } else if (stateNum === 1) {
     stateClass = "state-prevu";
     iconHtml   = "📅";
     stateLabel = "Séance prévue";
-
     const diffMin = Math.floor((seanceMs - now) / 60000);
     const diffH   = Math.floor(diffMin / 60);
     const diffM   = diffMin % 60;
-
     stateSub = diffH > 0
       ? `Dans ${diffH}h${diffM > 0 ? pad(diffM) + "min" : ""} — rendez-vous à ${d.sessionTime}`
       : `Dans ${diffMin} minute${diffMin > 1 ? "s" : ""} — rendez-vous à ${d.sessionTime}`;
-
-    // Compte à rebours stylisé
     const h = String(Math.floor(diffMin / 60)).padStart(2, "0");
     const m = String(diffMin % 60).padStart(2, "0");
     extraHtml = `
@@ -439,12 +454,10 @@ function render(d) {
     stateClass = "state-bientot";
     iconHtml   = "🚪";
     stateLabel = "La salle est accessible";
-
-    const diffMin = Math.floor((seanceMs - now) / 60000);
+    const diffMin = Math.max(0, Math.floor((seanceMs - now) / 60000));
     stateSub = diffMin <= 0
       ? "La séance commence dans quelques instants !"
       : `La séance commence dans ${diffMin} minute${diffMin > 1 ? "s" : ""} — entre maintenant !`;
-
     const pct = Math.round(((15 * 60 * 1000 - (seanceMs - now)) / (15 * 60 * 1000)) * 100);
     extraHtml = `
       <div class="progress-section">
@@ -461,15 +474,12 @@ function render(d) {
     stateClass = "state-encours";
     iconHtml   = "🎬";
     stateLabel = "Film en cours";
-
     const elapsed    = now - seanceMs;
     const remaining  = endMs - now;
     const pct        = Math.min(100, Math.round((elapsed / durMs) * 100));
     const elapsedStr = msToHM(elapsed);
     const remainStr  = msToHM(remaining);
-
     stateSub = `${elapsedStr} écoulé${d.durationMinutes ? ` · encore ~${remainStr}` : ""}`;
-
     extraHtml = `
       <div class="progress-section">
         <div class="progress-label-row">
@@ -499,25 +509,35 @@ function render(d) {
       </div>`;
   }
 
-  // ── STATUT RÉSERVATION ──
+  // ── BADGE STATUT RÉSERVATION (mode privé seulement) ──
   const statusMap = {
-    "validé":     { chip: "rgba(57,217,138,0.14)", color: "var(--vert)", label: "✅ Réservation validée" },
-    "en attente": { chip: "rgba(245,183,0,0.14)",  color: "var(--jaune-soft)", label: "⏳ En attente de validation" },
-    "refusé":     { chip: "rgba(255,107,107,0.14)", color: "var(--rouge)", label: "❌ Réservation refusée" },
-    "expiré":     { chip: "rgba(255,140,102,0.14)", color: "var(--orange)", label: "⏱ Réservation expirée" },
+    "validé":     { chip: "rgba(57,217,138,0.14)",  color: "var(--vert)",       label: "✅ Réservation validée" },
+    "en attente": { chip: "rgba(245,183,0,0.14)",   color: "var(--jaune-soft)", label: "⏳ En attente de validation" },
+    "refusé":     { chip: "rgba(255,107,107,0.14)", color: "var(--rouge)",      label: "❌ Réservation refusée" },
+    "expiré":     { chip: "rgba(255,140,102,0.14)", color: "var(--orange)",     label: "⏱ Réservation expirée" },
   };
-  const st = statusMap[d.status] || statusMap["en attente"];
-  const statusBadge = `
+  const st = statusMap[d.status] || {};
+  const statusBadge = (!isPublic && st.label) ? `
     <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;
       background:${st.chip};color:${st.color};font-size:0.8rem;font-weight:700;margin-bottom:20px;">
       ${st.label}
-    </div>`;
+    </div>` : "";
+
+  // Badge mode public
+  const publicBadge = isPublic
+    ? `<div class="public-badge">👁 Vue publique — aucune réservation liée</div>`
+    : "";
+
+  // Lien retour adapté
+  const backHref = isPublic ? "/programme.html" : "/compte.html";
+  const backLabel = isPublic ? "← Retour au programme" : "← Retour à mon compte";
 
   // ── ASSEMBLAGE ──
   wrap.innerHTML = `
-    <a href="/compte.html" class="btn-back">← Retour à mon compte</a>
+    <a href="${backHref}" class="btn-back">${backLabel}</a>
     ${hero}
     <div class="state-card ${stateClass}">
+      ${publicBadge}
       ${specialState ? "" : statusBadge}
       <div class="state-icon-wrap">${iconHtml}</div>
       <div class="state-label">${stateLabel}</div>
@@ -529,31 +549,35 @@ function render(d) {
     </div>`;
 }
 
-function estimateEndTime(startTime, durationMinutes) {
-  const [h, m] = startTime.split(":").map(Number);
-  const totalMin = h * 60 + m + durationMinutes;
-  return `${pad(Math.floor(totalMin / 60) % 24)}:${pad(totalMin % 60)}`;
-}
-
 // ── INIT ──
 async function init() {
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
+  const params  = new URLSearchParams(window.location.search);
+  const resaId  = params.get("id");
+  const seanceId = params.get("seance");
 
-  if (!id) {
+  if (!resaId && !seanceId) {
     document.getElementById("mainWrap").innerHTML =
-      `<div class="loading-state"><p>Identifiant de réservation manquant.</p><a href="/compte.html" class="btn-back" style="margin:20px auto 0;">← Retour</a></div>`;
+      `<div class="loading-state"><p>Paramètre manquant.</p><a href="/programme.html" class="btn-back" style="margin:20px auto 0;">← Retour</a></div>`;
     return;
   }
 
   try {
-    const res  = await fetch(`/api/seance/${encodeURIComponent(id)}`);
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error);
-    render(data);
+    if (resaId) {
+      // Mode privé : réservation
+      const res  = await fetch(`/api/seance/${encodeURIComponent(resaId)}`);
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+      render(data, false);
+    } else {
+      // Mode public : séance seule
+      const res  = await fetch(`/api/seance-info/${encodeURIComponent(seanceId)}`);
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+      render(data, true);
+    }
   } catch (err) {
     document.getElementById("mainWrap").innerHTML =
-      `<div class="loading-state"><p>Impossible de charger la séance.<br><small>${err.message || ""}</small></p><a href="/compte.html" class="btn-back" style="margin:20px auto 0;">← Retour</a></div>`;
+      `<div class="loading-state"><p>Impossible de charger la séance.<br><small>${err.message || ""}</small></p><a href="/programme.html" class="btn-back" style="margin:20px auto 0;">← Retour</a></div>`;
   }
 }
 
