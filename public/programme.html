@@ -371,7 +371,8 @@ function openDayModal(dateKey) {
     const remClass = full ? "full" : (low ? "low" : "");
     const remText  = full ? "Complet" : `${s.remaining} place(s) restante(s)`;
     const btn = full ? `<span class="btn-reserve disabled">Complet</span>` : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
-    return `<div class="day-seance-item"><div class="day-seance-film">${s.filmTitle}</div><div class="day-seance-meta"><span>🕐 <b>${s.sessionTime}</b></span>${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}<span class="remaining ${remClass}">${remText}</span></div>${btn}</div>`;
+    const btnSuivi = `<a class="btn-reserve" href="/seance.html?seance=${s.id}" style="background:rgba(167,179,209,0.13);color:var(--gris);border:1px solid rgba(167,179,209,0.2);">▶ Suivre</a>`;
+    return `<div class="day-seance-item"><div class="day-seance-film">${s.filmTitle}</div><div class="day-seance-meta"><span>🕐 <b>${s.sessionTime}</b></span>${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}<span class="remaining ${remClass}">${remText}</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;">${btn}${btnSuivi}</div></div>`;
   }).join("");
   document.getElementById("dayModalOverlay").classList.add("show");
 }
@@ -400,7 +401,8 @@ function buildFilmCard(film) {
     const full = s.remaining <= 0;
     const low  = !full && s.remaining <= 5;
     const btn  = full ? `<span class="btn-reserve disabled">Complet</span>` : `<a class="btn-reserve" href="/reservation.html?seance=${s.id}">Réserver</a>`;
-    return `<div class="seance-row ${i === 0 ? "next" : ""}"><div class="seance-info"><span><b>${formatDate(s.sessionDate)}</b></span><span>🕐 ${s.sessionTime}</span>${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}<span class="remaining ${full ? "full" : (low ? "low" : "")}">${full ? "Complet" : `${s.remaining} place(s) restante(s)`}</span></div>${btn}</div>`;
+    const btnSuivi = `<a class="btn-reserve" href="/seance.html?seance=${s.id}" style="background:rgba(167,179,209,0.13);color:var(--gris);border:1px solid rgba(167,179,209,0.2);">▶ Suivre</a>`;
+    return `<div class="seance-row ${i === 0 ? "next" : ""}"><div class="seance-info"><span><b>${formatDate(s.sessionDate)}</b></span><span>🕐 ${s.sessionTime}</span>${s.roomNumber ? `<span>🏛 ${s.roomNumber}</span>` : ""}<span class="remaining ${full ? "full" : (low ? "low" : "")}">${full ? "Complet" : `${s.remaining} place(s) restante(s)`}</span></div><div style="display:flex;gap:8px;flex-wrap:wrap;">${btn}${btnSuivi}</div></div>`;
   }).join("");
   return `<div class="film-card"><div class="film-head"><div class="poster-frame">${film.genre ? `<span class="poster-tag">${film.genre}</span>` : ""}${poster}</div><div class="film-info"><div class="film-title">${film.title}</div>${meta ? `<div class="film-meta">${meta}</div>` : ""}${film.synopsis ? `<div class="film-synopsis">${film.synopsis}</div>` : ""}</div></div><div class="seances-list">${seancesHtml}</div></div>`;
 }
