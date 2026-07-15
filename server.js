@@ -1466,6 +1466,28 @@ app.get("/api/seance/:id", async (req, res) => {
         genre: f.genre || null
     });
 });
+app.get("/api/seance-info/:seanceId", async (req, res) => {
+    const { seanceId } = req.params;
+    const { data: seance, error } = await supabase
+        .from("seances")
+        .select("id, room_number, session_date, session_time, cancelled, films(title, duration_minutes, poster_url, genre)")
+        .eq("id", seanceId)
+        .single();
+    if (error || !seance) return res.status(404).json({ ok: false, error: "Séance introuvable." });
+    const f = seance.films || {};
+    res.json({
+        ok: true,
+        mode: "public",
+        sessionDate: seance.session_date,
+        sessionTime: (seance.session_time || "").slice(0, 5),
+        roomNumber: seance.room_number || null,
+        cancelled: seance.cancelled || false,
+        filmTitle: f.title || "",
+        durationMinutes: f.duration_minutes || null,
+        posterUrl: f.poster_url || null,
+        genre: f.genre || null
+    });
+});
 app.post("/api/supprimer-compte", async (req, res) => {
   const { userId } = req.body;
   if (!userId) return res.status(400).send("userId manquant");
