@@ -1438,7 +1438,34 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
 </body>
 </html>`);
 });
-
+// ============================================
+//  SUIVI SÉANCE (public)
+// ============================================
+app.get("/api/seance/:id", async (req, res) => {
+    const { id } = req.params;
+    const { data: resa, error } = await supabase
+        .from("reservations")
+        .select("id, status, people_number, client_name, seances(id, room_number, session_date, session_time, cancelled, films(title, duration_minutes, poster_url, genre))")
+        .eq("id", id)
+        .single();
+    if (error || !resa) return res.status(404).json({ ok: false, error: "Réservation introuvable." });
+    const s = resa.seances || {};
+    const f = s.films || {};
+    res.json({
+        ok: true,
+        clientName: resa.client_name,
+        status: resa.status,
+        peopleNumber: resa.people_number,
+        sessionDate: s.session_date,
+        sessionTime: (s.session_time || "").slice(0, 5),
+        roomNumber: s.room_number || null,
+        cancelled: s.cancelled || false,
+        filmTitle: f.title || "",
+        durationMinutes: f.duration_minutes || null,
+        posterUrl: f.poster_url || null,
+        genre: f.genre || null
+    });
+});
 app.post("/api/supprimer-compte", async (req, res) => {
   const { userId } = req.body;
   if (!userId) return res.status(400).send("userId manquant");
