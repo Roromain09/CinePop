@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suivi séance — CinéPop</title>
+  <link rel="icon" href="img/favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    :root {
+      --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
+      --jaune: #f5b700; --jaune-soft: #ffd84d;
+      --blanc: #ffffff; --gris: #a7b3d1;
+      --vert: #39d98a; --rouge: #ff6b6b; --orange: #ff8c66;
+      --ombre: rgba(0, 0, 0, 0.45);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      min-height: 100vh; color: var(--blanc);
+      background:
+        radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
+        linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
+      padding-bottom: 60px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 32px; max-width: 1200px; margin: 0 auto;
+    }
+    .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; }
+    .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+    .nav-links { display:flex; gap:8px; align-items:center; }
+    .nav-links a {
+      color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
+      padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
+    }
+    .nav-links a:hover { color: var(--blanc); background: rgba(255,255,255,0.07); }
+    .nav-avatar {
+      width: 38px; height: 38px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+      border-radius: 52% 48% 55% 45% / 50% 46% 54% 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; text-decoration: none;
+      box-shadow: 0 0 16px rgba(245,183,0,0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 2px solid rgba(245,183,0,0.6);
+    }
+    .nav-avatar:hover { transform: scale(1.1); box-shadow: 0 0 24px rgba(245,183,0,0.55); }
+    .nav-toggle {
+      display: none;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      color: var(--blanc); font-size: 1.3rem; line-height: 1;
+      padding: 8px 14px; border-radius: 12px; cursor: pointer;
+    }
+    @media (max-width: 680px) {
+      nav { flex-wrap: wrap; }
+      .nav-toggle { display: block; }
+      .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
+      .nav-links.open { display: flex; }
+      .nav-links a { text-align: center; padding: 12px 16px; }
+      .nav-avatar { display: none !important; }
+      .nav-auth-mobile {
+        display: flex !important; align-items: center; justify-content: center; gap: 8px;
+        background: rgba(245,183,0,0.1) !important; color: var(--blanc) !important;
+      }
+    }
+
+    /* ── LAYOUT ── */
+    .wrap { max-width: 640px; margin: 0 auto; padding: 10px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── POSTER HERO ── */
+    .poster-hero {
+      position: relative; border-radius: 24px; overflow: hidden;
+      min-height: 200px; display: flex; align-items: flex-end;
+      background: linear-gradient(145deg, #1c3258, #08101d);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 70px var(--ombre);
+    }
+    .poster-hero-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: 0.45;
+    }
+    .poster-hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(7,17,31,0.2) 0%, rgba(7,17,31,0.85) 100%);
+    }
+    .poster-hero-content {
+      position: relative; z-index: 1; padding: 24px 28px; width: 100%;
+    }
+    .poster-hero-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px; border-radius: 999px;
+      background: rgba(245,183,0,0.15); color: var(--jaune-soft);
+      font-size: 0.72rem; font-weight: 700; border: 1px solid rgba(245,183,0,0.25);
+      margin-bottom: 10px;
+    }
+    .poster-hero-title { font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 900; line-height: 1.1; margin-bottom: 6px; }
+    .poster-hero-meta { color: var(--gris); font-size: 0.85rem; display: flex; gap: 14px; flex-wrap: wrap; }
+
+    /* ── ÉTAT CARD ── */
+    .state-card {
+      background: rgba(17, 34, 64, 0.78);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px; padding: 32px;
+      box-shadow: 0 20px 50px var(--ombre);
+      position: relative; overflow: hidden;
+    }
+    .state-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    }
+    .state-card.state-prevu::before  { background: linear-gradient(90deg, var(--gris), rgba(167,179,209,0.4)); }
+    .state-card.state-bientot::before { background: linear-gradient(90deg, var(--jaune), var(--jaune-soft)); }
+    .state-card.state-encours::before { background: linear-gradient(90deg, var(--vert), #7fffbe); }
+    .state-card.state-termine::before { background: linear-gradient(90deg, var(--orange), #ffb899); }
+    .state-card.state-annule::before  { background: linear-gradient(90deg, var(--rouge), #ffb3b3); }
+    .state-card.state-refuse::before  { background: linear-gradient(90deg, var(--rouge), #ffb3b3); }
+
+    /* ── ICÔNE ÉTAT ── */
+    .state-icon-wrap {
+      width: 72px; height: 72px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 20px; border: 2px solid;
+    }
+    .state-prevu  .state-icon-wrap { background: rgba(167,179,209,0.1); border-color: rgba(167,179,209,0.3); }
+    .state-bientot .state-icon-wrap { background: rgba(245,183,0,0.12); border-color: rgba(245,183,0,0.4); box-shadow: 0 0 28px rgba(245,183,0,0.25); }
+    .state-encours .state-icon-wrap { background: rgba(57,217,138,0.12); border-color: rgba(57,217,138,0.4); box-shadow: 0 0 28px rgba(57,217,138,0.2); }
+    .state-termine .state-icon-wrap { background: rgba(255,140,102,0.12); border-color: rgba(255,140,102,0.35); }
+    .state-annule  .state-icon-wrap { background: rgba(255,107,107,0.12); border-color: rgba(255,107,107,0.35); }
+    .state-refuse  .state-icon-wrap { background: rgba(255,107,107,0.12); border-color: rgba(255,107,107,0.35); }
+
+    .state-label {
+      text-align: center; font-size: 1.5rem; font-weight: 900; margin-bottom: 6px;
+    }
+    .state-sublabel { text-align: center; color: var(--gris); font-size: 0.92rem; line-height: 1.6; margin-bottom: 24px; }
+
+    /* ── TIMELINE ── */
+    .timeline {
+      display: flex; align-items: center; gap: 0; margin-bottom: 28px;
+    }
+    .tl-step {
+      display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1;
+    }
+    .tl-dot {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; border: 2px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: var(--gris);
+      font-weight: 800; font-size: 0.72rem; z-index: 1;
+      transition: all 0.3s ease;
+    }
+    .tl-dot.done   { background: var(--vert);  border-color: var(--vert);  color: #06281a; }
+    .tl-dot.active { background: var(--jaune); border-color: var(--jaune); color: #111; box-shadow: 0 0 16px rgba(245,183,0,0.5); }
+    .tl-dot.active.green { background: var(--vert); border-color: var(--vert); color: #06281a; box-shadow: 0 0 16px rgba(57,217,138,0.45); }
+    .tl-dot.active.orange { background: var(--orange); border-color: var(--orange); color: #111; box-shadow: 0 0 16px rgba(255,140,102,0.4); }
+    .tl-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gris); text-align: center; }
+    .tl-label.done   { color: var(--vert); }
+    .tl-label.active { color: var(--jaune); }
+    .tl-label.active.green  { color: var(--vert); }
+    .tl-label.active.orange { color: var(--orange); }
+    .tl-line {
+      flex: 1; height: 2px; background: rgba(255,255,255,0.08); border-radius: 999px;
+      margin-bottom: 20px;
+    }
+    .tl-line.done { background: var(--vert); }
+
+    /* ── BARRE PROGRESSION ── */
+    .progress-section { margin-bottom: 24px; }
+    .progress-label-row { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--gris); margin-bottom: 8px; }
+    .progress-label-row b { color: var(--blanc); }
+    .progress-track { height: 10px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
+    .progress-fill  { height: 100%; border-radius: 999px; transition: width 1s ease; }
+    .fill-vert   { background: linear-gradient(90deg, var(--vert), #7fffbe); box-shadow: 0 0 12px rgba(57,217,138,0.5); }
+    .fill-orange { background: linear-gradient(90deg, var(--orange), #ffb899); }
+    .fill-jaune  { background: linear-gradient(90deg, var(--jaune), var(--jaune-soft)); box-shadow: 0 0 12px rgba(245,183,0,0.4); }
+
+    /* ── INFOS GRID ── */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .info-cell {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 14px 16px;
+    }
+    .info-cell-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--gris); margin-bottom: 4px; }
+    .info-cell-value { font-size: 0.96rem; font-weight: 800; color: var(--blanc); }
+
+    /* ── COUNTDOWN ── */
+    .countdown-block {
+      background: rgba(245,183,0,0.08); border: 1px solid rgba(245,183,0,0.2);
+      border-radius: 18px; padding: 20px 24px; text-align: center; margin-bottom: 20px;
+    }
+    .countdown-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--jaune-soft); margin-bottom: 8px; }
+    .countdown-value { font-size: 2.4rem; font-weight: 900; color: var(--jaune); letter-spacing: 1px; }
+    .countdown-sub { font-size: 0.78rem; color: var(--gris); margin-top: 4px; }
+
+    /* ── BTN RETOUR ── */
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: var(--gris);
+      font-size: 0.88rem; font-weight: 700; text-decoration: none;
+      transition: all 0.2s ease; align-self: flex-start;
+    }
+    .btn-back:hover { background: rgba(255,255,255,0.09); color: var(--blanc); }
+
+    /* ── LOADING / ERROR ── */
+    .loading-state { text-align: center; padding: 80px 20px; color: var(--gris); }
+    .loading-state .spin {
+      width: 44px; height: 44px; border-radius: 50%; margin: 0 auto 16px;
+      border: 3px solid rgba(255,255,255,0.08); border-top: 3px solid var(--jaune);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ANNULÉ / REFUSÉ ── */
+    .alert-banner {
+      padding: 14px 18px; border-radius: 16px; font-size: 0.9rem; line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .alert-rouge { background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3); color: #ffd6d6; }
+
+    @media (max-width: 480px) {
+      .state-card { padding: 24px 20px; }
+      .info-grid { grid-template-columns: 1fr; }
+      .countdown-value { font-size: 1.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="dot"></span> CINÉPOP</div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/index.html">Accueil</a>
+    <a href="/programme.html">Programme</a>
+    <a href="/historique.html">Historique</a>
+    <a href="/support.html">Support</a>
+    <a href="/connexion.html" id="navAuthMobile" class="nav-auth-mobile" style="display:none;">
+      <span class="nav-emoji-mobile">👤</span> Mon compte
+    </a>
+  </div>
+  <a href="/connexion.html" class="nav-avatar" id="navAuthLink" title="Connexion">👤</a>
+</nav>
+
+<div class="wrap" id="mainWrap">
+  <div class="loading-state">
+    <div class="spin"></div>
+    <p>Chargement de la séance…</p>
+  </div>
+</div>
+
+<script>
+// ── UTILS ──
+function pad(n) { return String(n).padStart(2, "0"); }
+
+function formatDate(d) {
+  return new Date(d + "T00:00:00").toLocaleDateString("fr-FR", {
+    weekday: "long", day: "2-digit", month: "long", year: "numeric"
+  });
+}
+
+function sessionDateMs(date, time) {
+  return new Date(`${date}T${time}:00`).getTime();
+}
+
+function msToHM(ms) {
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h > 0) return `${h}h${pad(m)}`;
+  return `${m} min`;
+}
+
+// ── ÉTAT ──
+// 1 = prévu (>15 min avant)
+// 2 = bientôt (≤15 min avant et pas encore commencé)
+// 3 = en cours (commencé, pas encore terminé)
+// 4 = terminé
+// 0 = annulé / refusé
+
+function computeState(seanceMs, durationMs, now) {
+  const diff = seanceMs - now; // ms avant début
+
+  if (diff > 15 * 60 * 1000)  return 1; // prévu
+  if (diff > 0)                 return 2; // bientôt (≤15 min)
+  if (now < seanceMs + durationMs) return 3; // en cours
+  return 4; // terminé
+}
+
+// ── RENDER ──
+function render(d) {
+  const wrap = document.getElementById("mainWrap");
+
+  const now        = Date.now();
+  const seanceMs   = sessionDateMs(d.sessionDate, d.sessionTime);
+  const durMs      = (d.durationMinutes || 120) * 60 * 1000;
+  const endMs      = seanceMs + durMs;
+
+  // État spécial : annulé ou refusé
+  const isCancelled = d.cancelled;
+  const isRefused   = d.status === "refusé";
+  const isExpired   = d.status === "expiré";
+  const isAttente   = d.status === "en attente";
+
+  let stateNum = computeState(seanceMs, durMs, now);
+  let specialState = null;
+  if (isCancelled)     specialState = "annule";
+  else if (isRefused)  specialState = "refuse";
+
+  // ── HERO POSTER ──
+  const posterHtml = d.posterUrl
+    ? `<img class="poster-hero-img" src="${d.posterUrl}" alt="${d.filmTitle}">`
+    : "";
+
+  const genreHtml = d.genre ? `<span>${d.genre}</span> <span>·</span>` : "";
+  const dureeHtml = d.durationMinutes ? `<span>${d.durationMinutes} min</span>` : "";
+
+  const hero = `
+    <div class="poster-hero">
+      ${posterHtml}
+      <div class="poster-hero-overlay"></div>
+      <div class="poster-hero-content">
+        <div class="poster-hero-pill"><span>🎬</span> CINÉPOP — Suivi séance</div>
+        <div class="poster-hero-title">${d.filmTitle}</div>
+        <div class="poster-hero-meta">
+          ${genreHtml}
+          ${dureeHtml}
+          ${d.roomNumber ? `<span>· ${d.roomNumber}</span>` : ""}
+        </div>
+      </div>
+    </div>`;
+
+  // ── TIMELINE HTML ──
+  // étapes : Réservé · Salle ouverte · En séance · Terminé
+  function tlDot(step, activeClass) {
+    const icons = ["✓", "🚪", "🎬", "★"];
+    if (step < stateNum)  return `<div class="tl-dot done">${icons[step - 1]}</div>`;
+    if (step === stateNum) return `<div class="tl-dot active ${activeClass}">${icons[step - 1]}</div>`;
+    return `<div class="tl-dot">${icons[step - 1]}</div>`;
+  }
+  function tlLabel(step, label, activeClass) {
+    if (step < stateNum)  return `<div class="tl-label done">${label}</div>`;
+    if (step === stateNum) return `<div class="tl-label active ${activeClass}">${label}</div>`;
+    return `<div class="tl-label">${label}</div>`;
+  }
+  function tlLine(afterStep) {
+    return `<div class="tl-line ${afterStep < stateNum ? "done" : ""}"></div>`;
+  }
+
+  const activeClassMap = { 1: "", 2: "", 3: "green", 4: "orange" };
+  const ac = activeClassMap[stateNum] || "";
+
+  const timeline = `
+    <div class="timeline">
+      <div class="tl-step">
+        ${tlDot(1, "")}
+        ${tlLabel(1, "Réservé", "")}
+      </div>
+      ${tlLine(1)}
+      <div class="tl-step">
+        ${tlDot(2, "")}
+        ${tlLabel(2, "Salle ouverte", "")}
+      </div>
+      ${tlLine(2)}
+      <div class="tl-step">
+        ${tlDot(3, "green")}
+        ${tlLabel(3, "En séance", "green")}
+      </div>
+      ${tlLine(3)}
+      <div class="tl-step">
+        ${tlDot(4, "orange")}
+        ${tlLabel(4, "Terminé", "orange")}
+      </div>
+    </div>`;
+
+  // ── INFO GRID ──
+  const infoGrid = `
+    <div class="info-grid">
+      <div class="info-cell">
+        <div class="info-cell-label">Date</div>
+        <div class="info-cell-value">📅 ${formatDate(d.sessionDate)}</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-cell-label">Heure de début</div>
+        <div class="info-cell-value">🕐 ${d.sessionTime}</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-cell-label">Salle</div>
+        <div class="info-cell-value">🏛 ${d.roomNumber || "—"}</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-cell-label">Places</div>
+        <div class="info-cell-value">🎟 ${d.peopleNumber} personne${d.peopleNumber > 1 ? "s" : ""}</div>
+      </div>
+    </div>`;
+
+  // ── ÉTAT CONTENT ──
+  let stateClass = "";
+  let iconHtml   = "";
+  let stateLabel = "";
+  let stateSub   = "";
+  let extraHtml  = "";
+
+  if (specialState === "annule" || specialState === "refuse") {
+    stateClass = `state-${specialState}`;
+    iconHtml   = "🚫";
+    stateLabel = specialState === "annule" ? "Séance annulée" : "Réservation refusée";
+    stateSub   = specialState === "annule"
+      ? "Cette séance a été annulée. Contacte le support si tu as des questions."
+      : "Ta réservation a été refusée. Contacte le support si tu as des questions.";
+    extraHtml  = `<div class="alert-banner alert-rouge">Si tu penses qu'il s'agit d'une erreur, contacte-nous via la page <a href="/support.html" style="color:var(--jaune-soft);font-weight:700;">Support</a>.</div>`;
+  } else if (stateNum === 1) {
+    stateClass = "state-prevu";
+    iconHtml   = "📅";
+    stateLabel = "Séance prévue";
+
+    const diffMin = Math.floor((seanceMs - now) / 60000);
+    const diffH   = Math.floor(diffMin / 60);
+    const diffM   = diffMin % 60;
+
+    stateSub = diffH > 0
+      ? `Dans ${diffH}h${diffM > 0 ? pad(diffM) + "min" : ""} — rendez-vous à ${d.sessionTime}`
+      : `Dans ${diffMin} minute${diffMin > 1 ? "s" : ""} — rendez-vous à ${d.sessionTime}`;
+
+    // Compte à rebours stylisé
+    const h = String(Math.floor(diffMin / 60)).padStart(2, "0");
+    const m = String(diffMin % 60).padStart(2, "0");
+    extraHtml = `
+      <div class="countdown-block">
+        <div class="countdown-label">Temps avant la séance</div>
+        <div class="countdown-value">${h}:${m}</div>
+        <div class="countdown-sub">heures : minutes</div>
+      </div>`;
+
+  } else if (stateNum === 2) {
+    stateClass = "state-bientot";
+    iconHtml   = "🚪";
+    stateLabel = "La salle est accessible";
+
+    const diffMin = Math.floor((seanceMs - now) / 60000);
+    stateSub = diffMin <= 0
+      ? "La séance commence dans quelques instants !"
+      : `La séance commence dans ${diffMin} minute${diffMin > 1 ? "s" : ""} — entre maintenant !`;
+
+    const pct = Math.round(((15 * 60 * 1000 - (seanceMs - now)) / (15 * 60 * 1000)) * 100);
+    extraHtml = `
+      <div class="progress-section">
+        <div class="progress-label-row">
+          <span>Salle accessible</span>
+          <b>Début dans ${diffMin} min</b>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill fill-jaune" style="width:${Math.min(100, pct)}%"></div>
+        </div>
+      </div>`;
+
+  } else if (stateNum === 3) {
+    stateClass = "state-encours";
+    iconHtml   = "🎬";
+    stateLabel = "Film en cours";
+
+    const elapsed    = now - seanceMs;
+    const remaining  = endMs - now;
+    const pct        = Math.min(100, Math.round((elapsed / durMs) * 100));
+    const elapsedStr = msToHM(elapsed);
+    const remainStr  = msToHM(remaining);
+
+    stateSub = `${elapsedStr} écoulé${d.durationMinutes ? ` · encore ~${remainStr}` : ""}`;
+
+    extraHtml = `
+      <div class="progress-section">
+        <div class="progress-label-row">
+          <span>Début : ${d.sessionTime}</span>
+          <b>${elapsedStr} / ${d.durationMinutes ? d.durationMinutes + " min" : "~2h"}</b>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill fill-vert" style="width:${pct}%"></div>
+        </div>
+        <div class="progress-label-row" style="margin-top:6px;">
+          <span></span>
+          <span>${d.durationMinutes ? `Fin estimée vers ${estimateEndTime(d.sessionTime, d.durationMinutes)}` : "Durée inconnue"}</span>
+        </div>
+      </div>`;
+
+  } else {
+    stateClass = "state-termine";
+    iconHtml   = "★";
+    stateLabel = "Film terminé";
+    stateSub   = `La séance s'est terminée à ${estimateEndTime(d.sessionTime, d.durationMinutes || 120)}. À bientôt chez CinéPop !`;
+    extraHtml  = `
+      <div class="progress-section">
+        <div class="progress-label-row"><span>Progression</span><b>100%</b></div>
+        <div class="progress-track">
+          <div class="progress-fill fill-orange" style="width:100%"></div>
+        </div>
+      </div>`;
+  }
+
+  // ── STATUT RÉSERVATION ──
+  const statusMap = {
+    "validé":     { chip: "rgba(57,217,138,0.14)", color: "var(--vert)", label: "✅ Réservation validée" },
+    "en attente": { chip: "rgba(245,183,0,0.14)",  color: "var(--jaune-soft)", label: "⏳ En attente de validation" },
+    "refusé":     { chip: "rgba(255,107,107,0.14)", color: "var(--rouge)", label: "❌ Réservation refusée" },
+    "expiré":     { chip: "rgba(255,140,102,0.14)", color: "var(--orange)", label: "⏱ Réservation expirée" },
+  };
+  const st = statusMap[d.status] || statusMap["en attente"];
+  const statusBadge = `
+    <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;
+      background:${st.chip};color:${st.color};font-size:0.8rem;font-weight:700;margin-bottom:20px;">
+      ${st.label}
+    </div>`;
+
+  // ── ASSEMBLAGE ──
+  wrap.innerHTML = `
+    <a href="/compte.html" class="btn-back">← Retour à mon compte</a>
+    ${hero}
+    <div class="state-card ${stateClass}">
+      ${specialState ? "" : statusBadge}
+      <div class="state-icon-wrap">${iconHtml}</div>
+      <div class="state-label">${stateLabel}</div>
+      <div class="state-sublabel">${stateSub}</div>
+      ${specialState ? extraHtml : ""}
+      ${specialState ? "" : timeline}
+      ${specialState ? "" : extraHtml}
+      ${infoGrid}
+    </div>`;
+}
+
+function estimateEndTime(startTime, durationMinutes) {
+  const [h, m] = startTime.split(":").map(Number);
+  const totalMin = h * 60 + m + durationMinutes;
+  return `${pad(Math.floor(totalMin / 60) % 24)}:${pad(totalMin % 60)}`;
+}
+
+// ── INIT ──
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+
+  if (!id) {
+    document.getElementById("mainWrap").innerHTML =
+      `<div class="loading-state"><p>Identifiant de réservation manquant.</p><a href="/compte.html" class="btn-back" style="margin:20px auto 0;">← Retour</a></div>`;
+    return;
+  }
+
+  try {
+    const res  = await fetch(`/api/seance/${encodeURIComponent(id)}`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+    render(data);
+  } catch (err) {
+    document.getElementById("mainWrap").innerHTML =
+      `<div class="loading-state"><p>Impossible de charger la séance.<br><small>${err.message || ""}</small></p><a href="/compte.html" class="btn-back" style="margin:20px auto 0;">← Retour</a></div>`;
+  }
+}
+
+document.getElementById("navToggle").addEventListener("click", () => {
+  document.getElementById("navLinks").classList.toggle("open");
+});
+
+init();
+</script>
+<script src="/nav-auth.js"></script>
+</body>
+</html>
