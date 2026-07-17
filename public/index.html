@@ -1,229 +1,782 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CinéPop — Accueil</title>
-<link rel="icon" href="img/favicon.ico">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPS Simulateur — Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bleu: #07111f; --bleu2: #0f1d33; --bleu3: #17284a;
-    --jaune: #f5b700; --jaune-soft: #ffd84d;
-    --blanc: #ffffff; --gris: #a7b3d1;
-    --ombre: rgba(0, 0, 0, 0.45);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    min-height: 100vh;
-    color: var(--blanc);
-    background:
-      radial-gradient(circle at top, rgba(245, 183, 0, 0.14), transparent 28%),
-      radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
-      linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0a0d12; --surface:#111620; --card:#161c27; --border:#1e2736;
+  --accent:#00d084; --blue:#0ea5e9; --purple:#a855f7; --warn:#f59e0b; --danger:#ef4444;
+  --text:#e2e8f0; --muted:#64748b; --radius:14px; --shadow:0 8px 32px rgba(0,0,0,.6);
+}
+html,body { min-height:100%; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
 
-  nav {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 22px 32px; max-width: 1200px; margin: 0 auto;
-  }
-  .logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.2rem; letter-spacing:0.5px; }
-  .logo .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
-  .nav-links { display:flex; gap:8px; align-items:center; }
-  .nav-links a {
-    color: var(--gris); text-decoration:none; font-weight:600; font-size:0.92rem;
-    padding:9px 16px; border-radius:999px; transition: all 0.2s ease;
-  }
-  .nav-links a:hover, .nav-links a.active { color: var(--blanc); background: rgba(255,255,255,0.07); }
+/* TOPBAR */
+.topbar {
+  position:sticky; top:0; z-index:100;
+  background:rgba(10,13,18,.9); backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:16px; padding:0 32px; height:60px;
+}
+.logo-wrap { display:flex; align-items:center; gap:10px; }
+.logo-icon { width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--blue)); display:flex; align-items:center; justify-content:center; font-size:17px; }
+.logo-title { font-size:16px; font-weight:700; }
+.logo-sub { font-size:11px; color:var(--muted); margin-left:6px; }
+.spacer { flex:1; }
+.live-badge { display:flex; align-items:center; gap:6px; padding:5px 12px; border-radius:99px; background:var(--surface); border:1px solid var(--border); font-size:12px; font-weight:600; }
+.live-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.btn-primary { display:flex; align-items:center; gap:7px; padding:8px 18px; border-radius:99px; border:none; background:linear-gradient(135deg,var(--accent),var(--blue)); color:#0a0d12; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:opacity .15s,transform .1s; }
+.btn-primary:hover { opacity:.9; }
+.btn-primary:active { transform:scale(.97); }
 
-  /* ── BULLE AVATAR ── */
-  .nav-avatar {
-    width: 38px; height: 38px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
-    border-radius: 52% 48% 55% 45% / 50% 46% 54% 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; text-decoration: none;
-    box-shadow: 0 0 16px rgba(245,183,0,0.35);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 2px solid rgba(245,183,0,0.6);
-  }
-  .nav-avatar:hover { transform: scale(1.1); box-shadow: 0 0 24px rgba(245,183,0,0.55); }
-  .nav-link-connexion { color: var(--gris) !important; }
+/* MAIN */
+main { max-width:1200px; margin:0 auto; padding:32px; }
 
-  .nav-toggle {
-    display: none;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: var(--blanc); font-size: 1.3rem; line-height: 1;
-    padding: 8px 14px; border-radius: 12px; cursor: pointer;
-  }
+/* STATS */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:32px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; position:relative; overflow:hidden; }
+.stat-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--c1),var(--c2)); }
+.stat-card.c-green  { --c1:var(--accent); --c2:var(--blue); }
+.stat-card.c-blue   { --c1:var(--blue);   --c2:var(--purple); }
+.stat-card.c-purple { --c1:var(--purple); --c2:var(--warn); }
+.stat-card.c-warn   { --c1:var(--warn);   --c2:var(--danger); }
+.stat-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
+.stat-value { font-size:32px; font-weight:800; font-family:'JetBrains Mono',monospace; line-height:1; }
+.stat-value.c-green  { color:var(--accent); }
+.stat-value.c-blue   { color:var(--blue); }
+.stat-value.c-purple { color:var(--purple); }
+.stat-value.c-warn   { color:var(--warn); }
+.stat-sub { font-size:11px; color:var(--muted); margin-top:4px; }
 
-  .hero {
-    max-width: 1100px; margin: 40px auto 0; padding: 0 24px;
-    display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; align-items: center;
-  }
+/* TOOLBAR */
+.toolbar { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.toolbar-title { font-size:18px; font-weight:700; flex:1; }
+.search-wrap { position:relative; }
+.search-input { padding:8px 12px 8px 32px; background:var(--surface); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:13px; font-family:inherit; outline:none; width:220px; transition:border-color .2s; }
+.search-input:focus { border-color:var(--blue); }
+.search-input::placeholder { color:var(--muted); }
+.search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; }
+.filter-row { display:flex; gap:4px; }
+.filter-btn { padding:7px 13px; border-radius:8px; border:1px solid var(--border); background:none; color:var(--muted); font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; transition:all .15s; }
+.filter-btn:hover { color:var(--text); border-color:var(--blue); }
+.filter-btn.active { background:rgba(14,165,233,.12); border-color:var(--blue); color:var(--blue); }
 
-  .brand-pill {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 10px 14px; border-radius: 999px;
-    background: rgba(245, 183, 0, 0.12); color: var(--jaune-soft);
-    font-weight: 700; border: 1px solid rgba(245, 183, 0, 0.22); margin-bottom: 22px;
-  }
-  .brand-pill .dot { width:10px; height:10px; border-radius:50%; background: var(--jaune); box-shadow: 0 0 18px rgba(245,183,0,0.8); }
+/* GRID */
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:14px; }
 
-  h1 { font-size: clamp(2.4rem, 5vw, 4.2rem); line-height: 1.04; font-weight: 900; letter-spacing: -0.04em; max-width: 12ch; }
-  .subtitle { margin-top: 18px; max-width: 50ch; color: var(--gris); font-size: 1.08rem; line-height: 1.7; }
+/* CARD */
+.sim-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:border-color .2s,transform .15s,box-shadow .2s; display:block; text-decoration:none; cursor:pointer; }
+.sim-card:hover { border-color:var(--blue); transform:translateY(-2px); box-shadow:0 12px 40px rgba(0,0,0,.4); }
+.sim-card.s-running  { border-color:rgba(0,208,132,.3); }
+.sim-card.s-arrived  { border-color:rgba(168,85,247,.2); }
+.sim-card.s-scheduled { border-color:rgba(245,158,11,.25); }
 
-  .cta-row { display:flex; flex-wrap:wrap; gap:14px; margin-top: 30px; }
-  .btn {
-    display:inline-flex; align-items:center; justify-content:center;
-    padding: 16px 26px; border-radius: 14px; font-weight: 900; font-size: 1rem;
-    text-decoration:none; cursor:pointer; border:none; transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .btn-primary { background: linear-gradient(135deg, var(--jaune), var(--jaune-soft)); color:#111; box-shadow: 0 12px 28px rgba(245,183,0,0.24); }
-  .btn-primary:hover { transform: translateY(-2px); }
-  .btn-ghost { background: rgba(255,255,255,0.06); color: var(--blanc); border:1px solid rgba(255,255,255,0.12); }
-  .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+.card-body { padding:16px 18px 14px; }
+.card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:10px; }
+.card-name { font-size:15px; font-weight:700; color:var(--text); }
+.card-date { font-size:10px; color:var(--muted); margin-top:2px; }
 
-  .chips { display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; }
-  .chip { padding:10px 14px; border-radius:999px; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#dbe6ff; font-size:0.92rem; }
+.status-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:99px; font-size:10px; font-weight:700; white-space:nowrap; flex-shrink:0; }
+.status-pill.running   { background:rgba(0,208,132,.12);  color:var(--accent);  border:1px solid rgba(0,208,132,.3); }
+.status-pill.paused    { background:rgba(14,165,233,.1);  color:var(--blue);    border:1px solid rgba(14,165,233,.25); }
+.status-pill.arrived   { background:rgba(168,85,247,.1);  color:var(--purple);  border:1px solid rgba(168,85,247,.25); }
+.status-pill.scheduled { background:rgba(245,158,11,.1);  color:var(--warn);    border:1px solid rgba(245,158,11,.25); }
+.pill-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.status-pill.running .pill-dot { animation:pulse 1.5s infinite; }
 
-  .poster {
-    border-radius: 28px; min-height: 380px;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
-      radial-gradient(circle at 20% 20%, rgba(245,183,0,0.22), transparent 30%),
-      radial-gradient(circle at 80% 30%, rgba(255,255,255,0.08), transparent 22%),
-      linear-gradient(135deg, #132743, #08101d);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 24px 70px var(--ombre);
-    position: relative; overflow: hidden;
-    display:flex; align-items:flex-end;
-  }
-  .poster img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:0.9; }
-  .poster-badge {
-    position: relative; margin: 18px; padding: 10px 14px; border-radius: 14px;
-    background: rgba(7, 17, 31, 0.75); border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px); color: var(--jaune-soft); font-weight: 700; z-index: 1;
-  }
+.card-route { font-size:12px; color:var(--muted); margin-bottom:12px; }
+.card-route strong { color:var(--text); font-weight:500; }
 
-  .section { max-width: 1100px; margin: 90px auto 0; padding: 0 24px; }
-  .section-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; }
-  .section-subtitle { color: var(--gris); margin-bottom: 32px; max-width: 60ch; line-height: 1.6; }
+.sched-tag { font-size:11px; color:var(--warn); background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.2); border-radius:6px; padding:4px 8px; margin-bottom:12px; display:inline-block; }
 
-  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .info-card { background: rgba(17, 34, 64, 0.78); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 22px; padding: 26px; }
-  .info-card .icon { font-size: 1.8rem; margin-bottom: 14px; }
-  .info-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
-  .info-card p { color: var(--gris); font-size: 0.95rem; line-height: 1.6; }
+.track { height:5px; background:var(--border); border-radius:99px; overflow:hidden; margin-bottom:10px; }
+.track-fill { height:100%; border-radius:99px; }
+.track-fill.running   { background:linear-gradient(90deg,var(--accent),var(--blue)); }
+.track-fill.paused    { background:var(--blue); }
+.track-fill.arrived   { background:var(--accent); }
+.track-fill.scheduled { background:var(--warn); }
 
-  footer {
-    max-width: 1100px; margin: 90px auto 0; padding: 28px 24px 40px;
-    display:flex; justify-content:space-between; align-items:center;
-    color: var(--gris); font-size: 0.85rem; flex-wrap: wrap; gap: 12px;
-  }
-  footer a { color: var(--gris); text-decoration: none; }
-  footer a:hover { color: var(--blanc); }
+.card-meta { display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--muted); }
+.card-pct { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px; }
 
-  @media (max-width: 920px) {
-    .hero { grid-template-columns: 1fr; }
-    .grid3 { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 680px) {
-    nav { flex-wrap: wrap; }
-    .nav-toggle { display: block; }
-    .nav-links { display: none; width: 100%; flex-direction: column; gap: 6px; margin-top: 14px; }
-    .nav-links.open { display: flex; }
-    .nav-links a { text-align: center; padding: 12px 16px; }
-    .nav-avatar { display: none !important; }
-    .nav-auth-mobile {
-      display: flex !important; align-items: center; justify-content: center; gap: 8px;
-      background: rgba(245,183,0,0.1) !important; color: var(--blanc) !important;
-    }
-  }
+.card-footer { padding:10px 18px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,.15); }
+.card-km { font-size:11px; color:var(--muted); }
+.card-km strong { color:var(--text); font-family:'JetBrains Mono',monospace; }
+.card-actions { display:flex; gap:6px; }
+.btn-card { padding:5px 10px; border-radius:7px; border:1px solid var(--border); background:none; color:var(--muted); font-size:11px; font-weight:600; font-family:inherit; cursor:pointer; transition:all .15s; }
+.btn-card.open:hover  { border-color:var(--blue);   color:var(--blue);   background:rgba(14,165,233,.08); }
+.btn-card.del:hover   { border-color:var(--danger);  color:var(--danger); background:rgba(239,68,68,.08); }
+
+/* EMPTY */
+.empty { text-align:center; padding:80px 20px; grid-column:1/-1; }
+.empty-icon { font-size:52px; margin-bottom:16px; opacity:.7; }
+.empty h2 { font-size:20px; font-weight:700; margin-bottom:8px; }
+.empty p { font-size:14px; color:var(--muted); margin-bottom:24px; }
+
+/* MODAL base */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .2s; }
+.overlay.open { opacity:1; pointer-events:all; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:28px; width:100%; max-width:520px; box-shadow:var(--shadow); transform:scale(.95) translateY(10px); transition:transform .25s; max-height:90vh; overflow-y:auto; }
+.overlay.open .modal { transform:scale(1) translateY(0); }
+.modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.modal-head h2 { font-size:18px; font-weight:700; }
+.modal-x { width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:none; color:var(--muted); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.modal-x:hover { color:var(--text); border-color:var(--text); }
+.form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+.form-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+.form-input { padding:10px 12px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:13px; font-family:inherit; outline:none; transition:border-color .2s; width:100%; }
+.form-input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(14,165,233,.1); }
+.form-input::placeholder { color:var(--muted); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.modal-actions { display:flex; gap:8px; margin-top:20px; }
+.btn-cancel { flex:1; padding:10px; border-radius:10px; border:1px solid var(--border); background:none; color:var(--text); font-size:13px; font-family:inherit; cursor:pointer; }
+.btn-cancel:hover { background:var(--card); }
+.btn-submit { flex:2; padding:10px; border-radius:10px; border:none; background:linear-gradient(135deg,var(--accent),var(--blue)); color:#0a0d12; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; }
+.btn-submit:hover { opacity:.9; }
+.btn-submit:disabled { opacity:.4; cursor:not-allowed; }
+.btn-danger { flex:1; padding:10px; border-radius:10px; border:none; background:var(--danger); color:#fff; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; }
+.btn-danger:hover { opacity:.85; }
+
+/* CHAMP ADRESSE avec suggestions */
+.addr-field-wrap { position:relative; }
+.addr-row-input { display:flex; gap:6px; }
+.addr-row-input .form-input { flex:1; min-width:0; }
+.btn-pick-map { flex-shrink:0; width:38px; height:38px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--muted); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.btn-pick-map:hover, .btn-pick-map.active { border-color:var(--accent); color:var(--accent); background:rgba(0,208,132,.08); }
+.addr-sugg { position:absolute; top:calc(100% + 4px); left:0; right:44px; background:var(--card); border:1px solid var(--border); border-radius:10px; z-index:300; box-shadow:var(--shadow); overflow:hidden; display:none; }
+.addr-sugg.open { display:block; }
+.addr-sugg-item { padding:9px 13px; font-size:12px; cursor:pointer; border-bottom:1px solid var(--border); line-height:1.4; transition:background .1s; }
+.addr-sugg-item:last-child { border-bottom:none; }
+.addr-sugg-item:hover { background:rgba(0,208,132,.07); }
+.addr-sugg-item b { color:var(--text); font-weight:600; display:block; }
+.addr-sugg-item span { color:var(--muted); font-size:11px; }
+.addr-picked-tag { font-size:11px; color:var(--accent); margin-top:5px; padding:3px 8px; background:rgba(0,208,132,.07); border-radius:6px; display:none; }
+.addr-picked-tag.on { display:block; }
+
+/* MODALE CARTE */
+#modal-map { z-index:1100; }
+#modal-map .modal { max-width:680px; padding:20px; }
+#pick-map-container { width:100%; height:380px; border-radius:12px; overflow:hidden; border:1px solid var(--border); margin:14px 0; position:relative; }
+#pick-map { width:100%; height:100%; }
+#pick-map-hint { position:absolute; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.72); color:#fff; font-size:12px; font-weight:600; padding:6px 14px; border-radius:99px; pointer-events:none; white-space:nowrap; z-index:10; }
+#pick-map-confirm { width:100%; padding:10px; border-radius:10px; border:none; background:linear-gradient(135deg,var(--accent),var(--blue)); color:#0a0d12; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:opacity .15s; }
+#pick-map-confirm:disabled { opacity:.4; cursor:not-allowed; }
+#pick-map-confirm:not(:disabled):hover { opacity:.88; }
+
+/* TOAST */
+#toast { position:fixed; bottom:24px; right:24px; z-index:9999; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 18px; font-size:13px; box-shadow:var(--shadow); transform:translateY(80px); opacity:0; transition:transform .3s,opacity .3s; pointer-events:none; }
+#toast.show { transform:translateY(0); opacity:1; }
+
+@media(max-width:700px) { main{padding:16px;} .stats-row{grid-template-columns:1fr 1fr;} .topbar{padding:0 16px;} .live-badge{display:none;} }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="logo"><span class="dot"></span> CINÉPOP</div>
-  <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
-  <div class="nav-links" id="navLinks">
-    <a href="/index.html" class="active">Accueil</a>
-    <a href="/programme.html">Programme</a>
-    <a href="/historique.html">Historique</a>
-    <a href="/support.html">Support</a>
-    <a href="/connexion.html" id="navAuthMobile" class="nav-auth-mobile" style="display:none;">
-      <span class="nav-emoji-mobile">👤</span> Mon compte
-    </a>
+<nav class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-icon">🗺️</div>
+    <span class="logo-title">GPS Simulateur</span>
+    <span class="logo-sub">Dashboard</span>
   </div>
-  <a href="/connexion.html" class="nav-avatar" id="navAuthLink" title="Connexion">👤</a>
+  <div class="spacer"></div>
+  <div class="live-badge">
+    <span class="live-dot"></span>
+    <span id="running-count">0</span>&nbsp;en cours
+  </div>
+  <button class="btn-primary" onclick="openNewModal()">＋ Nouvelle simulation</button>
 </nav>
 
-<div class="hero">
-  <div>
-    <div class="brand-pill"><span class="dot"></span> Votre cinéma préféré !</div>
-    <h1>Et POP, voilà votre ciné !</h1>
-    <p class="subtitle">
-      CinéPop, c'est du cinéma simple, chaleureux et accessible. Découvrez le programme
-      de la semaine et réservez votre séance en quelques clics, sans file d'attente.
+<main>
+  <div class="stats-row">
+    <div class="stat-card c-green">
+      <div class="stat-label">Total</div>
+      <div class="stat-value c-green" id="s-total">0</div>
+      <div class="stat-sub">simulations</div>
+    </div>
+    <div class="stat-card c-blue">
+      <div class="stat-label">En cours</div>
+      <div class="stat-value c-blue" id="s-running">0</div>
+      <div class="stat-sub">actives</div>
+    </div>
+    <div class="stat-card c-purple">
+      <div class="stat-label">Terminées</div>
+      <div class="stat-value c-purple" id="s-arrived">0</div>
+      <div class="stat-sub">destinations atteintes</div>
+    </div>
+    <div class="stat-card c-warn">
+      <div class="stat-label">Planifiées</div>
+      <div class="stat-value c-warn" id="s-scheduled">0</div>
+      <div class="stat-sub">en attente</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-title">Simulations</div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="search" placeholder="Rechercher…" oninput="render()">
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('all')">Toutes</button>
+      <button class="filter-btn" onclick="setFilter('running')">En cours</button>
+      <button class="filter-btn" onclick="setFilter('paused')">Pause</button>
+      <button class="filter-btn" onclick="setFilter('scheduled')">Planifiées</button>
+      <button class="filter-btn" onclick="setFilter('arrived')">Terminées</button>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<!-- Modal: Nouvelle simulation -->
+<div class="overlay" id="modal-new" onclick="overlayClick(event,'modal-new')">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Nouvelle simulation</h2>
+      <button class="modal-x" onclick="closeModal('modal-new')">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nom (optionnel)</label>
+      <input class="form-input" id="f-name" placeholder="Ex: Trajet quotidien" autocomplete="off">
+    </div>
+
+    <!-- Départ -->
+    <div class="form-group">
+      <label class="form-label">Départ</label>
+      <div class="addr-field-wrap">
+        <div class="addr-row-input">
+          <input class="form-input" id="f-start" placeholder="Ex: Tour Eiffel, Paris" autocomplete="off">
+          <button class="btn-pick-map" id="btn-pick-start" title="Choisir sur la carte" onclick="openMapPick('start')">📍</button>
+        </div>
+        <div class="addr-sugg" id="sugg-start"></div>
+        <div class="addr-picked-tag" id="tag-start"></div>
+      </div>
+    </div>
+
+    <!-- Arrivée -->
+    <div class="form-group">
+      <label class="form-label">Arrivée</label>
+      <div class="addr-field-wrap">
+        <div class="addr-row-input">
+          <input class="form-input" id="f-end" placeholder="Ex: Musée du Louvre, Paris" autocomplete="off">
+          <button class="btn-pick-map" id="btn-pick-end" title="Choisir sur la carte" onclick="openMapPick('end')">📍</button>
+        </div>
+        <div class="addr-sugg" id="sugg-end"></div>
+        <div class="addr-picked-tag" id="tag-end"></div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Vitesse</label>
+        <select class="form-input" id="f-speed">
+          <option value="1">1× réel</option>
+          <option value="2">2×</option>
+          <option value="5" selected>5×</option>
+          <option value="10">10×</option>
+          <option value="20">20×</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Planifier (optionnel)</label>
+        <input class="form-input" type="datetime-local" id="f-schedule">
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-new')">Annuler</button>
+      <button class="btn-submit" id="btn-create" onclick="createSim()">🚀 Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Sélection sur carte -->
+<div class="overlay" id="modal-map" onclick="overlayClick(event,'modal-map')">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="pick-map-title">Choisir un point</h2>
+      <button class="modal-x" onclick="closeMapPick()">✕</button>
+    </div>
+    <div id="pick-map-container">
+      <div id="pick-map"></div>
+      <div id="pick-map-hint">Cliquez sur la carte pour placer le point</div>
+    </div>
+    <button id="pick-map-confirm" disabled onclick="confirmMapPick()">✓ Confirmer ce point</button>
+  </div>
+</div>
+
+<!-- Modal: Confirmer suppression -->
+<div class="overlay" id="modal-del" onclick="overlayClick(event,'modal-del')">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-head">
+      <h2>Supprimer ?</h2>
+      <button class="modal-x" onclick="closeModal('modal-del')">✕</button>
+    </div>
+    <p style="color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:20px">
+      Supprimer définitivement <strong id="del-name" style="color:var(--text)"></strong> ?
     </p>
-    <div class="cta-row">
-      <a class="btn btn-primary" href="/programme.html">🎬 Voir le programme</a>
-    </div>
-    <div class="chips">
-      <div class="chip">Sécurisé</div>
-      <div class="chip">Rapide</div>
-      <div class="chip">Sans frais de service</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-del')">Annuler</button>
+      <button class="btn-danger" onclick="doDelete()">Supprimer</button>
     </div>
   </div>
-
-  <div class="poster">
-    <img src="img/acp.png" alt="CinéPop">
-    <div class="poster-badge">🍿 Bienvenue chez CinéPop</div>
-  </div>
 </div>
 
-<div class="section">
-  <div class="section-title">Comment ça marche ?</div>
-  <div class="section-subtitle">Trois étapes, zéro complication.</div>
-  <div class="grid3">
-    <div class="info-card"><div class="icon">📅</div><h3>1. Choisissez votre séance</h3><p>Consultez le programme : films, salles et horaires disponibles, mis à jour en direct.</p></div>
-    <div class="info-card"><div class="icon">✍️</div><h3>2. Réservez en ligne</h3><p>Indiquez votre nom, votre email et le nombre de places.</p></div>
-    <div class="info-card"><div class="icon">🎟️</div><h3>3. Récupérez votre ticket</h3><p>Une fois votre réservation validée, votre billet avec QR code vous est remis.</p></div>
-  </div>
-</div>
+<div id="toast"></div>
 
-<div class="section" id="infos">
-  <div class="section-title">ℹ️ Infos pratiques</div>
-  <div class="section-subtitle">Tout ce qu'il faut savoir avant de venir.</div>
-  <div class="info-card" id="infoContent" style="white-space: pre-wrap; line-height: 1.8; color: var(--gris); font-size: 0.95rem; max-width: 700px;"></div>
-</div>
-
-<footer>
-  <div>© CinéPop — Tous droits réservés</div>
-  <div><a href="/admin.html">Espace administration</a></div>
-</footer>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-async function loadInfo() {
-  const res = await fetch("/api/info");
-  const data = await res.json();
-  const el = document.getElementById("infoContent");
-  if (data.ok && data.content) {
-    el.textContent = data.content;
-    document.getElementById("infos").style.display = "";
+const STATUS_LABEL = { running:'En cours', paused:'En pause', arrived:'Terminée', scheduled:'Planifiée' };
+let allSims = [], activeFilter = 'all', pendingDeleteId = null;
+
+/* ── FETCH ── */
+async function fetchSims() {
+  try {
+    const r = await fetch('/api/sims');
+    allSims = await r.json();
+    render();
+  } catch(e) { toast('❌ Erreur chargement'); }
+}
+
+/* ════════════════════════════════════════════
+   INTERPOLATION LOCALE (progression fluide entre 2 fetchs)
+════════════════════════════════════════════ */
+function advanceMetresLocal(sim, nowMs) {
+  if (sim.status !== 'running' || !sim.routeData) return sim.travelledMetres || 0;
+  const { cumDist, segSpeedKmh } = sim.routeData;
+  if (!cumDist || cumDist.length < 2) return sim.travelledMetres || 0;
+  const mult = sim.speedMult || 1, TM = sim.totalMetres;
+  let m = sim.travelledMetres || 0;
+  let simSec = (nowMs - (sim.savedAt || nowMs)) / 1000 * mult;
+  if (simSec <= 0) return m;
+  let ptr = bisect(cumDist, m);
+  while (simSec > 0 && m < TM) {
+    const mps = (segSpeedKmh[ptr] || 50) * 0.9 / 3.6;
+    const segEnd = Math.min(TM, cumDist[ptr+1] || TM);
+    const segSec = (segEnd - m) / mps;
+    if (simSec >= segSec) { m = segEnd; simSec -= segSec; ptr++; }
+    else { m += mps * simSec; simSec = 0; }
+  }
+  return Math.min(m, TM);
+}
+
+let rafHandle = null;
+function startInterpolationLoop() {
+  if (rafHandle) cancelAnimationFrame(rafHandle);
+  let lastUpdate = 0;
+  const FRAME_MS = 100; // ~10fps, suffisant pour une barre de progression fluide
+  const tick = (ts) => {
+    if (ts - lastUpdate >= FRAME_MS) {
+      lastUpdate = ts;
+      const now = Date.now();
+      document.querySelectorAll('.sim-card[data-running="1"]').forEach(card => {
+        const id = card.dataset.simId;
+        const sim = allSims.find(s => s.id === id);
+        if (!sim || !sim.routeData || !sim.totalMetres) return;
+        const m = advanceMetresLocal(sim, now);
+        const pct = Math.min(100, m / sim.totalMetres * 100);
+
+        const track = card.querySelector('[data-track]');
+        const pctEl = card.querySelector('[data-pct]');
+        const etaEl = card.querySelector('[data-eta]');
+        const kmEl  = card.querySelector('[data-km]');
+        if (track) track.style.width = pct.toFixed(2) + '%';
+        if (pctEl) pctEl.textContent = pct.toFixed(1) + '%';
+        if (etaEl && sim.totalTimeSec) etaEl.textContent = etaLabel(sim, m);
+        if (kmEl) {
+          const total = (sim.totalMetres/1000).toFixed(1);
+          kmEl.innerHTML = `${(m/1000).toFixed(1)} / <strong>${total}</strong> km · ${sim.speedMult||1}×`;
+        }
+      });
+    }
+    rafHandle = requestAnimationFrame(tick);
+  };
+  rafHandle = requestAnimationFrame(tick);
+}
+
+/* ── RENDER ── */
+function render() {
+  const q = (document.getElementById('search').value || '').toLowerCase();
+  let list = allSims.slice();
+  if (activeFilter !== 'all') list = list.filter(s => s.status === activeFilter);
+  if (q) list = list.filter(s =>
+    (s.name||'').toLowerCase().includes(q) ||
+    (s.startName||'').toLowerCase().includes(q) ||
+    (s.endName||'').toLowerCase().includes(q)
+  );
+  const ord = { running:0, scheduled:1, paused:2, arrived:3 };
+  list.sort((a,b) => {
+    const d = (ord[a.status]||9) - (ord[b.status]||9);
+    return d !== 0 ? d : new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
+  document.getElementById('s-total').textContent     = allSims.length;
+  document.getElementById('s-running').textContent   = allSims.filter(s=>s.status==='running').length;
+  document.getElementById('s-arrived').textContent   = allSims.filter(s=>s.status==='arrived').length;
+  document.getElementById('s-scheduled').textContent = allSims.filter(s=>s.status==='scheduled').length;
+  document.getElementById('running-count').textContent = allSims.filter(s=>s.status==='running').length;
+
+  const grid = document.getElementById('grid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty">
+      <div class="empty-icon">🗺️</div>
+      <h2>${allSims.length ? 'Aucun résultat' : 'Aucune simulation'}</h2>
+      <p>${allSims.length ? 'Changez de filtre.' : 'Créez votre première simulation.'}</p>
+      ${!allSims.length ? '<button class="btn-primary" onclick="openNewModal()">＋ Nouvelle simulation</button>' : ''}
+    </div>`;
+    return;
+  }
+  grid.innerHTML = list.map(buildCard).join('');
+}
+
+function buildCard(sim) {
+  const status = sim.status || 'paused';
+  const pct = sim.totalMetres > 0 ? Math.min(100, (sim.travelledMetres||0)/sim.totalMetres*100) : 0;
+  const dist  = ((sim.travelledMetres||0)/1000).toFixed(1);
+  const total = ((sim.totalMetres||0)/1000).toFixed(1);
+  const date  = sim.createdAt ? new Date(sim.createdAt).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+  const name  = h(sim.name || 'Sans nom');
+
+  let eta = '';
+  if (status === 'running' && sim.routeData && sim.totalTimeSec) {
+    eta = etaLabel(sim, sim.travelledMetres || 0);
+  } else if (status === 'arrived')   { eta = '🎉 Arrivé'; }
+  else if (status === 'scheduled')   { eta = sim.scheduledAt ? new Date(sim.scheduledAt).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : ''; }
+  else { eta = 'En pause'; }
+
+  const schedLine = status === 'scheduled' && sim.scheduledAt
+    ? `<div class="sched-tag">⏰ ${new Date(sim.scheduledAt).toLocaleString('fr-FR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`
+    : '';
+
+  // data-attrs utilisés par l'interpolation locale (running uniquement)
+  const interpAttrs = status === 'running'
+    ? `data-sim-id="${sim.id}" data-running="1"`
+    : `data-sim-id="${sim.id}"`;
+
+  return `<div class="sim-card s-${status}" ${interpAttrs} onclick="goSim('${sim.id}')">
+    <div class="card-body">
+      <div class="card-head">
+        <div>
+          <div class="card-name">${name}</div>
+          <div class="card-date">${date}</div>
+        </div>
+        <div class="status-pill ${status}"><div class="pill-dot"></div>${STATUS_LABEL[status]||status}</div>
+      </div>
+      ${schedLine}
+      <div class="card-route"><strong>${h(sim.startName||'?')}</strong> → <strong>${h(sim.endName||'?')}</strong></div>
+      <div class="track"><div class="track-fill ${status}" data-track style="width:${pct.toFixed(1)}%"></div></div>
+      <div class="card-meta">
+        <span class="card-pct" data-pct>${pct.toFixed(1)}%</span>
+        <span data-eta>${eta}</span>
+      </div>
+    </div>
+    <div class="card-footer">
+      <div class="card-km" data-km>${dist} / <strong>${total}</strong> km · ${sim.speedMult||1}×</div>
+      <div class="card-actions" onclick="event.stopPropagation()">
+        <button class="btn-card open" onclick="goSim('${sim.id}')">Ouvrir →</button>
+        <button class="btn-card del"  onclick="askDelete('${sim.id}','${name}')">🗑</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function etaLabel(sim, m) {
+  const { cumDist, cumTime } = sim.routeData;
+  const ptr = bisect(cumDist, m);
+  const segD = ((cumDist[ptr+1]||cumDist[ptr]) - cumDist[ptr]) || 1;
+  const t = Math.min(1, (m - cumDist[ptr]) / segD);
+  const timeAt = cumTime[ptr] + ((cumTime[ptr+1]||cumTime[ptr]) - cumTime[ptr]) * t;
+  const rem = Math.max(0, sim.totalTimeSec - timeAt) / (sim.speedMult||1);
+  return `~${Math.ceil(rem/60)} min`;
+}
+
+function goSim(id) { window.location.href = '/sim/' + id; }
+
+/* ── FILTER ── */
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach((b,i) => {
+    const labels = ['all','running','paused','scheduled','arrived'];
+    b.classList.toggle('active', labels[i] === f);
+  });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   MODAL NOUVELLE SIMULATION
+════════════════════════════════════════════ */
+
+// Coordonnées sélectionnées (par suggestion ou par carte)
+let pickedCoords = { start: null, end: null };
+// Cache suggestions Nominatim
+const suggCache = {};
+// Timers debounce
+const suggTimers = {};
+
+function openNewModal() {
+  ['f-name','f-start','f-end','f-schedule'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-speed').value = '5';
+  document.getElementById('btn-create').disabled = false;
+  document.getElementById('btn-create').textContent = '🚀 Créer';
+  pickedCoords = { start: null, end: null };
+  ['start','end'].forEach(w => {
+    document.getElementById('sugg-'+w).classList.remove('open');
+    document.getElementById('sugg-'+w).innerHTML = '';
+    setPickedTag(w, null);
+  });
+  openModal('modal-new');
+}
+
+function setPickedTag(which, label) {
+  const tag = document.getElementById('tag-'+which);
+  if (label) {
+    tag.textContent = '📍 ' + label;
+    tag.classList.add('on');
   } else {
-    document.getElementById("infos").style.display = "none";
+    tag.classList.remove('on');
+    tag.textContent = '';
   }
 }
-loadInfo();
-document.getElementById("navToggle").addEventListener("click", () => {
-  document.getElementById("navLinks").classList.toggle("open");
-});
+
+// Suggestions d'adresse
+function wireAddrInput(inputId, suggId, which) {
+  const inp = document.getElementById(inputId);
+  const sug = document.getElementById(suggId);
+  inp.addEventListener('input', () => {
+    // L'utilisateur retape → invalider la sélection précédente
+    pickedCoords[which] = null;
+    setPickedTag(which, null);
+    clearTimeout(suggTimers[which]);
+    const q = inp.value.trim();
+    if (q.length < 3) { sug.classList.remove('open'); return; }
+    suggTimers[which] = setTimeout(() => fetchSugg(q, sug, inp, which), 300);
+  });
+  inp.addEventListener('blur', () => setTimeout(() => sug.classList.remove('open'), 200));
+}
+
+async function fetchSugg(q, sug, inp, which) {
+  if (!suggCache[q]) {
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}&addressdetails=1`);
+      suggCache[q] = await r.json();
+    } catch(e) { return; }
+  }
+  const results = suggCache[q];
+  if (!results.length) { sug.classList.remove('open'); return; }
+  sug.innerHTML = '';
+  results.forEach(item => {
+    const d = document.createElement('div');
+    d.className = 'addr-sugg-item';
+    const parts = item.display_name.split(',');
+    d.innerHTML = `<b>${h(parts[0])}</b><span>${h(parts.slice(1,3).join(',').trim())}</span>`;
+    d.onmousedown = () => {
+      inp.value = item.display_name;
+      pickedCoords[which] = { lat: +item.lat, lon: +item.lon, name: item.display_name };
+      setPickedTag(which, parts[0].trim());
+      sug.classList.remove('open');
+    };
+    sug.appendChild(d);
+  });
+  sug.classList.add('open');
+}
+
+wireAddrInput('f-start', 'sugg-start', 'start');
+wireAddrInput('f-end',   'sugg-end',   'end');
+
+/* ════════════════════════════════════════════
+   MODALE CARTE PICK
+════════════════════════════════════════════ */
+let pickMap = null, pickMapMarker = null, pickMapWhich = null, pickMapCoord = null;
+
+function openMapPick(which) {
+  pickMapWhich = which;
+  pickMapCoord = null;
+  document.getElementById('pick-map-title').textContent = which === 'start' ? '📍 Choisir le départ' : '📍 Choisir l\'arrivée';
+  document.getElementById('pick-map-confirm').disabled = true;
+  document.getElementById('btn-pick-start').classList.toggle('active', which === 'start');
+  document.getElementById('btn-pick-end').classList.toggle('active', which === 'end');
+  openModal('modal-map');
+
+  // Initialiser la carte une seule fois
+  if (!pickMap) {
+    pickMap = L.map('pick-map', { zoomControl: true }).setView([48.8566, 2.3522], 12);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© CARTO', subdomains: 'abcd', maxZoom: 19
+    }).addTo(pickMap);
+    pickMap.on('click', onPickMapClick);
+  }
+
+  // Pré-positionner sur une coord existante si dispo
+  const other = which === 'start' ? 'end' : 'start';
+  const existCoord = pickedCoords[which] || pickedCoords[other];
+  if (existCoord) pickMap.setView([existCoord.lat, existCoord.lon], 14);
+
+  // Afficher le marker existant s'il y en a un pour ce champ
+  if (pickMapMarker) { pickMap.removeLayer(pickMapMarker); pickMapMarker = null; }
+  if (pickedCoords[which]) {
+    const c = pickedCoords[which];
+    pickMapMarker = L.marker([c.lat, c.lon], { icon: pinIcon(which) }).addTo(pickMap);
+    pickMapCoord = c;
+    document.getElementById('pick-map-confirm').disabled = false;
+  }
+
+  // Forcer Leaflet à recalculer la taille (la modale était cachée)
+  setTimeout(() => pickMap.invalidateSize(), 50);
+}
+
+function onPickMapClick(e) {
+  const { lat, lng: lon } = e.latlng;
+  pickMapCoord = { lat, lon };
+  if (pickMapMarker) pickMap.removeLayer(pickMapMarker);
+  pickMapMarker = L.marker([lat, lon], { icon: pinIcon(pickMapWhich) }).addTo(pickMap);
+  document.getElementById('pick-map-confirm').disabled = false;
+  document.getElementById('pick-map-hint').textContent = 'Point sélectionné — confirmez ou cliquez ailleurs';
+}
+
+async function confirmMapPick() {
+  if (!pickMapCoord) return;
+  const btn = document.getElementById('pick-map-confirm');
+  btn.disabled = true;
+  btn.textContent = 'Géocodage…';
+
+  // Reverse geocoding pour obtenir un nom lisible
+  let name = `${pickMapCoord.lat.toFixed(5)}, ${pickMapCoord.lon.toFixed(5)}`;
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pickMapCoord.lat}&lon=${pickMapCoord.lon}`);
+    const d = await r.json();
+    if (d.display_name) name = d.display_name.split(',').slice(0,2).join(',').trim();
+  } catch(e) {}
+
+  const coord = { ...pickMapCoord, name };
+  pickedCoords[pickMapWhich] = coord;
+  document.getElementById('f-' + pickMapWhich).value = name;
+  setPickedTag(pickMapWhich, name.split(',')[0]);
+  document.getElementById('btn-pick-' + pickMapWhich).classList.remove('active');
+
+  btn.textContent = '✓ Confirmer ce point';
+  closeMapPick();
+}
+
+function closeMapPick() {
+  closeModal('modal-map');
+  document.getElementById('btn-pick-start').classList.remove('active');
+  document.getElementById('btn-pick-end').classList.remove('active');
+  document.getElementById('pick-map-hint').textContent = 'Cliquez sur la carte pour placer le point';
+  document.getElementById('pick-map-confirm').disabled = true;
+  document.getElementById('pick-map-confirm').textContent = '✓ Confirmer ce point';
+}
+
+function pinIcon(which) {
+  const col = which === 'start' ? '#00d084' : '#ef4444';
+  const em  = which === 'start' ? '🟢' : '🔴';
+  return L.divIcon({ className:'', iconSize:[32,32], iconAnchor:[16,30],
+    html:`<div style="background:${col};width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:13px;"><span style="transform:rotate(45deg)">${em}</span></div>`
+  });
+}
+
+/* ════════════════════════════════════════════
+   CRÉER SIMULATION
+════════════════════════════════════════════ */
+async function createSim() {
+  const name  = document.getElementById('f-name').value.trim();
+  const startTxt = document.getElementById('f-start').value.trim();
+  const endTxt   = document.getElementById('f-end').value.trim();
+  const speed = +document.getElementById('f-speed').value;
+  const sched = document.getElementById('f-schedule').value;
+  if (!startTxt || !endTxt) { toast('❌ Renseignez départ et arrivée'); return; }
+
+  const btn = document.getElementById('btn-create');
+  btn.disabled = true; btn.textContent = 'Géocodage…';
+  try {
+    // Utiliser les coords pickées si dispo, sinon géocoder le texte
+    const sc = pickedCoords.start || await geocode(startTxt);
+    const ec = pickedCoords.end   || await geocode(endTxt);
+
+    const simName = name || `${(sc.name || startTxt).split(',')[0]} → ${(ec.name || endTxt).split(',')[0]}`;
+    const body = {
+      name: simName, status: sched ? 'scheduled' : 'running',
+      startName: sc.name || startTxt, endName: ec.name || endTxt,
+      startCoord: { lat: sc.lat, lon: sc.lon },
+      endCoord:   { lat: ec.lat, lon: ec.lon },
+      speedMult: speed,
+      scheduledAt: sched ? new Date(sched).toISOString() : null,
+      travelledMetres: 0, totalMetres: 0, totalTimeSec: 0, routeData: null
+    };
+    const r   = await fetch('/api/sims', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const sim = await r.json();
+    closeModal('modal-new');
+    toast(`✅ "${simName}" créée`);
+    if (!sched) { window.location.href = '/sim/' + sim.id; return; }
+    await fetchSims();
+  } catch(e) {
+    toast('❌ ' + (e.message || 'Erreur'));
+  } finally {
+    btn.disabled = false; btn.textContent = '🚀 Créer';
+  }
+}
+
+async function geocode(q) {
+  const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`);
+  const d = await r.json();
+  if (!d.length) throw new Error(`Adresse introuvable: "${q}"`);
+  return { lat: +d[0].lat, lon: +d[0].lon, name: d[0].display_name.split(',').slice(0,2).join(',').trim() };
+}
+
+/* ── DELETE ── */
+function askDelete(id, name) {
+  pendingDeleteId = id;
+  document.getElementById('del-name').textContent = name;
+  openModal('modal-del');
+}
+async function doDelete() {
+  if (!pendingDeleteId) return;
+  try {
+    await fetch('/api/sims/' + pendingDeleteId, { method: 'DELETE' });
+    toast('🗑 Simulation supprimée');
+    closeModal('modal-del');
+    pendingDeleteId = null;
+    await fetchSims();
+  } catch(e) { toast('❌ Erreur suppression'); }
+}
+
+/* ── MODALS ── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function overlayClick(e, id) {
+  if (e.target === document.getElementById(id)) {
+    if (id === 'modal-map') { closeMapPick(); return; }
+    closeModal(id);
+  }
+}
+
+/* ── TOAST ── */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* ── UTILS ── */
+function h(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function bisect(arr, v) {
+  if (!arr || arr.length < 2) return 0;
+  let lo = 0, hi = arr.length - 2;
+  while (lo < hi) { const mid = (lo+hi+1)>>1; arr[mid] <= v ? lo=mid : hi=mid-1; }
+  return lo;
+}
+
+fetchSims();
+setInterval(fetchSims, 15000);
+startInterpolationLoop();
 </script>
-<script src="/nav-auth.js"></script>
 </body>
 </html>
