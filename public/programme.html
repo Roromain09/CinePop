@@ -22,9 +22,60 @@
       radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
       linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
     padding-bottom: 60px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ── DÉCOR FOND ── */
+  .bg-decor {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-decor svg {
+    position: absolute;
+    fill: var(--jaune);
+  }
+  .deco-cal-1 {
+    width: 220px; top: 5%; right: -30px;
+    opacity: 0.04;
+    transform: rotate(8deg);
+  }
+  .deco-clock-1 {
+    width: 180px; bottom: 15%; left: -20px;
+    opacity: 0.04;
+    transform: rotate(-12deg);
+  }
+  .deco-cal-2 {
+    width: 100px; top: 24%; left: 38%;
+    opacity: 0.028;
+    animation: prog-float 8s ease-in-out infinite;
+  }
+  .deco-clock-2 {
+    width: 130px; bottom: 8%; right: 5%;
+    opacity: 0.032;
+    transform: rotate(-10deg);
+  }
+  .deco-cal-3 {
+    width: 115px; top: 10%; left: 5%;
+    opacity: 0.03;
+    transform: rotate(20deg);
+    animation: prog-float 10s ease-in-out infinite reverse;
+  }
+  .deco-clock-3 {
+    width: 80px; top: 52%; right: 3%;
+    opacity: 0.025;
+    animation: prog-float 7s ease-in-out infinite;
+  }
+  @keyframes prog-float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-12px); }
   }
 
   nav {
+    position: relative; z-index: 1;
     display: flex; align-items: center; justify-content: space-between;
     padding: 22px 32px; max-width: 1200px; margin: 0 auto;
   }
@@ -57,7 +108,10 @@
     padding: 8px 14px; border-radius: 12px; cursor: pointer;
   }
 
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+  .wrap {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto; padding: 20px 24px;
+  }
   .page-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 8px; }
   .page-subtitle { color: var(--gris); margin-bottom: 36px; }
 
@@ -234,6 +288,95 @@
 </style>
 </head>
 <body>
+
+<!-- ── DÉCOR FOND ── -->
+<div class="bg-decor" aria-hidden="true">
+
+  <!-- Calendrier 1 (grand, haut droit) -->
+  <svg class="deco-cal-1" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="15" width="90" height="90" rx="8"/>
+    <rect x="5" y="15" width="90" height="22" rx="8"/>
+    <rect x="5" y="27" width="90" height="10"/>
+    <rect x="25" y="5" width="8" height="20" rx="4"/>
+    <rect x="67" y="5" width="8" height="20" rx="4"/>
+    <rect x="15" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="32" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="49" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="66" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="15" y="66" width="12" height="10" rx="2" fill="rgba(0,0,0,0.15)"/>
+    <rect x="32" y="66" width="12" height="10" rx="2" fill="rgba(0,0,0,0.15)"/>
+    <rect x="49" y="66" width="12" height="10" rx="2" fill="rgba(0,0,0,0.15)"/>
+    <rect x="66" y="66" width="12" height="10" rx="2" fill="rgba(0,0,0,0.15)"/>
+    <rect x="15" y="82" width="12" height="10" rx="2" fill="rgba(0,0,0,0.12)"/>
+    <rect x="32" y="82" width="12" height="10" rx="2" fill="rgba(0,0,0,0.12)"/>
+  </svg>
+
+  <!-- Horloge 1 (bas gauche) -->
+  <svg class="deco-clock-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="44"/>
+    <circle cx="50" cy="50" r="36" fill="rgba(0,0,0,0.15)"/>
+    <circle cx="50" cy="50" r="3"/>
+    <line x1="50" y1="50" x2="50" y2="22" stroke="rgba(0,0,0,0.25)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="50" y1="50" x2="68" y2="58" stroke="rgba(0,0,0,0.22)" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="50" y1="8" x2="50" y2="15" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+    <line x1="50" y1="85" x2="50" y2="92" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+    <line x1="8" y1="50" x2="15" y2="50" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+    <line x1="85" y1="50" x2="92" y2="50" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+  </svg>
+
+  <!-- Petit calendrier centre haut (flottant) -->
+  <svg class="deco-cal-2" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="15" width="90" height="90" rx="8"/>
+    <rect x="5" y="15" width="90" height="22" rx="8"/>
+    <rect x="5" y="27" width="90" height="10"/>
+    <rect x="25" y="5" width="8" height="20" rx="4"/>
+    <rect x="67" y="5" width="8" height="20" rx="4"/>
+    <rect x="15" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="32" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="49" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+  </svg>
+
+  <!-- Horloge 2 (bas droit) -->
+  <svg class="deco-clock-2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="44"/>
+    <circle cx="50" cy="50" r="36" fill="rgba(0,0,0,0.15)"/>
+    <circle cx="50" cy="50" r="3"/>
+    <line x1="50" y1="50" x2="34" y2="26" stroke="rgba(0,0,0,0.25)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="50" y1="50" x2="72" y2="44" stroke="rgba(0,0,0,0.22)" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="50" y1="8" x2="50" y2="15" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+    <line x1="50" y1="85" x2="50" y2="92" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+    <line x1="8" y1="50" x2="15" y2="50" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+    <line x1="85" y1="50" x2="92" y2="50" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+  </svg>
+
+  <!-- Calendrier haut gauche (flottant) -->
+  <svg class="deco-cal-3" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="15" width="90" height="90" rx="8"/>
+    <rect x="5" y="15" width="90" height="22" rx="8"/>
+    <rect x="5" y="27" width="90" height="10"/>
+    <rect x="25" y="5" width="8" height="20" rx="4"/>
+    <rect x="67" y="5" width="8" height="20" rx="4"/>
+    <rect x="15" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="32" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="49" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="66" y="50" width="12" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+    <rect x="15" y="66" width="12" height="10" rx="2" fill="rgba(0,0,0,0.15)"/>
+  </svg>
+
+  <!-- Petite horloge milieu droit (flottante) -->
+  <svg class="deco-clock-3" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="44"/>
+    <circle cx="50" cy="50" r="36" fill="rgba(0,0,0,0.15)"/>
+    <circle cx="50" cy="50" r="3"/>
+    <line x1="50" y1="50" x2="50" y2="24" stroke="rgba(0,0,0,0.25)" stroke-width="3" stroke-linecap="round"/>
+    <line x1="50" y1="50" x2="64" y2="62" stroke="rgba(0,0,0,0.22)" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="50" y1="8" x2="50" y2="15" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+    <line x1="50" y1="85" x2="50" y2="92" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+    <line x1="8" y1="50" x2="15" y2="50" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+    <line x1="85" y1="50" x2="92" y2="50" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+  </svg>
+
+</div>
 
 <nav>
   <div class="logo"><span class="dot"></span> CINÉPOP</div>
