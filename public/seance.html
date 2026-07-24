@@ -24,10 +24,61 @@
         radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
         linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
       padding-bottom: 60px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── DÉCOR POPCORN ── */
+    .bg-decor {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .bg-decor svg {
+      position: absolute;
+      fill: var(--jaune);
+    }
+    .deco-bucket-1 {
+      width: 220px; top: 4%; right: -30px;
+      opacity: 0.045;
+      transform: rotate(10deg);
+    }
+    .deco-grain-1 {
+      width: 160px; bottom: 18%; left: -20px;
+      opacity: 0.04;
+      transform: rotate(-18deg);
+    }
+    .deco-grain-2 {
+      width: 90px; top: 22%; left: 38%;
+      opacity: 0.028;
+      animation: float-bob 7s ease-in-out infinite;
+    }
+    .deco-bucket-2 {
+      width: 130px; bottom: 8%; right: 6%;
+      opacity: 0.032;
+      transform: rotate(-14deg);
+    }
+    .deco-grain-3 {
+      width: 110px; top: 8%; left: 6%;
+      opacity: 0.03;
+      transform: rotate(25deg);
+      animation: float-bob 9s ease-in-out infinite reverse;
+    }
+    .deco-grain-4 {
+      width: 75px; top: 52%; right: 3%;
+      opacity: 0.025;
+      animation: float-bob 6s ease-in-out infinite;
+    }
+    @keyframes float-bob {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
     }
 
     /* ── NAV ── */
     nav {
+      position: relative; z-index: 1;
       display: flex; align-items: center; justify-content: space-between;
       padding: 22px 32px; max-width: 1200px; margin: 0 auto;
     }
@@ -70,7 +121,7 @@
     }
 
     /* ── LAYOUT ── */
-    .wrap { max-width: 640px; margin: 0 auto; padding: 10px 24px; display: flex; flex-direction: column; gap: 20px; }
+    .wrap { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 10px 24px; display: flex; flex-direction: column; gap: 20px; }
 
     /* ── POSTER HERO ── */
     .poster-hero {
@@ -206,18 +257,18 @@
     }
 
     /* ── LOADING / ERROR ── */
-   .loading-state .spin {
-  width: 44px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background:
-    radial-gradient(farthest-side, #ffa516 94%, #0000) top/7px 7px no-repeat,
-    conic-gradient(#0000 30%, #ffa516);
-  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 7px), #000 0);
-  animation: loader-spin 1s infinite linear;
-  margin: 0 auto 16px;
-}
-@keyframes loader-spin { 100% { transform: rotate(1turn); } }
+    .loading-state .spin {
+      width: 44px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(farthest-side, #ffa516 94%, #0000) top/7px 7px no-repeat,
+        conic-gradient(#0000 30%, #ffa516);
+      -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 7px), #000 0);
+      animation: loader-spin 1s infinite linear;
+      margin: 0 auto 16px;
+    }
+    @keyframes loader-spin { 100% { transform: rotate(1turn); } }
 
     /* ── ANNULÉ / REFUSÉ ── */
     .alert-banner {
@@ -234,6 +285,65 @@
   </style>
 </head>
 <body>
+
+<!-- ── DÉCOR POPCORN ── -->
+<div class="bg-decor" aria-hidden="true">
+
+  <!-- Seau popcorn haut droite -->
+  <svg class="deco-bucket-1" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="22" rx="9" ry="8" opacity="0.9"/>
+    <ellipse cx="50" cy="14" rx="10" ry="9"/>
+    <ellipse cx="70" cy="20" rx="8"  ry="8" opacity="0.9"/>
+    <ellipse cx="20" cy="34" rx="7"  ry="6" opacity="0.7"/>
+    <ellipse cx="80" cy="32" rx="7"  ry="6" opacity="0.7"/>
+    <path d="M18 45 L82 45 L74 115 Q50 122 26 115 Z"/>
+    <rect x="18" y="45" width="64" height="10" rx="3" fill="rgba(0,0,0,0.18)"/>
+    <line x1="50" y1="55" x2="47" y2="115" stroke="rgba(0,0,0,0.12)" stroke-width="4"/>
+  </svg>
+
+  <!-- Grain popcorn bas gauche -->
+  <svg class="deco-grain-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="50" rx="38" ry="30" transform="rotate(-20 50 50)"/>
+    <ellipse cx="50" cy="50" rx="22" ry="18" transform="rotate(15 50 50)" fill="rgba(0,0,0,0.15)"/>
+    <ellipse cx="36" cy="36" rx="14" ry="10" transform="rotate(-30 36 36)"/>
+    <ellipse cx="65" cy="38" rx="12" ry="9"  transform="rotate(20 65 38)"/>
+    <ellipse cx="50" cy="68" rx="13" ry="9"  transform="rotate(-10 50 68)"/>
+  </svg>
+
+  <!-- Grain popcorn centre haut flottant -->
+  <svg class="deco-grain-2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="50" rx="36" ry="28" transform="rotate(10 50 50)"/>
+    <ellipse cx="38" cy="38" rx="16" ry="11" transform="rotate(-20 38 38)"/>
+    <ellipse cx="65" cy="42" rx="13" ry="9"  transform="rotate(25 65 42)"/>
+    <ellipse cx="50" cy="65" rx="15" ry="10" transform="rotate(-5 50 65)"/>
+  </svg>
+
+  <!-- Petit seau bas droit -->
+  <svg class="deco-bucket-2" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="28" cy="24" rx="8" ry="7" opacity="0.9"/>
+    <ellipse cx="50" cy="16" rx="9" ry="8"/>
+    <ellipse cx="72" cy="22" rx="7" ry="7" opacity="0.9"/>
+    <path d="M18 45 L82 45 L74 115 Q50 122 26 115 Z"/>
+    <rect x="18" y="45" width="64" height="10" rx="3" fill="rgba(0,0,0,0.18)"/>
+    <line x1="50" y1="55" x2="47" y2="115" stroke="rgba(0,0,0,0.12)" stroke-width="4"/>
+  </svg>
+
+  <!-- Grain haut gauche flottant -->
+  <svg class="deco-grain-3" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="50" rx="40" ry="32" transform="rotate(-15 50 50)"/>
+    <ellipse cx="35" cy="35" rx="18" ry="13" transform="rotate(-30 35 35)"/>
+    <ellipse cx="68" cy="40" rx="14" ry="10" transform="rotate(20 68 40)"/>
+    <ellipse cx="48" cy="67" rx="16" ry="11" transform="rotate(-8 48 67)"/>
+  </svg>
+
+  <!-- Grain milieu droit flottant -->
+  <svg class="deco-grain-4" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="50" rx="35" ry="27" transform="rotate(8 50 50)"/>
+    <ellipse cx="38" cy="40" rx="15" ry="10" transform="rotate(-22 38 40)"/>
+    <ellipse cx="64" cy="44" rx="12" ry="9"  transform="rotate(18 64 44)"/>
+  </svg>
+
+</div>
 
 <nav>
   <div class="logo"><span class="dot"></span> CINÉPOP</div>
@@ -286,10 +396,6 @@ function estimateEndTime(startTime, durationMinutes) {
 }
 
 // ── ÉTAT ──
-// 1 = prévu (>15 min avant)
-// 2 = bientôt (≤15 min avant)
-// 3 = en cours
-// 4 = terminé
 function computeState(seanceMs, durationMs, now) {
   const diff = seanceMs - now;
   if (diff > 15 * 60 * 1000)      return 1;
@@ -353,49 +459,24 @@ function render(d, isPublic) {
     return `<div class="tl-line ${afterStep < stateNum ? "done" : ""}"></div>`;
   }
 
-  // En mode public, la première étape est "Séance" (pas "Réservé")
   const timeline = isPublic ? `
     <div class="timeline">
-      <div class="tl-step">
-        ${tlDot(1, "")}
-        ${tlLabel(1, "Prévu", "")}
-      </div>
+      <div class="tl-step">${tlDot(1, "")}${tlLabel(1, "Prévu", "")}</div>
       ${tlLine(1)}
-      <div class="tl-step">
-        ${tlDot(2, "")}
-        ${tlLabel(2, "Salle ouverte", "")}
-      </div>
+      <div class="tl-step">${tlDot(2, "")}${tlLabel(2, "Salle ouverte", "")}</div>
       ${tlLine(2)}
-      <div class="tl-step">
-        ${tlDot(3, "green")}
-        ${tlLabel(3, "En séance", "green")}
-      </div>
+      <div class="tl-step">${tlDot(3, "green")}${tlLabel(3, "En séance", "green")}</div>
       ${tlLine(3)}
-      <div class="tl-step">
-        ${tlDot(4, "orange")}
-        ${tlLabel(4, "Terminé", "orange")}
-      </div>
+      <div class="tl-step">${tlDot(4, "orange")}${tlLabel(4, "Terminé", "orange")}</div>
     </div>` : `
     <div class="timeline">
-      <div class="tl-step">
-        ${tlDot(1, "")}
-        ${tlLabel(1, "Réservé", "")}
-      </div>
+      <div class="tl-step">${tlDot(1, "")}${tlLabel(1, "Réservé", "")}</div>
       ${tlLine(1)}
-      <div class="tl-step">
-        ${tlDot(2, "")}
-        ${tlLabel(2, "Salle ouverte", "")}
-      </div>
+      <div class="tl-step">${tlDot(2, "")}${tlLabel(2, "Salle ouverte", "")}</div>
       ${tlLine(2)}
-      <div class="tl-step">
-        ${tlDot(3, "green")}
-        ${tlLabel(3, "En séance", "green")}
-      </div>
+      <div class="tl-step">${tlDot(3, "green")}${tlLabel(3, "En séance", "green")}</div>
       ${tlLine(3)}
-      <div class="tl-step">
-        ${tlDot(4, "orange")}
-        ${tlLabel(4, "Terminé", "orange")}
-      </div>
+      <div class="tl-step">${tlDot(4, "orange")}${tlLabel(4, "Terminé", "orange")}</div>
     </div>`;
 
   // ── INFO GRID ──
@@ -514,7 +595,7 @@ function render(d, isPublic) {
       </div>`;
   }
 
-  // ── BADGE STATUT RÉSERVATION (mode privé seulement) ──
+  // ── BADGE STATUT RÉSERVATION ──
   const statusMap = {
     "validé":     { chip: "rgba(57,217,138,0.14)",  color: "var(--vert)",       label: "✅ Réservation validée" },
     "en attente": { chip: "rgba(245,183,0,0.14)",   color: "var(--jaune-soft)", label: "⏳ En attente de validation" },
@@ -528,16 +609,13 @@ function render(d, isPublic) {
       ${st.label}
     </div>` : "";
 
-  // Badge mode public
   const publicBadge = isPublic
     ? `<div class="public-badge">👁 Vue publique — aucune réservation liée</div>`
     : "";
 
-  // Lien retour adapté
   const backHref = isPublic ? "/programme.html" : "/compte.html";
   const backLabel = isPublic ? "← Retour au programme" : "← Retour à mon compte";
 
-  // ── ASSEMBLAGE ──
   wrap.innerHTML = `
     <a href="${backHref}" class="btn-back">${backLabel}</a>
     ${hero}
@@ -556,8 +634,8 @@ function render(d, isPublic) {
 
 // ── INIT ──
 async function init() {
-  const params  = new URLSearchParams(window.location.search);
-  const resaId  = params.get("id");
+  const params   = new URLSearchParams(window.location.search);
+  const resaId   = params.get("id");
   const seanceId = params.get("seance");
 
   if (!resaId && !seanceId) {
@@ -568,13 +646,11 @@ async function init() {
 
   try {
     if (resaId) {
-      // Mode privé : réservation
       const res  = await fetch(`/api/seance/${encodeURIComponent(resaId)}`);
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
       render(data, false);
     } else {
-      // Mode public : séance seule
       const res  = await fetch(`/api/seance-info/${encodeURIComponent(seanceId)}`);
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
