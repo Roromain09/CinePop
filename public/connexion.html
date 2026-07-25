@@ -23,10 +23,33 @@
         radial-gradient(circle at bottom right, rgba(17, 34, 64, 0.95), transparent 34%),
         linear-gradient(180deg, #0f1d33 0%, #07111f 100%);
       padding-bottom: 60px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── DÉCOR POPCORN ── */
+    .bg-decor {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .bg-decor svg { position: absolute; fill: var(--jaune); }
+    .deco-bucket-1 { width: 220px; top: 4%; right: -30px; opacity: 0.045; transform: rotate(10deg); }
+    .deco-grain-1  { width: 160px; bottom: 18%; left: -20px; opacity: 0.04; transform: rotate(-18deg); }
+    .deco-grain-2  { width: 90px; top: 22%; left: 38%; opacity: 0.028; animation: float-bob 7s ease-in-out infinite; }
+    .deco-bucket-2 { width: 130px; bottom: 8%; right: 6%; opacity: 0.032; transform: rotate(-14deg); }
+    .deco-grain-3  { width: 110px; top: 8%; left: 6%; opacity: 0.03; transform: rotate(25deg); animation: float-bob 9s ease-in-out infinite reverse; }
+    .deco-grain-4  { width: 75px; top: 52%; right: 3%; opacity: 0.025; animation: float-bob 6s ease-in-out infinite; }
+    @keyframes float-bob {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
     }
 
     /* ── NAV ── */
     nav {
+      position: relative; z-index: 1;
       display: flex; align-items: center; justify-content: space-between;
       padding: 22px 32px; max-width: 1200px; margin: 0 auto;
     }
@@ -54,7 +77,7 @@
     }
 
     /* ── LAYOUT ── */
-    .wrap { max-width: 440px; margin: 10px auto; padding: 0 24px; }
+    .wrap { position: relative; z-index: 1; max-width: 440px; margin: 10px auto; padding: 0 24px; }
 
     .form-card {
       background: rgba(17, 34, 64, 0.78);
@@ -80,7 +103,6 @@
     h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 6px; }
     .page-subtitle { color: var(--gris); font-size: 0.92rem; line-height: 1.6; margin-bottom: 28px; }
 
-    /* ── FORM ── */
     .form-fields { display: flex; flex-direction: column; gap: 14px; }
     .field-group { display: flex; flex-direction: column; gap: 5px; }
     .field-label {
@@ -144,7 +166,6 @@
     }
     .separator span { color: var(--gris); font-size: 0.78rem; white-space: nowrap; }
 
-    /* ── BOUTON SANS COMPTE ── */
     .btn-ghost-resa {
       width: 100%; padding: 13px 18px; border-radius: 14px;
       border: 1px solid rgba(255,255,255,0.1);
@@ -154,12 +175,8 @@
     }
     .btn-ghost-resa:hover { background: rgba(255,255,255,0.08); color: var(--blanc); border-color: rgba(255,255,255,0.2); }
 
-    /* ── PANNEAU RECHERCHE ── */
-    .resa-search-panel {
-      display: none; flex-direction: column; gap: 12px; margin-top: 4px;
-    }
+    .resa-search-panel { display: none; flex-direction: column; gap: 12px; margin-top: 4px; }
     .resa-search-panel.open { display: flex; }
-
     .search-row { display: flex; gap: 8px; }
     .search-row input { flex: 1; padding: 13px 16px; }
     .btn-search {
@@ -171,7 +188,6 @@
     .btn-search:hover { transform: translateY(-1px); }
 
     .resa-results { display: flex; flex-direction: column; gap: 10px; }
-
     .resa-card {
       background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
       border-radius: 16px; padding: 14px 16px;
@@ -187,7 +203,6 @@
     .resa-field { display: flex; flex-direction: column; gap: 1px; }
     .resa-field-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--gris); }
     .resa-field-value { font-size: 0.86rem; color: var(--blanc); }
-
     .resa-empty { text-align: center; padding: 20px; color: var(--gris); font-size: 0.88rem; }
     .resa-error { padding: 11px 14px; border-radius: 12px; background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3); color: #ffd6d6; font-size: 0.86rem; }
 
@@ -235,6 +250,52 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
+
+<!-- ── DÉCOR POPCORN ── -->
+<div class="bg-decor" aria-hidden="true">
+  <svg class="deco-bucket-1" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="22" rx="9" ry="8" opacity="0.9"/>
+    <ellipse cx="50" cy="14" rx="10" ry="9"/>
+    <ellipse cx="70" cy="20" rx="8"  ry="8" opacity="0.9"/>
+    <ellipse cx="20" cy="34" rx="7"  ry="6" opacity="0.7"/>
+    <ellipse cx="80" cy="32" rx="7"  ry="6" opacity="0.7"/>
+    <path d="M18 45 L82 45 L74 115 Q50 122 26 115 Z"/>
+    <rect x="18" y="45" width="64" height="10" rx="3" fill="rgba(0,0,0,0.18)"/>
+    <line x1="50" y1="55" x2="47" y2="115" stroke="rgba(0,0,0,0.12)" stroke-width="4"/>
+  </svg>
+  <svg class="deco-grain-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="50" rx="38" ry="30" transform="rotate(-20 50 50)"/>
+    <ellipse cx="50" cy="50" rx="22" ry="18" transform="rotate(15 50 50)" fill="rgba(0,0,0,0.15)"/>
+    <ellipse cx="36" cy="36" rx="14" ry="10" transform="rotate(-30 36 36)"/>
+    <ellipse cx="65" cy="38" rx="12" ry="9"  transform="rotate(20 65 38)"/>
+    <ellipse cx="50" cy="68" rx="13" ry="9"  transform="rotate(-10 50 68)"/>
+  </svg>
+  <svg class="deco-grain-2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="50" rx="36" ry="28" transform="rotate(10 50 50)"/>
+    <ellipse cx="38" cy="38" rx="16" ry="11" transform="rotate(-20 38 38)"/>
+    <ellipse cx="65" cy="42" rx="13" ry="9"  transform="rotate(25 65 42)"/>
+    <ellipse cx="50" cy="65" rx="15" ry="10" transform="rotate(-5 50 65)"/>
+  </svg>
+  <svg class="deco-bucket-2" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="28" cy="24" rx="8" ry="7" opacity="0.9"/>
+    <ellipse cx="50" cy="16" rx="9" ry="8"/>
+    <ellipse cx="72" cy="22" rx="7" ry="7" opacity="0.9"/>
+    <path d="M18 45 L82 45 L74 115 Q50 122 26 115 Z"/>
+    <rect x="18" y="45" width="64" height="10" rx="3" fill="rgba(0,0,0,0.18)"/>
+    <line x1="50" y1="55" x2="47" y2="115" stroke="rgba(0,0,0,0.12)" stroke-width="4"/>
+  </svg>
+  <svg class="deco-grain-3" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="50" rx="40" ry="32" transform="rotate(-15 50 50)"/>
+    <ellipse cx="35" cy="35" rx="18" ry="13" transform="rotate(-30 35 35)"/>
+    <ellipse cx="68" cy="40" rx="14" ry="10" transform="rotate(20 68 40)"/>
+    <ellipse cx="48" cy="67" rx="16" ry="11" transform="rotate(-8 48 67)"/>
+  </svg>
+  <svg class="deco-grain-4" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="50" rx="35" ry="27" transform="rotate(8 50 50)"/>
+    <ellipse cx="38" cy="40" rx="15" ry="10" transform="rotate(-22 38 40)"/>
+    <ellipse cx="64" cy="44" rx="12" ry="9"  transform="rotate(18 64 44)"/>
+  </svg>
+</div>
 
 <nav>
   <div class="logo"><span class="dot"></span> CINÉPOP</div>
@@ -286,7 +347,6 @@
 
       <button class="btn-ghost-resa" onclick="toggleResaSearch()">🎟 Voir mes réservations sans compte</button>
 
-      <!-- Panneau de recherche -->
       <div class="resa-search-panel" id="resaSearchPanel">
         <div class="search-row">
           <input type="text" id="resaName" placeholder="Nom Prénom" onkeydown="if(event.key==='Enter') searchResa()">
@@ -327,7 +387,6 @@ document.getElementById("navToggle").addEventListener("click", () => {
   document.getElementById("navLinks").classList.toggle("open");
 });
 
-/* ── AFFICHER/MASQUER MOT DE PASSE ── */
 let pwVisible = false;
 function togglePw() {
   pwVisible = !pwVisible;
@@ -337,7 +396,6 @@ function togglePw() {
   btn.textContent = pwVisible ? "🙈" : "👁";
 }
 
-/* ── ERREUR CONNEXION ── */
 function showError(msg) {
   const el = document.getElementById("errorCard");
   el.textContent = msg;
@@ -347,7 +405,6 @@ function hideError() {
   document.getElementById("errorCard").classList.remove("show");
 }
 
-/* ── CONNEXION ── */
 async function seConnecter() {
   hideError();
   const email    = document.getElementById("email").value.trim();
@@ -369,9 +426,7 @@ async function seConnecter() {
   }
 }
 
-/* ── RECHERCHE RÉSERVATIONS SANS COMPTE ── */
 let resaPanelOpen = false;
-
 function toggleResaSearch() {
   resaPanelOpen = !resaPanelOpen;
   const panel = document.getElementById("resaSearchPanel");
@@ -427,7 +482,6 @@ async function searchResa() {
   }
 }
 
-/* ── MOT DE PASSE OUBLIÉ ── */
 function openForgot(e) {
   if (e) e.preventDefault();
   document.getElementById("forgotOverlay").classList.add("show");
