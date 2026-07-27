@@ -3,927 +3,934 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Cinéma</title>
+  <title>Admin — CinéPop</title>
   <link rel="icon" href="img/favicon.ico">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'DM Sans', sans-serif;
-}
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #07111f;
+      --s1:       #0d1b2e;
+      --s2:       #112240;
+      --s3:       #162b4a;
+      --gold:     #f5b700;
+      --gold2:    #ffd84d;
+      --gris:     #a7b3d1;
+      --border:   rgba(167,179,209,0.10);
+      --border2:  rgba(245,183,0,0.18);
+      --green:    #39d98a;
+      --red:      #ff6b6b;
+      --orange:   #ff8c66;
+      --blue:     #4da6ff;
+      --teal:     #00d4b4;
+      --purple:   #b388ff;
+      --ombre:    rgba(0,0,0,0.5);
+    }
 
-:root {
-  --bg: #080f1a;
-  --surface: #0d1b2e;
-  --surface2: #112240;
-  --gold: #f5b700;
-  --gold-light: #ffd84d;
-  --red: #ff4455;
-  --green: #00e896;
-  --orange: #ff8c00;
-  --blue: #4da6ff;
-  --purple: #b388ff;
-  --teal: #00d4b4;
-  --text: #e8eaf0;
-  --text-muted: #7b8ba0;
-  --border: rgba(245,183,0,0.12);
-}
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  padding: 20px;
-  min-height: 100vh;
-}
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: #e8eaf0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-h1 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.6rem;
-  letter-spacing: 2px;
-  color: var(--gold);
-  margin-bottom: 22px;
-}
+    /* ── LOGIN ── */
+    #login-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999; gap: 14px;
+    }
+    #login-screen h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem; letter-spacing: 2px; color: var(--gold);
+    }
+    #admin-pass {
+      padding: 12px 20px; border-radius: 12px;
+      border: 1px solid var(--border2);
+      background: var(--s2); color: #e8eaf0;
+      width: 240px; text-align: center;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    #admin-pass:focus { border-color: var(--gold); }
+    #login-error { color: var(--red); font-size: 0.85rem; display: none; }
 
-.admin-container {
-  max-width: 1000px;
-  margin: 0 auto;
-}
+    /* ── LAYOUT ── */
+    .shell {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+    }
 
-.admin-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-.logo { display:flex; align-items:center; gap:10px; font-weight:900; font-size:1.1rem; letter-spacing:0.5px; }
-.logo .dot { width:9px; height:9px; border-radius:50%; background: var(--gold); box-shadow: 0 0 14px rgba(245,183,0,0.7); }
-.admin-tag {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  background: rgba(245,183,0,0.14);
-  color: var(--gold);
-  padding: 3px 9px;
-  border-radius: 999px;
-}
-.back-link {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 7px 12px;
-  border-radius: 999px;
-  transition: all 0.2s;
-}
-.back-link:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--s1);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex; flex-direction: column; gap: 6px;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 900; font-size: 1rem; letter-spacing: 0.5px;
+      padding: 0 8px; margin-bottom: 20px;
+    }
+    .sidebar-logo .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gold); box-shadow: 0 0 12px rgba(245,183,0,0.8);
+    }
+    .sidebar-logo .admin-tag {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.5px;
+      background: rgba(245,183,0,0.14); color: var(--gold);
+      padding: 2px 7px; border-radius: 999px; margin-left: 2px;
+    }
+    .sidebar-section {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: rgba(167,179,209,0.45);
+      padding: 14px 8px 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 10px;
+      cursor: pointer; font-size: 0.84rem; font-weight: 600;
+      color: var(--gris); transition: all 0.18s ease;
+      border: 1px solid transparent; position: relative;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #e8eaf0; }
+    .nav-item.active-attente { background: rgba(245,183,0,0.10); color: var(--gold); border-color: rgba(245,183,0,0.18); }
+    .nav-item.active-valide  { background: rgba(57,217,138,0.10); color: var(--green); border-color: rgba(57,217,138,0.2); }
+    .nav-item.active-refuse  { background: rgba(255,107,107,0.10); color: var(--red); border-color: rgba(255,107,107,0.18); }
+    .nav-item.active-expire  { background: rgba(255,140,102,0.10); color: var(--orange); border-color: rgba(255,140,102,0.18); }
+    .nav-item.active-programme { background: rgba(77,166,255,0.10); color: var(--blue); border-color: rgba(77,166,255,0.18); }
+    .nav-item.active-boutique  { background: rgba(0,212,180,0.10); color: var(--teal); border-color: rgba(0,212,180,0.18); }
+    .nav-item.active-support   { background: rgba(179,136,255,0.12); color: var(--purple); border-color: rgba(179,136,255,0.2); }
+    .nav-item.active-info      { background: rgba(57,217,138,0.10); color: var(--green); border-color: rgba(57,217,138,0.2); }
+    .nav-badge {
+      margin-left: auto; font-size: 0.68rem; font-weight: 800;
+      padding: 1px 8px; border-radius: 999px; background: rgba(255,255,255,0.08);
+    }
+    .nav-item.active-attente .nav-badge { background: var(--gold); color: var(--bg); }
+    .nav-item.active-valide  .nav-badge { background: var(--green); color: var(--bg); }
+    .nav-item.active-refuse  .nav-badge { background: var(--red); color: #fff; }
+    .nav-item.active-expire  .nav-badge { background: var(--orange); color: #fff; }
+    .nav-item.active-support .nav-badge { background: var(--purple); color: #fff; }
 
-.tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--surface);
-  border-radius: 14px;
-  padding: 5px;
-  margin-bottom: 24px;
-  border: 1px solid var(--border);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.tabs::-webkit-scrollbar { display: none; }
+    .sidebar-footer {
+      margin-top: auto; padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-footer a {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--gris); text-decoration: none; font-size: 0.82rem; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; transition: all 0.18s;
+    }
+    .sidebar-footer a:hover { background: rgba(255,255,255,0.05); color: #e8eaf0; }
 
-.tab-btn {
-  flex: 1;
-  min-width: 100px;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  background: transparent;
-  color: var(--text-muted);
-  transition: all 0.25s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  white-space: nowrap;
-}
+    /* ── MAIN ── */
+    .main {
+      padding: 28px 32px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .main-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .main-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem; letter-spacing: 2px; color: var(--gold);
+    }
+    .refresh-btn {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: var(--s2); border: 1px solid var(--border);
+      color: var(--gris); font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .refresh-btn:hover { background: var(--s3); color: #e8eaf0; }
 
-.tab-btn .badge {
-  background: rgba(255,255,255,0.1);
-  padding: 1px 7px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  transition: all 0.25s;
-}
+    /* ── PANELS ── */
+    .panel { display: none; }
+    .panel.visible { display: block; }
 
-.tab-btn.active-attente  { background: rgba(245,183,0,0.15);  color: var(--gold);   }
-.tab-btn.active-valide   { background: rgba(0,232,150,0.13);  color: var(--green);  }
-.tab-btn.active-refuse   { background: rgba(255,68,85,0.13);  color: var(--red);    }
-.tab-btn.active-expire   { background: rgba(255,140,0,0.13);  color: var(--orange); }
-.tab-btn.active-gestion  { background: rgba(77,166,255,0.13); color: var(--blue);   }
+    /* ── TUILES GRILLE ── */
+    .tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
 
-.tab-btn.active-attente  .badge { background: var(--gold);   color: var(--bg); }
-.tab-btn.active-valide   .badge { background: var(--green);  color: var(--bg); }
-.tab-btn.active-refuse   .badge { background: var(--red);    color: #fff; }
-.tab-btn.active-expire   .badge { background: var(--orange); color: #fff; }
+    .tile {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      position: relative;
+    }
+    .tile:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
+    .tile-accent { position: absolute; top: 0; left: 16px; right: 16px; height: 3px; border-radius: 0 0 4px 4px; }
 
-.tab-panel { display: none; flex-direction: column; gap: 14px; }
-.tab-panel.visible { display: flex; }
+    .tile-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .tile-client { font-size: 0.96rem; font-weight: 800; color: #e8eaf0; }
+    .tile-film {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.4px;
+      background: rgba(245,183,0,0.12); color: var(--gold);
+      padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+      max-width: 120px; overflow: hidden; text-overflow: ellipsis;
+    }
 
-.resa-card {
-  background: var(--surface2);
-  border-radius: 14px;
-  padding: 18px 20px;
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.resa-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
-}
+    .tile-meta {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .tile-meta-row {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; color: var(--gris);
+    }
+    .tile-meta-row .label {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; color: rgba(167,179,209,0.5);
+      min-width: 44px;
+    }
+    .tile-meta-row .val { color: #e8eaf0; font-weight: 600; }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 14px;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+    .tile-id {
+      font-size: 0.62rem; font-family: monospace;
+      color: rgba(167,179,209,0.35); overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-.client-name {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text);
-}
+    .tile-commande {
+      background: rgba(0,212,180,0.07);
+      border: 1px dashed rgba(0,212,180,0.25);
+      border-radius: 10px; padding: 9px 11px;
+    }
+    .tile-commande-title {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; color: var(--teal); margin-bottom: 5px;
+    }
+    .tile-commande-item {
+      display: flex; justify-content: space-between;
+      font-size: 0.74rem; color: var(--gris); padding: 1px 0;
+    }
+    .tile-commande-item b { color: #e8eaf0; }
+    .tile-commande-total { font-size: 0.78rem; font-weight: 800; color: var(--teal); text-align: right; margin-top: 4px; }
 
-.film-badge {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-  background: rgba(245,183,0,0.12);
-  color: var(--gold);
-  border-radius: 6px;
-  padding: 3px 10px;
-}
+    .tile-actions {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
 
-.card-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 16px;
-  margin-bottom: 14px;
-}
+    .btn {
+      padding: 7px 12px; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.76rem; font-weight: 700;
+      border: none; cursor: pointer; transition: all 0.15s ease;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-gold   { background: var(--gold); color: var(--bg); }
+    .btn-gold:hover { background: var(--gold2); }
+    .btn-red    { background: rgba(255,107,107,0.13); color: var(--red); border: 1px solid rgba(255,107,107,0.25); }
+    .btn-red:hover { background: rgba(255,107,107,0.24); }
+    .btn-blue   { background: rgba(77,166,255,0.12); color: var(--blue); border: 1px solid rgba(77,166,255,0.25); }
+    .btn-blue:hover { background: rgba(77,166,255,0.24); }
+    .btn-ghost  { background: rgba(255,255,255,0.05); color: var(--gris); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.10); color: #e8eaf0; }
 
-.card-field {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
+    /* chips statut */
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 700;
+    }
+    .chip-valide  { background: rgba(57,217,138,0.13); color: var(--green); }
+    .chip-refuse  { background: rgba(255,107,107,0.13); color: var(--red); }
+    .chip-expire  { background: rgba(255,140,102,0.13); color: var(--orange); }
+    .chip-attente { background: rgba(245,183,0,0.12); color: var(--gold); }
+    .chip-pret    { background: rgba(0,212,180,0.12); color: var(--teal); }
+    .chip-remis   { background: rgba(77,166,255,0.12); color: var(--blue); }
+    .chip-nouveau { background: rgba(179,136,255,0.13); color: var(--purple); }
+    .chip-traite  { background: rgba(57,217,138,0.12); color: var(--green); }
 
-.field-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
+    /* ── SECTION VALIDÉES GROUPÉE ── */
+    .group-block { margin-bottom: 20px; }
+    .group-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--s2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px 16px;
+      cursor: pointer; transition: background 0.2s, border-color 0.2s;
+      margin-bottom: 0; user-select: none;
+    }
+    .group-header:hover { background: rgba(245,183,0,0.07); border-color: rgba(245,183,0,0.2); }
+    .group-header.open  { border-radius: 12px 12px 0 0; border-bottom-color: transparent; }
+    .group-header-left .g-film { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 1px; color: var(--gold); }
+    .group-header-left .g-meta { font-size: 0.76rem; color: var(--gris); margin-top: 2px; }
+    .group-header-right { display: flex; align-items: center; gap: 10px; }
+    .g-count { background: rgba(57,217,138,0.13); color: var(--green); font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+    .g-chevron { color: var(--gris); font-size: 0.8rem; transition: transform 0.22s ease; }
+    .group-body {
+      display: none; background: var(--s1);
+      border: 1px solid var(--border); border-top: none;
+      border-radius: 0 0 12px 12px; padding: 14px; 
+    }
+    .group-body.open { display: block; }
+    .group-body .tiles-grid { gap: 10px; }
 
-.field-value {
-  font-size: 0.88rem;
-  color: var(--text);
-}
+    /* ── EMPTY ── */
+    .empty { text-align: center; padding: 60px 20px; color: var(--gris); }
+    .empty .empty-icon { font-size: 2.2rem; margin-bottom: 10px; }
 
-.card-id {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  font-family: monospace;
-  margin-bottom: 14px;
-}
-.support-message {
-  font-size: 0.86rem;
-  color: var(--text);
-  background: rgba(255,255,255,0.03);
-  border-radius: 10px;
-  padding: 12px 14px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
+    /* ── PROGRAMME ── */
+    .section-block { margin-bottom: 32px; }
+    .section-head {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .section-head h2 {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 1.5px; color: var(--gold);
+    }
+    .inline-form {
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px; margin-bottom: 14px;
+    }
+    .inline-form input, .inline-form select, .inline-form textarea {
+      padding: 10px 12px; border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: var(--bg); color: #e8eaf0;
+      font-size: 0.83rem; outline: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.2s;
+    }
+    .inline-form input:focus, .inline-form select:focus, .inline-form textarea:focus { border-color: var(--gold); }
+    .inline-form input::placeholder, .inline-form textarea::placeholder { color: rgba(167,179,209,0.4); }
+    .inline-form .form-actions { grid-column: 1/-1; display: flex; gap: 8px; flex-wrap: wrap; }
+    .inline-form .form-actions .btn { flex: 1; min-width: 140px; justify-content: center; padding: 10px; }
 
-.card-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+    /* rows prog */
+    .prog-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap;
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 11px; padding: 11px 14px; margin-bottom: 7px;
+      transition: border-color 0.18s;
+    }
+    .prog-row:hover { border-color: rgba(245,183,0,0.2); }
+    .prog-row .title { font-weight: 700; font-size: 0.88rem; }
+    .prog-row .meta  { font-size: 0.74rem; color: var(--gris); margin-top: 2px; }
+    .row-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 
-.status-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
+    /* séances groupées */
+    .seance-group-section-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; letter-spacing: 1px;
+      margin-bottom: 6px; padding: 0 2px;
+    }
 
-.chip-valide  { background: rgba(0,232,150,0.12); color: var(--green); }
-.chip-refuse  { background: rgba(255,68,85,0.12);  color: var(--red); }
-.chip-expire  { background: rgba(255,140,0,0.12);  color: var(--orange); }
-.chip-nouveau { background: rgba(245,183,0,0.12); color: var(--gold); }
-.chip-traite  { background: rgba(0,232,150,0.12); color: var(--green); }
-.chip-pret    { background: rgba(0,212,180,0.12); color: var(--teal); }
-.chip-remis   { background: rgba(77,166,255,0.12); color: var(--blue); }
+    /* ── BOUTIQUE ── */
+    .produit-row {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 11px; padding: 11px 14px; margin-bottom: 7px;
+      transition: border-color 0.18s;
+    }
+    .produit-row:hover { border-color: rgba(0,212,180,0.2); }
+    .produit-img-wrap {
+      width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden;
+    }
+    .produit-img-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
+    .produit-main { flex: 1; min-width: 0; }
+    .produit-nom  { font-weight: 700; font-size: 0.86rem; }
+    .produit-desc-prix { font-size: 0.72rem; color: var(--gris); margin-top: 1px; }
+    .produit-desc-prix b { color: var(--teal); }
 
-.btn {
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  transition: all 0.2s;
-}
-.btn-validate  { background: var(--gold); color: var(--bg); }
-.btn-validate:hover  { background: var(--gold-light); }
-.btn-refuse    { background: rgba(255,68,85,0.15); color: var(--red); border: 1px solid rgba(255,68,85,0.3); }
-.btn-refuse:hover    { background: rgba(255,68,85,0.28); }
-.btn-delete    { background: rgba(255,68,85,0.1); color: var(--red); border: 1px solid rgba(255,68,85,0.2); }
-.btn-delete:hover    { background: rgba(255,68,85,0.22); }
-.btn-reprint   { background: rgba(77,166,255,0.15); color: var(--blue); border: 1px solid rgba(77,166,255,0.3); }
-.btn-reprint:hover   { background: rgba(77,166,255,0.28); }
-.btn-edit      { background: rgba(77,166,255,0.12); color: var(--blue); border: 1px solid rgba(77,166,255,0.25); }
-.btn-edit:hover      { background: rgba(77,166,255,0.24); }
-.btn-teal      { background: rgba(0,212,180,0.12); color: var(--teal); border: 1px solid rgba(0,212,180,0.25); }
-.btn-teal:hover      { background: rgba(0,212,180,0.24); }
+    .stock-badge { font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+    .stock-ok   { background: rgba(57,217,138,0.12); color: var(--green); }
+    .stock-low  { background: rgba(255,140,102,0.12); color: var(--orange); }
+    .stock-zero { background: rgba(255,107,107,0.12); color: var(--red); }
 
-.empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-.empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .stock-ctrl { display: flex; align-items: center; gap: 5px; }
+    .stock-btn {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05); color: #e8eaf0;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; padding: 0; line-height: 1;
+    }
+    .stock-btn:hover { background: rgba(255,255,255,0.12); }
+    .stock-btn.plus { background: rgba(0,212,180,0.12); border-color: rgba(0,212,180,0.3); color: var(--teal); }
+    .stock-btn.plus:hover { background: rgba(0,212,180,0.22); }
+    .stock-val { min-width: 24px; text-align: center; font-weight: 800; font-size: 0.84rem; }
 
-#fab {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: var(--surface2);
-  color: var(--gold);
-  border: 1px solid var(--border);
-  font-size: 20px;
-  cursor: pointer;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-  transition: all 0.2s;
-}
-#fab:hover { background: rgba(245,183,0,0.1); }
+    .actif-toggle {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.72rem; font-weight: 700; cursor: pointer;
+      padding: 4px 9px; border-radius: 999px; border: none; transition: all 0.2s;
+    }
+    .actif-on  { background: rgba(57,217,138,0.12); color: var(--green); }
+    .actif-off { background: rgba(255,107,107,0.10); color: var(--red); }
 
-#creer-panel {
-  display: none;
-  position: fixed;
-  bottom: 78px;
-  right: 20px;
-  background: var(--surface2);
-  border-radius: 14px;
-  padding: 20px;
-  width: 300px;
-  max-height: 70vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-  z-index: 100;
-  border: 1px solid var(--border);
-}
+    /* ── SUPPORT ── */
+    .support-tile {
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 18px; margin-bottom: 10px;
+      transition: border-color 0.18s;
+    }
+    .support-tile:hover { border-color: rgba(179,136,255,0.25); }
+    .support-tile-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .support-email { font-weight: 800; font-size: 0.88rem; }
+    .support-subject { font-size: 0.78rem; color: var(--gris); margin-top: 2px; }
+    .support-date { font-size: 0.7rem; color: rgba(167,179,209,0.5); }
+    .support-msg {
+      font-size: 0.82rem; color: #e8eaf0;
+      background: rgba(255,255,255,0.03); border-radius: 9px;
+      padding: 10px 12px; line-height: 1.55; white-space: pre-wrap; word-break: break-word;
+      margin-bottom: 10px;
+    }
 
-#creer-panel h3 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.1rem;
-  letter-spacing: 1.5px;
-  color: var(--gold);
-  margin-bottom: 12px;
-}
+    /* ── INFO EDITOR ── */
+    .info-editor {
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px;
+    }
+    .info-editor textarea {
+      width: 100%; min-height: 200px;
+      padding: 12px 14px; border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: var(--bg); color: #e8eaf0;
+      font-size: 0.88rem; font-family: 'DM Sans', sans-serif;
+      resize: vertical; outline: none; line-height: 1.6;
+      transition: border-color 0.2s;
+    }
+    .info-editor textarea:focus { border-color: var(--gold); }
+    .info-save-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+    #info-save-msg { font-size: 0.8rem; }
 
-.form-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+    /* ── FAB (création résa manuelle) ── */
+    .fab {
+      position: fixed; bottom: 24px; right: 24px;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--s2); color: var(--gold);
+      border: 1px solid var(--border2); font-size: 1.2rem;
+      cursor: pointer; z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5); transition: all 0.2s;
+    }
+    .fab:hover { background: rgba(245,183,0,0.12); }
+    .fab-panel {
+      display: none; position: fixed; bottom: 78px; right: 24px;
+      background: var(--s1); border-radius: 14px; padding: 18px;
+      width: 290px; max-height: 70vh; overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6); z-index: 100;
+      border: 1px solid var(--border);
+    }
+    .fab-panel h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 1.5px; color: var(--gold); margin-bottom: 12px; }
+    .fab-fields { display: flex; flex-direction: column; gap: 7px; }
+    .fab-fields input, .fab-fields select {
+      padding: 9px 11px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: var(--bg); color: #e8eaf0;
+      font-size: 0.82rem; font-family: 'DM Sans', sans-serif; outline: none;
+    }
+    .fab-fields input:focus, .fab-fields select:focus { border-color: var(--gold); }
+    #f-msg { font-size: 0.78rem; margin: 0; }
 
-.form-fields input,
-.form-fields select,
-.form-fields textarea {
-  padding: 9px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 0.84rem;
-  font-family: 'DM Sans', sans-serif;
-  outline: none;
-  transition: border 0.2s;
-}
-.form-fields input:focus,
-.form-fields select:focus,
-.form-fields textarea:focus {
-  border-color: var(--gold);
-}
-.form-fields input::placeholder, .form-fields textarea::placeholder { color: var(--text-muted); }
+    /* ── LOADER ── */
+    #loader {
+      position: fixed; inset: 0;
+      background: rgba(7,17,31,0.85); display: none;
+      align-items: center; justify-content: center;
+      z-index: 999; flex-direction: column; backdrop-filter: blur(4px);
+    }
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.08);
+      border-top: 3px solid var(--gold);
+      border-radius: 50%; width: 40px; height: 40px;
+      animation: spin 0.8s linear infinite;
+    }
+    #loader p { margin-top: 12px; color: var(--gold); font-size: 0.82rem; letter-spacing: 0.5px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-.programme-section { margin-bottom: 28px; }
-.programme-section h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.3rem;
-  letter-spacing: 1.5px;
-  color: var(--gold);
-  margin-bottom: 14px;
-}
-.inline-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 16px;
-}
-.inline-form input, .inline-form select, .inline-form textarea {
-  padding: 9px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 0.84rem;
-  outline: none;
-  font-family: 'DM Sans', sans-serif;
-}
-.inline-form input:focus, .inline-form select:focus, .inline-form textarea:focus { border-color: var(--gold); }
-.inline-form button {
-  grid-column: 1 / -1;
-}
-.inline-form .form-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.inline-form .form-actions .btn { flex: 1; min-width: 140px; }
-.film-row, .seance-row, .produit-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  background: var(--surface2);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-}
-.film-row .title, .seance-row .title, .produit-row .title { font-weight: 700; font-size: 0.92rem; }
-.film-row .meta, .seance-row .meta, .produit-row .meta { font-size: 0.78rem; color: var(--text-muted); }
-.row-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-
-#loader {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(8,15,26,0.88);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  flex-direction: column;
-  backdrop-filter: blur(4px);
-}
-.spinner {
-  border: 4px solid rgba(255,255,255,0.1);
-  border-top: 4px solid var(--gold);
-  border-radius: 50%;
-  width: 46px;
-  height: 46px;
-  animation: spin 0.8s linear infinite;
-}
-#loader p { margin-top: 14px; color: var(--gold); font-size: 0.85rem; letter-spacing: 0.5px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-#login-screen {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-#login-screen h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.8rem;
-  letter-spacing: 2px;
-  color: var(--gold);
-  margin-bottom: 22px;
-}
-#admin-pass {
-  padding: 11px 16px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text);
-  width: min(240px, 80vw);
-  text-align: center;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.95rem;
-  outline: none;
-}
-#admin-pass:focus { border-color: var(--gold); }
-
-/* ── SOUS-TABS ── */
-.sub-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--bg);
-  border-radius: 10px;
-  padding: 4px;
-  margin-bottom: 20px;
-  border: 1px solid rgba(255,255,255,0.06);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.sub-tabs::-webkit-scrollbar { display: none; }
-.sub-tab-btn {
-  flex: 1;
-  min-width: 90px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 7px;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  background: transparent;
-  color: var(--text-muted);
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-.sub-tab-btn.active-programme { background: rgba(77,166,255,0.13); color: var(--blue); }
-.sub-tab-btn.active-support   { background: rgba(179,136,255,0.15); color: var(--purple); }
-.sub-tab-btn.active-info      { background: rgba(0,232,150,0.12); color: var(--green); }
-.sub-tab-btn.active-boutique  { background: rgba(0,212,180,0.13); color: var(--teal); }
-
-/* ── INFO EDITOR ── */
-.info-editor {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-}
-.info-editor textarea {
-  width: 100%;
-  min-height: 220px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 0.9rem;
-  font-family: 'DM Sans', sans-serif;
-  resize: vertical;
-  outline: none;
-  line-height: 1.6;
-  transition: border 0.2s;
-}
-.info-editor textarea:focus { border-color: var(--gold); }
-.info-editor .save-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 10px;
-}
-.info-save-msg { font-size: 0.82rem; }
-
-/* ── SÉANCES GROUPÉES ── */
-.seance-group { margin-bottom: 10px; border-radius: 14px; overflow: hidden; }
-.seance-group-header {
-  display: flex; justify-content: space-between; align-items: center;
-  gap: 10px; flex-wrap: wrap;
-  background: var(--surface2);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 14px 18px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  user-select: none;
-}
-.seance-group-header:hover { background: rgba(245,183,0,0.08); border-color: rgba(245,183,0,0.25); }
-.seance-group-header.open { border-radius: 14px 14px 0 0; border-bottom-color: transparent; }
-.seance-group-title { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 1px; color: var(--gold); }
-.seance-group-meta { font-size: 0.78rem; color: var(--text-muted); }
-.seance-group-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.seance-badge { background: rgba(0,232,150,0.13); color: var(--green); font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-.seance-chevron { color: var(--text-muted); font-size: 0.9rem; transition: transform 0.25s ease; }
-.seance-group-body {
-  display: none;
-  flex-direction: column;
-  gap: 0;
-  background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-top: none;
-  border-radius: 0 0 14px 14px;
-  overflow: hidden;
-}
-.seance-group-body.open { display: flex; }
-.seance-group-body .resa-card {
-  border-radius: 0; border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  box-shadow: none;
-}
-.seance-group-body .resa-card:last-child { border-bottom: none; border-radius: 0 0 14px 14px; }
-.seance-group-body .resa-card:hover { transform: none; }
-
-/* ── COMMANDE INLINE (dans card résa validée) ── */
-.commande-inline {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px dashed rgba(0,212,180,0.25);
-}
-.commande-inline-title {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: var(--teal);
-  margin-bottom: 8px;
-}
-.commande-inline-items { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
-.commande-inline-item {
-  display: flex; justify-content: space-between;
-  font-size: 0.82rem; color: var(--text-muted);
-}
-.commande-inline-item b { color: var(--text); }
-.commande-inline-total {
-  font-size: 0.84rem; font-weight: 700; color: var(--teal);
-  text-align: right;
-}
-
-/* ── BOUTIQUE ── */
-.boutique-section { margin-bottom: 28px; }
-.boutique-section h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.3rem;
-  letter-spacing: 1.5px;
-  color: var(--teal);
-  margin-bottom: 14px;
-}
-
-.stock-badge {
-  font-size: 0.72rem; font-weight: 700;
-  padding: 2px 8px; border-radius: 20px;
-}
-.stock-ok   { background: rgba(0,232,150,0.13); color: var(--green); }
-.stock-low  { background: rgba(255,140,0,0.13); color: var(--orange); }
-.stock-zero { background: rgba(255,68,85,0.13); color: var(--red); }
-
-.actif-toggle {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 0.75rem; font-weight: 700; cursor: pointer;
-  padding: 4px 10px; border-radius: 20px; border: none;
-  transition: all 0.2s;
-}
-.actif-on  { background: rgba(0,232,150,0.12); color: var(--green); }
-.actif-off { background: rgba(255,68,85,0.10); color: var(--red); }
-
-/* +/- stock */
-.stock-controls {
-  display: flex; align-items: center; gap: 6px;
-}
-.stock-btn {
-  width: 26px; height: 26px; border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05); color: var(--text);
-  font-size: 0.9rem; font-weight: 700; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s ease; padding: 0; line-height: 1;
-}
-.stock-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.28); }
-.stock-btn.plus { background: rgba(0,212,180,0.12); border-color: rgba(0,212,180,0.3); color: var(--teal); }
-.stock-btn.plus:hover { background: rgba(0,212,180,0.24); }
-.stock-val {
-  min-width: 28px; text-align: center;
-  font-weight: 800; font-size: 0.88rem;
-}
-
-.commande-card {
-  background: var(--surface2);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 14px;
-  padding: 16px 18px;
-  margin-bottom: 10px;
-}
-.commande-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
-}
-.commande-id { font-size: 0.72rem; color: var(--text-muted); font-family: monospace; }
-.commande-items { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-.commande-item {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.84rem; padding: 5px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.commande-item:last-child { border-bottom: none; }
-.commande-total {
-  font-size: 0.9rem; font-weight: 800;
-  color: var(--teal); text-align: right; margin-bottom: 10px;
-}
-.commande-resa {
-  font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px; font-family: monospace;
-}
-
-.seance-section-header {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 0.95rem;
-  letter-spacing: 1.2px;
-  margin-bottom: 8px;
-  padding: 0 4px;
-}
-
-@media (max-width: 600px) {
-  body { padding: 14px; }
-  h1 { font-size: 1.35rem; }
-  .admin-topbar { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .card-grid { grid-template-columns: 1fr; }
-  .card-actions { flex-direction: column; }
-  .card-actions .btn { width: 100%; text-align: center; }
-  #creer-panel { width: calc(100vw - 32px); right: 16px; }
-  .film-row, .seance-row, .produit-row { flex-direction: column; align-items: stretch; }
-  .row-actions { width: 100%; }
-  .row-actions .btn { flex: 1; }
-  .tabs {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    overflow-x: visible;
-  }
-  .sub-tabs { flex-wrap: wrap; }
-  .sub-tab-btn { flex: unset; }
-}
-</style>
+    /* ── RESPONSIVE ── */
+    @media (max-width: 760px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { padding: 20px 16px; }
+      .tiles-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
+<!-- ── LOGIN ── -->
 <div id="login-screen">
-  <h2>🔐 Accès Administrateur</h2>
+  <h2>🔐 Accès Admin</h2>
   <input id="admin-pass" type="password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter') checkPassword()">
-  <button onclick="checkPassword()" class="btn btn-validate" style="margin-top:14px; padding:11px 28px; font-size:0.9rem; border-radius:10px;">
-    Entrer
-  </button>
-  <p id="error-msg" style="color:var(--red); margin-top:12px; font-size:0.85rem; display:none;">
-    ❌ Mot de passe incorrect
-  </p>
+  <button onclick="checkPassword()" class="btn btn-gold" style="padding:10px 28px; font-size:0.9rem; border-radius:10px; margin-top:4px;">Entrer</button>
+  <p id="login-error">❌ Mot de passe incorrect</p>
 </div>
 
-<div class="admin-topbar">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <div class="logo"><span class="dot"></span> CINÉPOP <span class="admin-tag">Admin</span></div>
-    <button id="refreshBtn" onclick="refreshAll()" title="Actualiser" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;padding:0;">↻</button>
-  </div>
-  <a href="/index.html" class="back-link">← Retour au site</a>
-</div>
-<h1>🎬 Administration</h1>
+<!-- ── SHELL ── -->
+<div class="shell">
 
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab-btn active-attente" id="tab-attente" onclick="switchTab('attente')">
-    ⏳ En attente <span class="badge" id="count-attente">0</span>
-  </button>
-  <button class="tab-btn" id="tab-valide" onclick="switchTab('valide')">
-    ✅ Validées <span class="badge" id="count-valide">0</span>
-  </button>
-  <button class="tab-btn" id="tab-refuse" onclick="switchTab('refuse')">
-    ❌ Refusées <span class="badge" id="count-refuse">0</span>
-  </button>
-  <button class="tab-btn" id="tab-expire" onclick="switchTab('expire')">
-    ⏱ Expirées <span class="badge" id="count-expire">0</span>
-  </button>
-  <button class="tab-btn" id="tab-gestion" onclick="switchTab('gestion')">
-    ⚙️ Gestion <span class="badge" id="count-support">0</span>
-  </button>
-</div>
-
-<!-- PANELS RÉSERVATIONS -->
-<div class="tab-panel visible" id="panel-attente"></div>
-<div class="tab-panel" id="panel-valide"></div>
-<div class="tab-panel" id="panel-refuse"></div>
-<div class="tab-panel" id="panel-expire"></div>
-
-<!-- GESTION PANEL -->
-<div class="tab-panel" id="panel-gestion">
-  <div class="sub-tabs">
-    <button class="sub-tab-btn active-programme" id="subtab-programme" onclick="switchSubTab('programme')">🎞 Programme</button>
-    <button class="sub-tab-btn" id="subtab-boutique" onclick="switchSubTab('boutique')">🛒 Boutique</button>
-    <button class="sub-tab-btn" id="subtab-support" onclick="switchSubTab('support')">📩 Support</button>
-    <button class="sub-tab-btn" id="subtab-info" onclick="switchSubTab('info')">ℹ️ Infos pratiques</button>
-  </div>
-
-  <!-- Sous-panel Programme -->
-  <div id="subpanel-programme">
-    <div class="programme-section">
-      <h2>🎬 Films</h2>
-      <div class="inline-form">
-        <input id="film-title" type="text" placeholder="Titre *">
-        <input id="film-genre" type="text" placeholder="Genre">
-        <input id="film-duration" type="number" placeholder="Durée (min)">
-        <input id="film-poster" type="text" placeholder="URL affiche (facultatif)">
-        <input id="film-synopsis" type="text" placeholder="Synopsis (facultatif)">
-        <div class="form-actions">
-          <button id="film-submit-btn" class="btn btn-validate" onclick="creerFilm()">➕ Ajouter le film</button>
-          <button id="film-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditFilm()">✖ Annuler</button>
-        </div>
-      </div>
-      <div id="films-list"></div>
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <span class="dot"></span> CINÉPOP <span class="admin-tag">Admin</span>
     </div>
 
-    <div class="programme-section">
-      <h2>🗓 Séances</h2>
-      <div class="inline-form">
-        <select id="seance-film"></select>
-        <input id="seance-room" type="text" placeholder="Salle">
-        <input id="seance-date" type="date">
-        <input id="seance-date-from" type="date" style="display:none;">
-        <input id="seance-date-to" type="date" style="display:none;">
-        <input id="seance-time" type="time">
-        <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
-        <input id="seance-price" type="number" placeholder="Prix (€) — ex: 9.50" step="0.01" min="0">
-        <input id="seance-info" type="text" placeholder="Message info (facultatif)">
-        <div class="form-actions" style="margin-bottom:4px;">
-          <button id="mode-single-btn" class="btn btn-validate" style="font-size:0.8rem;padding:7px 14px;" onclick="setSeanceMode('single')">📅 Date unique</button>
-          <button id="mode-period-btn" class="btn btn-edit" style="font-size:0.8rem;padding:7px 14px;" onclick="setSeanceMode('period')">📆 Période</button>
-        </div>
-        <div class="form-actions">
-          <button id="seance-submit-btn" class="btn btn-validate" onclick="creerSeance()">➕ Ajouter la séance</button>
-          <button id="seance-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
-        </div>
-      </div>
-      <div id="seances-list"></div>
+    <div class="sidebar-section">Réservations</div>
+    <div class="nav-item active-attente" id="nav-attente" onclick="switchTab('attente')">
+      ⏳ En attente <span class="nav-badge" id="count-attente">0</span>
     </div>
-  </div>
-
-  <!-- Sous-panel Boutique -->
-  <div id="subpanel-boutique" style="display:none;">
-    <div class="boutique-section">
-      <h2>🍿 Produits</h2>
-      <div class="inline-form">
-        <input id="prod-nom" type="text" placeholder="Nom du produit *">
-        <input id="prod-desc" type="text" placeholder="Description (facultatif)">
-        <input id="prod-prix" type="number" placeholder="Prix (€) *" step="0.01" min="0">
-        <input id="prod-stock" type="number" placeholder="Stock initial *" min="0">
-        <input id="prod-image" type="text" placeholder="URL image (facultatif)">
-        <div class="form-actions">
-          <button id="prod-submit-btn" class="btn btn-validate" onclick="creerProduit()">➕ Ajouter le produit</button>
-          <button id="prod-cancel-btn" class="btn btn-edit" style="display:none;" onclick="cancelEditProduit()">✖ Annuler</button>
-        </div>
-      </div>
-      <div id="produits-list"></div>
+    <div class="nav-item" id="nav-valide" onclick="switchTab('valide')">
+      ✅ Validées <span class="nav-badge" id="count-valide">0</span>
+    </div>
+    <div class="nav-item" id="nav-refuse" onclick="switchTab('refuse')">
+      ❌ Refusées <span class="nav-badge" id="count-refuse">0</span>
+    </div>
+    <div class="nav-item" id="nav-expire" onclick="switchTab('expire')">
+      ⏱ Expirées <span class="nav-badge" id="count-expire">0</span>
     </div>
 
+    <div class="sidebar-section">Gestion</div>
+    <div class="nav-item" id="nav-programme" onclick="switchTab('programme')">
+      🎞 Programme
+    </div>
+    <div class="nav-item" id="nav-boutique" onclick="switchTab('boutique')">
+      🛒 Boutique
+    </div>
+    <div class="nav-item" id="nav-support" onclick="switchTab('support')">
+      📩 Support <span class="nav-badge" id="count-support">0</span>
+    </div>
+    <div class="nav-item" id="nav-info" onclick="switchTab('info')">
+      ℹ️ Infos pratiques
+    </div>
 
-  </div>
+    <div class="sidebar-footer">
+      <a href="/index.html">← Retour au site</a>
+    </div>
+  </nav>
 
-  <!-- Sous-panel Support -->
-  <div id="subpanel-support" style="display:none;">
-    <div id="panel-support"></div>
-  </div>
+  <!-- MAIN -->
+  <main class="main">
+    <div class="main-header">
+      <div class="main-title" id="mainTitle">🎬 En attente</div>
+      <button class="refresh-btn" onclick="refreshAll()" title="Actualiser">↻</button>
+    </div>
 
-  <!-- Sous-panel Infos pratiques -->
-  <div id="subpanel-info" style="display:none;">
-    <div class="info-editor">
-      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Ce texte s'affiche en bas de la page d'accueil.</p>
-      <textarea id="info-content" placeholder="Ex : Ouvert du mardi au dimanche — Tarifs : 8€ adulte, 5€ enfant…"></textarea>
-      <div class="save-row">
-        <button class="btn btn-validate" onclick="saveInfo()">💾 Enregistrer</button>
-        <span id="info-save-msg" class="info-save-msg"></span>
+    <!-- Panels réservations -->
+    <div class="panel visible" id="panel-attente"></div>
+    <div class="panel" id="panel-valide"></div>
+    <div class="panel" id="panel-refuse"></div>
+    <div class="panel" id="panel-expire"></div>
+
+    <!-- Programme -->
+    <div class="panel" id="panel-programme">
+      <div class="section-block">
+        <div class="section-head"><h2>🎬 Films</h2></div>
+        <div class="inline-form">
+          <input id="film-title" type="text" placeholder="Titre *">
+          <input id="film-genre" type="text" placeholder="Genre">
+          <input id="film-duration" type="number" placeholder="Durée (min)">
+          <input id="film-poster" type="text" placeholder="URL affiche">
+          <input id="film-synopsis" type="text" placeholder="Synopsis">
+          <div class="form-actions">
+            <button id="film-submit-btn" class="btn btn-gold" onclick="creerFilm()">➕ Ajouter le film</button>
+            <button id="film-cancel-btn" class="btn btn-ghost" style="display:none;" onclick="cancelEditFilm()">✖ Annuler</button>
+          </div>
+        </div>
+        <div id="films-list"></div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-head"><h2>🗓 Séances</h2></div>
+        <div class="inline-form">
+          <select id="seance-film"></select>
+          <input id="seance-room" type="text" placeholder="Salle">
+          <input id="seance-date" type="date">
+          <input id="seance-date-from" type="date" style="display:none;">
+          <input id="seance-date-to" type="date" style="display:none;">
+          <input id="seance-time" type="time">
+          <input id="seance-capacity" type="number" placeholder="Capacité" value="50">
+          <input id="seance-price" type="number" placeholder="Prix (€)" step="0.01" min="0">
+          <input id="seance-info" type="text" placeholder="Message info">
+          <div class="form-actions" style="margin-bottom:4px;">
+            <button id="mode-single-btn" class="btn btn-gold" style="font-size:0.78rem;padding:7px 12px;" onclick="setSeanceMode('single')">📅 Date unique</button>
+            <button id="mode-period-btn" class="btn btn-ghost" style="font-size:0.78rem;padding:7px 12px;" onclick="setSeanceMode('period')">📆 Période</button>
+          </div>
+          <div class="form-actions">
+            <button id="seance-submit-btn" class="btn btn-gold" onclick="creerSeance()">➕ Ajouter la séance</button>
+            <button id="seance-cancel-btn" class="btn btn-ghost" style="display:none;" onclick="cancelEditSeance()">✖ Annuler</button>
+          </div>
+        </div>
+        <div id="seances-list"></div>
       </div>
     </div>
-  </div>
+
+    <!-- Boutique -->
+    <div class="panel" id="panel-boutique">
+      <div class="section-block">
+        <div class="section-head"><h2 style="color:var(--teal);">🍿 Produits</h2></div>
+        <div class="inline-form">
+          <input id="prod-nom" type="text" placeholder="Nom du produit *">
+          <input id="prod-desc" type="text" placeholder="Description">
+          <input id="prod-prix" type="number" placeholder="Prix (€) *" step="0.01" min="0">
+          <input id="prod-stock" type="number" placeholder="Stock initial *" min="0">
+          <input id="prod-image" type="text" placeholder="URL image">
+          <div class="form-actions">
+            <button id="prod-submit-btn" class="btn btn-gold" onclick="creerProduit()">➕ Ajouter le produit</button>
+            <button id="prod-cancel-btn" class="btn btn-ghost" style="display:none;" onclick="cancelEditProduit()">✖ Annuler</button>
+          </div>
+        </div>
+        <div id="produits-list"></div>
+      </div>
+    </div>
+
+    <!-- Support -->
+    <div class="panel" id="panel-support"></div>
+
+    <!-- Infos -->
+    <div class="panel" id="panel-info">
+      <div class="info-editor">
+        <p style="color:var(--gris);font-size:0.83rem;margin-bottom:12px;">Ce texte s'affiche en bas de la page d'accueil.</p>
+        <textarea id="info-content" placeholder="Ex : Ouvert du mardi au dimanche…"></textarea>
+        <div class="info-save-row">
+          <button class="btn btn-gold" onclick="saveInfo()">💾 Enregistrer</button>
+          <span id="info-save-msg"></span>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 
 <!-- FAB -->
-<button onclick="toggleForm()" id="fab">➕</button>
-
-<!-- CREATE PANEL (réservation manuelle) -->
-<div id="creer-panel">
-  <h3>📋 Créer une réservation</h3>
-  <div class="form-fields">
-    <input id="f-id"           type="text"   placeholder="ID personnalisé *">
-    <input id="f-clientName"   type="text"   placeholder="Nom du client *">
-    <input id="f-email"        type="email"  placeholder="Email">
+<button class="fab" id="fab" onclick="toggleFab()">➕</button>
+<div class="fab-panel" id="fab-panel">
+  <h3>📋 Réservation manuelle</h3>
+  <div class="fab-fields">
+    <input id="f-id" type="text" placeholder="ID personnalisé *">
+    <input id="f-clientName" type="text" placeholder="Nom du client *">
+    <input id="f-email" type="email" placeholder="Email">
     <select id="f-seanceId"></select>
     <input id="f-peopleNumber" type="number" placeholder="Nombre de personnes *" min="1" max="10">
-    <button onclick="creer()" class="btn btn-validate" style="margin-top:4px;">Créer la réservation</button>
-    <p id="f-msg" style="margin:0; font-size:0.8rem;"></p>
+    <button onclick="creer()" class="btn btn-gold" style="padding:10px; justify-content:center; margin-top:4px;">Créer la réservation</button>
+    <p id="f-msg"></p>
   </div>
 </div>
 
 <!-- LOADER -->
-<div id="loader">
-  <div class="spinner"></div>
-  <p>Traitement en cours…</p>
-</div>
+<div id="loader"><div class="spinner"></div><p>Traitement…</p></div>
 
 <script>
-let ADMIN_PASS = "";
-let currentTab = "attente";
-let currentSubTab = "programme";
+let ADMIN_PASS   = "";
+let currentTab   = "attente";
 let seancesCache = [];
-let filmsCache = [];
+let filmsCache   = [];
 let produitsCache = [];
+
+const TAB_TITLES = {
+  attente:    "⏳ En attente",
+  valide:     "✅ Validées",
+  refuse:     "❌ Refusées",
+  expire:     "⏱ Expirées",
+  programme:  "🎞 Programme",
+  boutique:   "🛒 Boutique",
+  support:    "📩 Support",
+  info:       "ℹ️ Infos pratiques"
+};
+
+const ALL_TABS = ["attente","valide","refuse","expire","programme","boutique","support","info"];
 
 /* ── AUTH ── */
 async function checkPassword() {
   const pass = document.getElementById("admin-pass").value;
-  const res  = await fetch(`/api/checkpass`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password: pass })
-  });
+  const res  = await fetch("/api/checkpass", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ password: pass }) });
   const data = await res.json();
   if (data.ok) {
     ADMIN_PASS = pass;
     document.getElementById("login-screen").style.display = "none";
-    load();
-    loadProgramme();
-    loadSupport();
+    load(); loadSupport();
   } else {
-    document.getElementById("error-msg").style.display = "block";
+    document.getElementById("login-error").style.display = "block";
   }
 }
-
-function adminHeaders() {
-  return { "Content-Type": "application/json", "x-admin-password": ADMIN_PASS };
-}
+function adminHeaders() { return {"Content-Type":"application/json","x-admin-password":ADMIN_PASS}; }
 
 /* ── LOADER ── */
 function showLoader() { document.getElementById("loader").style.display = "flex"; }
 function hideLoader() { document.getElementById("loader").style.display = "none"; }
 
+/* ── REFRESH ── */
 async function refreshAll() {
-  const btn = document.getElementById("refreshBtn");
-  btn.style.transform = "rotate(360deg)";
-  btn.style.transition = "transform 0.5s ease";
+  const btn = document.querySelector(".refresh-btn");
+  btn.style.transform = "rotate(360deg)"; btn.style.transition = "transform 0.5s";
   setTimeout(() => { btn.style.transform = ""; btn.style.transition = ""; }, 500);
   await Promise.all([load(), loadSupport()]);
-  if (currentTab === "gestion") {
-    if (currentSubTab === "programme") loadProgramme();
-    if (currentSubTab === "boutique") loadBoutique();
-    if (currentSubTab === "info") loadInfo();
-  }
+  if (currentTab === "programme") loadProgramme();
+  if (currentTab === "boutique")  loadBoutique();
+  if (currentTab === "info")      loadInfo();
 }
 
 /* ── TABS ── */
 function switchTab(tab) {
   currentTab = tab;
-  ["attente","valide","refuse","expire","gestion"].forEach(t => {
+  ALL_TABS.forEach(t => {
     document.getElementById(`panel-${t}`).classList.toggle("visible", t === tab);
-    const btn = document.getElementById(`tab-${t}`);
-    btn.className = "tab-btn";
-    if (t === tab) btn.classList.add(`active-${t}`);
+    const nav = document.getElementById(`nav-${t}`);
+    nav.className = "nav-item";
+    if (t === tab) nav.classList.add(`active-${t}`);
   });
-  document.getElementById("fab").style.display = tab === "gestion" ? "none" : "flex";
-  if (tab === "gestion") switchSubTab(currentSubTab || "programme");
+  document.getElementById("mainTitle").textContent = TAB_TITLES[tab] || "";
+  document.getElementById("fab").style.display = ["programme","boutique","support","info"].includes(tab) ? "none" : "flex";
+  if (tab === "programme") loadProgramme();
+  if (tab === "boutique")  loadBoutique();
+  if (tab === "info")      loadInfo();
 }
 
-function switchSubTab(sub) {
-  currentSubTab = sub;
-  ["programme","boutique","support","info"].forEach(s => {
-    document.getElementById(`subpanel-${s}`).style.display = s === sub ? "" : "none";
-    const btn = document.getElementById(`subtab-${s}`);
-    btn.className = "sub-tab-btn";
-    if (s === sub) btn.classList.add(`active-${s}`);
+/* ── COMMANDE INLINE (tuile) ── */
+function buildCommandeInline(commande) {
+  if (!commande?.items?.length) return "";
+  const items = commande.items.map(it =>
+    `<div class="tile-commande-item"><span><b>${it.nom}</b> ×${it.qte}</span><span>${(it.prix * it.qte).toFixed(2)} €</span></div>`
+  ).join("");
+  return `<div class="tile-commande">
+    <div class="tile-commande-title">🍿 Snacks & boissons</div>
+    ${items}
+    <div class="tile-commande-total">Total : ${parseFloat(commande.total).toFixed(2)} €</div>
+  </div>`;
+}
+
+/* ── TUILE RÉSERVATION ── */
+function buildTile(r, compact) {
+  const accentColors = { "en attente":"var(--gold)", "validé":"var(--green)", "refusé":"var(--red)", "expiré":"var(--orange)" };
+  const accent = accentColors[r.status] || "var(--gris)";
+  let actions = "";
+  if (r.status === "en attente") {
+    actions = `<button class="btn btn-gold" onclick="valider('${r.id}')">✅ Valider</button>
+               <button class="btn btn-red"  onclick="refuser('${r.id}')">❌ Refuser</button>
+               <button class="btn btn-ghost" onclick="supprimer('${r.id}')">🗑</button>`;
+  } else if (r.status === "validé") {
+    actions = `<button class="btn btn-blue" onclick="reimprimerTicket('${r.id}')">🎫 Ticket</button>
+               <button class="btn btn-ghost" onclick="supprimer('${r.id}')">🗑</button>`;
+  } else {
+    actions = `<button class="btn btn-ghost" onclick="supprimer('${r.id}')">🗑 Supprimer</button>`;
+  }
+  const statusChip = r.status === "validé" ? `<span class="chip chip-valide">✅ Validé</span>` :
+                     r.status === "refusé" ? `<span class="chip chip-refuse">❌ Refusé</span>` :
+                     r.status === "expiré" ? `<span class="chip chip-expire">⏱ Expiré</span>` : "";
+  if (compact) {
+    return `<div class="tile">
+      <div class="tile-accent" style="background:${accent};"></div>
+      <div class="tile-top">
+        <div class="tile-client">👤 ${r.clientName}</div>
+        ${statusChip}
+      </div>
+      <div class="tile-meta">
+        <div class="tile-meta-row"><span class="label">Places</span><span class="val">🎟 ${r.peopleNumber}</span></div>
+        <div class="tile-meta-row"><span class="label">Email</span><span class="val">${r.email || "—"}</span></div>
+      </div>
+      <div class="tile-id">ID : ${r.id}</div>
+      ${r.commande ? buildCommandeInline(r.commande) : ""}
+      <div class="tile-actions">${actions}</div>
+    </div>`;
+  }
+  return `<div class="tile">
+    <div class="tile-accent" style="background:${accent};"></div>
+    <div class="tile-top">
+      <div class="tile-client">👤 ${r.clientName}</div>
+      <div class="tile-film">${r.filmTitle}</div>
+    </div>
+    <div class="tile-meta">
+      <div class="tile-meta-row"><span class="label">Places</span><span class="val">🎟 ${r.peopleNumber}</span></div>
+      <div class="tile-meta-row"><span class="label">Date</span><span class="val">📅 ${r.sessionDate}</span></div>
+      <div class="tile-meta-row"><span class="label">Heure</span><span class="val">🕐 ${r.sessionTime}</span></div>
+      ${r.roomNumber ? `<div class="tile-meta-row"><span class="label">Salle</span><span class="val">🏛 ${r.roomNumber}</span></div>` : ""}
+      <div class="tile-meta-row"><span class="label">Email</span><span class="val">${r.email || "—"}</span></div>
+    </div>
+    <div class="tile-id">ID : ${r.id}</div>
+    ${r.commande ? buildCommandeInline(r.commande) : ""}
+    <div class="tile-actions">${actions}</div>
+  </div>`;
+}
+
+function emptyState(icon, msg) {
+  return `<div class="empty"><div class="empty-icon">${icon}</div>${msg}</div>`;
+}
+
+/* ── PANEL VALIDÉES GROUPÉ ── */
+function renderValideGrouped(reservations) {
+  const el = document.getElementById("panel-valide");
+  if (!reservations.length) { el.innerHTML = emptyState("✅","Aucune réservation validée"); return; }
+  const map = {};
+  reservations.forEach(r => {
+    if (!map[r.seanceId]) map[r.seanceId] = { seanceId: r.seanceId, filmTitle: r.filmTitle, sessionDate: r.sessionDate, sessionTime: r.sessionTime, roomNumber: r.roomNumber, items: [] };
+    map[r.seanceId].items.push(r);
   });
-  if (sub === "info")     loadInfo();
-  if (sub === "boutique") loadBoutique();
+  const groups = Object.values(map).sort((a,b) => `${b.sessionDate} ${b.sessionTime}`.localeCompare(`${a.sessionDate} ${a.sessionTime}`));
+  el.innerHTML = groups.map((g,gi) => {
+    const room = g.roomNumber ? ` · ${g.roomNumber}` : "";
+    const tiles = `<div class="tiles-grid">${g.items.map(r => buildTile(r, true)).join("")}</div>`;
+    return `<div class="group-block">
+      <div class="group-header" id="sgh-${gi}" onclick="toggleGroup(${gi})">
+        <div class="group-header-left">
+          <div class="g-film">${g.filmTitle}</div>
+          <div class="g-meta">📅 ${g.sessionDate} · 🕐 ${g.sessionTime}${room}</div>
+        </div>
+        <div class="group-header-right">
+          <span class="g-count">${g.items.length} résa</span>
+          <span class="g-chevron" id="scc-${gi}">▶</span>
+        </div>
+      </div>
+      <div class="group-body" id="sgb-${gi}">${tiles}</div>
+    </div>`;
+  }).join("");
+}
+
+function toggleGroup(gi) {
+  const h = document.getElementById(`sgh-${gi}`);
+  const b = document.getElementById(`sgb-${gi}`);
+  const c = document.getElementById(`scc-${gi}`);
+  const open = b.classList.toggle("open");
+  h.classList.toggle("open", open);
+  c.textContent = open ? "▼" : "▶";
+}
+
+/* ── LOAD RÉSERVATIONS ── */
+async function load() {
+  const res  = await fetch("/api/admin", { headers: adminHeaders() });
+  if (res.status === 401) return;
+  const data = await res.json();
+  const groups = { "en attente":[], "validé":[], "refusé":[], "expiré":[] };
+  data.forEach(r => { if (groups[r.status]) groups[r.status].push(r); });
+  const sk = r => `${r.sessionDate || ""} ${r.sessionTime || ""}`;
+  groups["en attente"].sort((a,b) => sk(a).localeCompare(sk(b)));
+  ["validé","refusé","expiré"].forEach(s => groups[s].sort((a,b) => sk(b).localeCompare(sk(a))));
+  document.getElementById("count-attente").textContent = groups["en attente"].length;
+  document.getElementById("count-valide").textContent  = groups["validé"].length;
+  document.getElementById("count-refuse").textContent  = groups["refusé"].length;
+  document.getElementById("count-expire").textContent  = groups["expiré"].length;
+  [["attente","en attente","⏳","Aucune réservation en attente"],
+   ["refuse","refusé","❌","Aucune réservation refusée"],
+   ["expire","expiré","⏱","Aucune réservation expirée"]
+  ].forEach(([pid,status,icon,msg]) => {
+    const items = groups[status];
+    document.getElementById(`panel-${pid}`).innerHTML = items.length
+      ? `<div class="tiles-grid">${items.map(r => buildTile(r, false)).join("")}</div>`
+      : emptyState(icon, msg);
+  });
+  renderValideGrouped(groups["validé"]);
+}
+
+/* ── ACTIONS ── */
+async function supprimer(id) {
+  if (!confirm("Supprimer cette réservation ?")) return;
+  showLoader();
+  try { await fetch("/api/admin/supprimer", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) }); }
+  catch { alert("Erreur serveur"); }
+  hideLoader(); load();
+}
+async function valider(id) {
+  showLoader();
+  try {
+    const res = await fetch("/api/admin/valider", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) });
+    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
+  } catch { alert("Erreur serveur"); hideLoader(); return; }
+  hideLoader(); load();
+}
+async function refuser(id) {
+  showLoader();
+  try { await fetch("/api/admin/refuser", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) }); }
+  catch { alert("Erreur serveur"); }
+  hideLoader(); load();
+}
+async function reimprimerTicket(id) {
+  showLoader();
+  try {
+    const res = await fetch("/api/admin/ticket", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) });
+    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a"); a.href = url; a.download = `ticket-${id}.pdf`; a.click();
+    URL.revokeObjectURL(url);
+  } catch { alert("Erreur serveur"); }
+  hideLoader(); load();
+}
+
+/* ── FAB (réservation manuelle) ── */
+function toggleFab() {
+  const panel = document.getElementById("fab-panel");
+  const fab   = document.getElementById("fab");
+  const open  = panel.style.display !== "none" && panel.style.display !== "";
+  panel.style.display = open ? "none" : "block";
+  fab.textContent = open ? "➕" : "✕";
+}
+function fillSeanceSelect(sel) {
+  sel.innerHTML = seancesCache.length
+    ? seancesCache.map(s => `<option value="${s.id}">${s.films?.title||"?"} — ${s.session_date} ${(s.session_time||"").slice(0,5)} (${s.room_number||"—"})</option>`).join("")
+    : `<option value="">Aucune séance</option>`;
+}
+async function creer() {
+  const get = id => document.getElementById(id).value.trim();
+  const msg = document.getElementById("f-msg");
+  const payload = { id:get("f-id"), clientName:get("f-clientName"), email:get("f-email"), seanceId:document.getElementById("f-seanceId").value, peopleNumber:get("f-peopleNumber") };
+  if (!payload.id||!payload.clientName||!payload.seanceId||!payload.peopleNumber) { msg.style.color="var(--red)"; msg.textContent="⚠ Champs obligatoires manquants."; return; }
+  showLoader();
+  try {
+    const res  = await fetch("/api/admin/creer", { method:"POST", headers:adminHeaders(), body:JSON.stringify(payload) });
+    const text = await res.text();
+    if (res.ok) { msg.style.color="var(--green)"; msg.textContent="✅ Créée !"; ["f-id","f-clientName","f-email","f-peopleNumber"].forEach(id=>document.getElementById(id).value=""); }
+    else { msg.style.color="var(--red)"; msg.textContent="❌ "+text; }
+  } catch { msg.style.color="var(--red)"; msg.textContent="❌ Erreur serveur."; }
+  hideLoader(); load();
+}
+
+/* ── SUPPORT ── */
+function buildSupportTile(m) {
+  const isNew = m.status === "nouveau";
+  const chip = isNew ? `<span class="chip chip-nouveau">🆕 Nouveau</span>` : `<span class="chip chip-traite">✅ Traité</span>`;
+  const date = new Date(m.created_at).toLocaleString("fr-FR", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  return `<div class="support-tile">
+    <div class="support-tile-top">
+      <div>
+        <div class="support-email">✉️ ${m.email}</div>
+        <div class="support-subject">${m.subject}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        ${chip}
+        <div class="support-date">🕐 ${date}</div>
+      </div>
+    </div>
+    <div class="support-msg">${m.message}</div>
+    <div class="tile-actions">
+      ${isNew ? `<button class="btn btn-gold" onclick="marquerTraite('${m.id}')">✅ Marquer traité</button>` : ""}
+      <button class="btn btn-red" onclick="supprimerSupport('${m.id}')">🗑 Supprimer</button>
+    </div>
+  </div>`;
+}
+async function loadSupport() {
+  const res = await fetch("/api/admin/support", { headers: adminHeaders() });
+  const data = await res.json();
+  const msgs = data.messages || [];
+  document.getElementById("count-support").textContent = msgs.filter(m => m.status==="nouveau").length;
+  document.getElementById("panel-support").innerHTML = msgs.length ? msgs.map(buildSupportTile).join("") : emptyState("📩","Aucun message de support.");
+}
+async function marquerTraite(id) {
+  showLoader();
+  try { await fetch("/api/admin/support/traiter", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) }); }
+  catch { alert("Erreur"); }
+  hideLoader(); loadSupport();
+}
+async function supprimerSupport(id) {
+  if (!confirm("Supprimer ce message ?")) return;
+  showLoader();
+  try { await fetch("/api/admin/support/supprimer", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) }); }
+  catch { alert("Erreur"); }
+  hideLoader(); loadSupport();
 }
 
 /* ── INFO ── */
@@ -932,666 +939,311 @@ async function loadInfo() {
   const data = await res.json();
   document.getElementById("info-content").value = data.content || "";
 }
-
 async function saveInfo() {
   const content = document.getElementById("info-content").value;
   const msg = document.getElementById("info-save-msg");
   try {
-    const res = await fetch("/api/admin/info", {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ content })
-    });
+    const res = await fetch("/api/admin/info", { method:"POST", headers:adminHeaders(), body:JSON.stringify({content}) });
     msg.style.color = res.ok ? "var(--green)" : "var(--red)";
     msg.textContent = res.ok ? "✅ Enregistré !" : "❌ Erreur.";
-  } catch {
-    msg.style.color = "var(--red)"; msg.textContent = "❌ Erreur serveur.";
-  }
-  setTimeout(() => msg.textContent = "", 3000);
+  } catch { msg.style.color="var(--red)"; msg.textContent="❌ Erreur serveur."; }
+  setTimeout(() => msg.textContent="", 3000);
 }
 
-/* ── SORT HELPER ── */
-function sortKey(r) {
-  return `${r.sessionDate || ""} ${r.sessionTime || ""}`.trim();
-}
-
-/* ── COMMANDE INLINE ── */
-function buildCommandeInline(commande) {
-  if (!commande) return "";
-  const items = commande.items || [];
-  if (!items.length) return "";
-  const itemsHtml = items.map(it =>
-    `<div class="commande-inline-item"><span><b>${it.nom}</b> × ${it.qte}</span><span>${(it.prix * it.qte).toFixed(2)} €</span></div>`
-  ).join("");
-  return `
-    <div class="commande-inline">
-      <div class="commande-inline-title">🍿 Snacks & boissons</div>
-      <div class="commande-inline-items">${itemsHtml}</div>
-      <div class="commande-inline-total">Total snacks : ${parseFloat(commande.total).toFixed(2)} €</div>
-    </div>`;
-}
-
-/* ── CARD BUILDER (réservations) ── */
-function buildCard(r) {
-  const statusChip = {
-    "validé":    `<span class="status-chip chip-valide">✅ Validé</span>`,
-    "refusé":    `<span class="status-chip chip-refuse">❌ Refusé</span>`,
-    "expiré":    `<span class="status-chip chip-expire">⏱ Expiré</span>`,
-    "en attente": ""
-  }[r.status] || "";
-
-  let actions;
-  if (r.status === "en attente") {
-    actions = `
-      <button class="btn btn-validate" onclick="valider('${r.id}')">✅ Valider</button>
-      <button class="btn btn-refuse"   onclick="refuser('${r.id}')">❌ Refuser</button>
-      <button class="btn btn-delete"   onclick="supprimer('${r.id}')">🗑 Supprimer</button>`;
-  } else if (r.status === "validé") {
-    actions = `
-      ${statusChip}
-      <button class="btn btn-reprint"  onclick="reimprimerTicket('${r.id}')">🎫 Obtenir le ticket</button>
-      <button class="btn btn-delete"   style="margin-left:auto;" onclick="supprimer('${r.id}')">🗑 Supprimer</button>`;
-  } else {
-    actions = `
-      ${statusChip}
-      <button class="btn btn-delete"   style="margin-left:auto;" onclick="supprimer('${r.id}')">🗑 Supprimer</button>`;
-  }
-
-  return `
-    <div class="resa-card">
-      <div class="card-header">
-        <span class="client-name">👤 ${r.clientName}</span>
-        <span class="film-badge">${r.filmTitle}</span>
-      </div>
-      <div class="card-grid">
-        <div class="card-field"><span class="field-label">Personnes</span><span class="field-value">🎟 ${r.peopleNumber}</span></div>
-        <div class="card-field"><span class="field-label">Email</span><span class="field-value">${r.email || '—'}</span></div>
-        <div class="card-field"><span class="field-label">Date</span><span class="field-value">📅 ${r.sessionDate}</span></div>
-        <div class="card-field"><span class="field-label">Heure</span><span class="field-value">🕐 ${r.sessionTime}</span></div>
-        ${r.roomNumber ? `<div class="card-field"><span class="field-label">Salle</span><span class="field-value">🏛 ${r.roomNumber}</span></div>` : ""}
-      </div>
-      <div class="card-id">ID : ${r.id}</div>
-      ${r.commande ? buildCommandeInline(r.commande) : ""}
-      <div class="card-actions" style="margin-top:14px;">${actions}</div>
-    </div>`;
-}
-
-function emptyState(icon, msg) {
-  return `<div class="empty"><div class="empty-icon">${icon}</div>${msg}</div>`;
-}
-
-/* ── PANEL VALIDÉ GROUPÉ ── */
-function renderValideGrouped(reservations) {
-  const el = document.getElementById("panel-valide");
-  if (!reservations.length) { el.innerHTML = emptyState("✅", "Aucune réservation validée"); return; }
-
-  const map = {};
-  reservations.forEach(r => {
-    if (!map[r.seanceId]) map[r.seanceId] = { seanceId: r.seanceId, filmTitle: r.filmTitle, sessionDate: r.sessionDate, sessionTime: r.sessionTime, roomNumber: r.roomNumber, items: [] };
-    map[r.seanceId].items.push(r);
-  });
-
-  const groups = Object.values(map).sort((a, b) =>
-    `${b.sessionDate} ${b.sessionTime}`.localeCompare(`${a.sessionDate} ${a.sessionTime}`)
-  );
-
-  el.innerHTML = groups.map((g, gi) => {
-    const room = g.roomNumber ? ` · ${g.roomNumber}` : "";
-    const cards = g.items.map(r => `
-      <div class="resa-card">
-        <div class="card-header">
-          <span class="client-name">👤 ${r.clientName}</span>
-          <span class="status-chip chip-valide">✅ Validé</span>
-        </div>
-        <div class="card-grid">
-          <div class="card-field"><span class="field-label">Personnes</span><span class="field-value">🎟 ${r.peopleNumber}</span></div>
-          <div class="card-field"><span class="field-label">Email</span><span class="field-value">${r.email || '—'}</span></div>
-        </div>
-        <div class="card-id">ID : ${r.id}</div>
-        ${r.commande ? buildCommandeInline(r.commande) : ""}
-        <div class="card-actions" style="margin-top:14px;">
-          <button class="btn btn-reprint" onclick="reimprimerTicket('${r.id}')">🎫 Obtenir le ticket</button>
-          <button class="btn btn-delete" style="margin-left:auto;" onclick="supprimer('${r.id}')">🗑 Supprimer</button>
-        </div>
-      </div>`).join("");
-
-    return `
-      <div class="seance-group">
-        <div class="seance-group-header" id="sgh-${gi}" onclick="toggleSeanceGroup(${gi})">
-          <div>
-            <div class="seance-group-title">${g.filmTitle}</div>
-            <div class="seance-group-meta">📅 ${g.sessionDate} · 🕐 ${g.sessionTime}${room}</div>
-          </div>
-          <div class="seance-group-right">
-            <span class="seance-badge">${g.items.length} réservation${g.items.length > 1 ? "s" : ""}</span>
-            <span class="seance-chevron" id="scc-${gi}">▶</span>
-          </div>
-        </div>
-        <div class="seance-group-body" id="sgb-${gi}">${cards}</div>
-      </div>`;
-  }).join("");
-}
-
-function toggleSeanceGroup(gi) {
-  const header  = document.getElementById(`sgh-${gi}`);
-  const body    = document.getElementById(`sgb-${gi}`);
-  const chevron = document.getElementById(`scc-${gi}`);
-  const isOpen  = body.classList.contains("open");
-  body.classList.toggle("open", !isOpen);
-  header.classList.toggle("open", !isOpen);
-  chevron.textContent = !isOpen ? "▼" : "▶";
-}
-
-/* ── LOAD RÉSERVATIONS ── */
-async function load() {
-  const res  = await fetch(`/api/admin`, { headers: adminHeaders() });
-  if (res.status === 401) { alert("Session admin invalide."); return; }
-  const data = await res.json();
-
-  const groups = { "en attente": [], "validé": [], "refusé": [], "expiré": [] };
-  data.forEach(r => { if (groups[r.status]) groups[r.status].push(r); });
-
-  groups["en attente"].sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
-  groups["validé"].sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
-  groups["refusé"].sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
-  groups["expiré"].sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
-
-  document.getElementById("count-attente").textContent = groups["en attente"].length;
-  document.getElementById("count-valide").textContent  = groups["validé"].length;
-  document.getElementById("count-refuse").textContent  = groups["refusé"].length;
-  document.getElementById("count-expire").textContent  = groups["expiré"].length;
-
-  [
-    ["attente", "en attente", "⏳", "Aucune réservation en attente"],
-    ["refuse",  "refusé",     "❌", "Aucune réservation refusée"],
-    ["expire",  "expiré",     "⏱", "Aucune réservation expirée"],
-  ].forEach(([panelId, status, icon, msg]) => {
-    const el    = document.getElementById(`panel-${panelId}`);
-    const items = groups[status];
-    el.innerHTML = items.length ? items.map(buildCard).join("") : emptyState(icon, msg);
-  });
-
-  renderValideGrouped(groups["validé"]);
-}
-
-/* ── ACTIONS RÉSERVATIONS ── */
-async function supprimer(id) {
-  if (!confirm("Supprimer définitivement cette réservation ?")) return;
-  showLoader();
-  try {
-    const res  = await fetch(`/api/admin/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) });
-    alert(await res.text());
-  } catch { alert("Erreur serveur !"); }
-  hideLoader(); load();
-}
-
-async function valider(id) {
-  showLoader();
-  try {
-    const res = await fetch(`/api/admin/valider`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) });
-    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
-  } catch { alert("Erreur serveur !"); hideLoader(); return; }
-  hideLoader(); load();
-}
-
-async function reimprimerTicket(id) {
-  showLoader();
-  try {
-    const res = await fetch(`/api/admin/ticket`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) });
-    if (!res.ok) { alert(await res.text()); hideLoader(); return; }
-    const blob = await res.blob();
-    const url  = window.URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href = url; a.download = `ticket-${id}.pdf`; a.click();
-    window.URL.revokeObjectURL(url);
-  } catch { alert("Erreur serveur !"); }
-  hideLoader(); load();
-}
-
-async function refuser(id) {
-  showLoader();
-  try {
-    const res  = await fetch(`/api/admin/refuser`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) });
-    alert(await res.text());
-  } catch { alert("Erreur serveur !"); }
-  hideLoader(); load();
-}
-
-/* ── FORM RÉSERVATION MANUELLE ── */
-function toggleForm() {
-  const panel   = document.getElementById("creer-panel");
-  const fab     = document.getElementById("fab");
-  const visible = panel.style.display !== "none";
-  panel.style.display = visible ? "none" : "block";
-  fab.textContent = visible ? "➕" : "✕";
-}
-
-function fillSeanceSelect(selectEl) {
-  selectEl.innerHTML = seancesCache.length
-    ? seancesCache.map(s => `<option value="${s.id}">${s.films?.title || "?"} — ${s.session_date} ${s.session_time?.slice(0,5)} (${s.room_number || "—"})</option>`).join("")
-    : `<option value="">Aucune séance disponible</option>`;
-}
-
-async function creer() {
-  const get = id => document.getElementById(id).value.trim();
-  const msg = document.getElementById("f-msg");
-  const payload = { id: get("f-id"), clientName: get("f-clientName"), email: get("f-email"), seanceId: document.getElementById("f-seanceId").value, peopleNumber: get("f-peopleNumber") };
-  if (!payload.id || !payload.clientName || !payload.seanceId || !payload.peopleNumber) { msg.style.color = "var(--red)"; msg.textContent = "⚠ Champs obligatoires manquants."; return; }
-  showLoader();
-  try {
-    const res  = await fetch(`/api/admin/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify(payload) });
-    const text = await res.text();
-    if (res.ok) { msg.style.color = "var(--green)"; msg.textContent = "✅ Réservation créée !"; ["f-id","f-clientName","f-email","f-peopleNumber"].forEach(id => document.getElementById(id).value = ""); }
-    else { msg.style.color = "var(--red)"; msg.textContent = "❌ " + text; }
-  } catch { msg.style.color = "var(--red)"; msg.textContent = "❌ Erreur serveur."; }
-  hideLoader(); load();
-}
-
-/* ── SUPPORT ── */
-function buildSupportCard(m) {
-  const isNouveau = m.status === "nouveau";
-  const chip = isNouveau ? `<span class="status-chip chip-nouveau">🆕 Nouveau</span>` : `<span class="status-chip chip-traite">✅ Traité</span>`;
-  const date = new Date(m.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
-  return `
-    <div class="resa-card">
-      <div class="card-header"><span class="client-name">✉️ ${m.email}</span>${chip}</div>
-      <div class="card-grid">
-        <div class="card-field"><span class="field-label">Objet</span><span class="field-value">${m.subject}</span></div>
-        <div class="card-field"><span class="field-label">Reçu le</span><span class="field-value">🕐 ${date}</span></div>
-      </div>
-      <div class="support-message">${m.message}</div>
-      <div class="card-actions" style="margin-top:14px;">
-        ${isNouveau ? `<button class="btn btn-validate" onclick="marquerTraite('${m.id}')">✅ Marquer traité</button>` : ""}
-        <button class="btn btn-delete" onclick="supprimerSupport('${m.id}')">🗑 Supprimer</button>
-      </div>
-    </div>`;
-}
-
-async function loadSupport() {
-  const res = await fetch(`/api/admin/support`, { headers: adminHeaders() });
-  const data = await res.json();
-  const messages = data.messages || [];
-  document.getElementById("count-support").textContent = messages.filter(m => m.status === "nouveau").length;
-  document.getElementById("panel-support").innerHTML = messages.length ? messages.map(buildSupportCard).join("") : emptyState("📩", "Aucun message de support.");
-}
-
-async function marquerTraite(id) {
-  showLoader();
-  try { const res = await fetch(`/api/admin/support/traiter`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
-  catch { alert("Erreur serveur !"); }
-  hideLoader(); loadSupport();
-}
-
-async function supprimerSupport(id) {
-  if (!confirm("Supprimer définitivement ce message ?")) return;
-  showLoader();
-  try { const res = await fetch(`/api/admin/support/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
-  catch { alert("Erreur serveur !"); }
-  hideLoader(); loadSupport();
-}
-
-/* ── PROGRAMME : FILMS ── */
+/* ── FILMS ── */
 let editingFilmId = null;
-
 function buildFilmRow(f) {
-  const meta = [f.genre, f.duration_minutes ? `${f.duration_minutes} min` : null].filter(Boolean).join(" • ");
-  return `
-    <div class="film-row">
-      <div><div class="title">${f.title}</div><div class="meta">${meta || "—"}</div></div>
-      <div class="row-actions">
-        <button class="btn btn-edit" onclick="editFilm('${f.id}')">✏️ Modifier</button>
-        <button class="btn btn-delete" onclick="supprimerFilm('${f.id}')">🗑 Supprimer</button>
-      </div>
-    </div>`;
+  const meta = [f.genre, f.duration_minutes ? `${f.duration_minutes} min` : null].filter(Boolean).join(" · ");
+  return `<div class="prog-row">
+    <div><div class="title">${f.title}</div><div class="meta">${meta||"—"}</div></div>
+    <div class="row-actions">
+      <button class="btn btn-blue" onclick="editFilm('${f.id}')">✏️</button>
+      <button class="btn btn-red" onclick="supprimerFilm('${f.id}')">🗑</button>
+    </div>
+  </div>`;
 }
-
 function editFilm(id) {
-  const f = filmsCache.find(x => x.id === id);
-  if (!f) return;
+  const f = filmsCache.find(x=>x.id===id); if (!f) return;
   editingFilmId = id;
-  document.getElementById("film-title").value    = f.title || "";
-  document.getElementById("film-genre").value    = f.genre || "";
-  document.getElementById("film-duration").value = f.duration_minutes || "";
-  document.getElementById("film-poster").value   = f.poster_url || "";
-  document.getElementById("film-synopsis").value = f.synopsis || "";
-  document.getElementById("film-submit-btn").textContent = "💾 Enregistrer les modifications";
-  document.getElementById("film-cancel-btn").style.display = "inline-block";
-  document.getElementById("film-title").scrollIntoView({ behavior: "smooth", block: "center" });
+  document.getElementById("film-title").value    = f.title||"";
+  document.getElementById("film-genre").value    = f.genre||"";
+  document.getElementById("film-duration").value = f.duration_minutes||"";
+  document.getElementById("film-poster").value   = f.poster_url||"";
+  document.getElementById("film-synopsis").value = f.synopsis||"";
+  document.getElementById("film-submit-btn").textContent = "💾 Enregistrer";
+  document.getElementById("film-cancel-btn").style.display = "inline-flex";
+  document.getElementById("film-title").scrollIntoView({ behavior:"smooth", block:"center" });
 }
-
 function cancelEditFilm() {
   editingFilmId = null;
-  ["film-title","film-genre","film-duration","film-poster","film-synopsis"].forEach(id => document.getElementById(id).value = "");
+  ["film-title","film-genre","film-duration","film-poster","film-synopsis"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("film-submit-btn").textContent = "➕ Ajouter le film";
   document.getElementById("film-cancel-btn").style.display = "none";
 }
-
 async function creerFilm() {
   const title = document.getElementById("film-title").value.trim();
   if (!title) { alert("Le titre est obligatoire."); return; }
-  const payload = { title, genre: document.getElementById("film-genre").value.trim(), durationMinutes: document.getElementById("film-duration").value.trim(), posterUrl: document.getElementById("film-poster").value.trim(), synopsis: document.getElementById("film-synopsis").value.trim() };
+  const payload = { title, genre:document.getElementById("film-genre").value.trim(), durationMinutes:document.getElementById("film-duration").value.trim(), posterUrl:document.getElementById("film-poster").value.trim(), synopsis:document.getElementById("film-synopsis").value.trim() };
   const isEdit = !!editingFilmId;
   if (isEdit) payload.id = editingFilmId;
   showLoader();
   try {
-    const res = await fetch(isEdit ? `/api/admin/films/modifier` : `/api/admin/films/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify(payload) });
+    const res = await fetch(isEdit?"/api/admin/films/modifier":"/api/admin/films/creer", { method:"POST", headers:adminHeaders(), body:JSON.stringify(payload) });
     if (!res.ok) { alert(await res.text()); hideLoader(); return; }
     cancelEditFilm();
   } catch { alert("Erreur serveur !"); }
   hideLoader(); loadProgramme();
 }
-
-async function loadFilms() {
-  const res = await fetch(`/api/admin/films`, { headers: adminHeaders() });
-  const data = await res.json();
-  filmsCache = data.films || [];
-  document.getElementById("films-list").innerHTML = filmsCache.length ? filmsCache.map(buildFilmRow).join("") : emptyState("🎬", "Aucun film pour le moment.");
-  const filmSelect = document.getElementById("seance-film");
-  filmSelect.innerHTML = filmsCache.length ? filmsCache.map(f => `<option value="${f.id}">${f.title}</option>`).join("") : `<option value="">Crée d'abord un film</option>`;
-}
-
 async function supprimerFilm(id) {
-  if (!confirm("Supprimer ce film ? Ses séances seront aussi supprimées.")) return;
+  if (!confirm("Supprimer ce film ?")) return;
   showLoader();
-  try { const res = await fetch(`/api/admin/films/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
-  catch { alert("Erreur serveur !"); }
+  try { await fetch("/api/admin/films/supprimer", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) }); }
+  catch { alert("Erreur"); }
   hideLoader(); loadProgramme();
 }
+async function loadFilms() {
+  const res  = await fetch("/api/admin/films", { headers: adminHeaders() });
+  const data = await res.json();
+  filmsCache = data.films || [];
+  document.getElementById("films-list").innerHTML = filmsCache.length ? filmsCache.map(buildFilmRow).join("") : emptyState("🎬","Aucun film.");
+  const sel = document.getElementById("seance-film");
+  sel.innerHTML = filmsCache.length ? filmsCache.map(f=>`<option value="${f.id}">${f.title}</option>`).join("") : `<option value="">Crée d'abord un film</option>`;
+}
 
-/* ── PROGRAMME : SÉANCES ── */
+/* ── SÉANCES ── */
 let editingSeanceId = null;
 let seanceMode = "single";
-
-function formatDateFr(dateStr) {
-  const [y, m, d] = dateStr.split("-");
-  return `${d}/${m}/${y}`;
-}
-
+function formatDateFr(d) { const [y,m,dd]=d.split("-"); return `${dd}/${m}/${y}`; }
 function buildSeanceRow(s) {
   const isCancelled = s.cancelled;
-  const priceStr = s.price != null ? `${parseFloat(s.price).toFixed(2)} €` : null;
-  return `
-    <div class="seance-row" style="${isCancelled ? 'opacity:0.6;' : ''}">
-      <div>
-        <div class="title">${s.films?.title || "?"} — ${formatDateFr(s.session_date)} ${s.session_time?.slice(0,5)}
-          ${isCancelled ? `<span style="background:rgba(255,68,85,0.18);color:#ff4455;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:8px;">ANNULÉE</span>` : ""}
-        </div>
-        <div class="meta">${s.room_number || "Salle non précisée"} • Capacité ${s.capacity}${priceStr ? ` • 💶 ${priceStr}/pers.` : ""}${s.info_message ? ` • ℹ️ ${s.info_message}` : ""}</div>
+  const priceStr = s.price != null ? `${parseFloat(s.price).toFixed(2)} €/pers.` : "";
+  return `<div class="prog-row" style="${isCancelled?'opacity:0.55;':''}">
+    <div>
+      <div class="title">${s.films?.title||"?"} — ${formatDateFr(s.session_date)} ${(s.session_time||"").slice(0,5)}
+        ${isCancelled?`<span style="background:rgba(255,107,107,0.18);color:#ff4455;font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:999px;margin-left:6px;">ANNULÉE</span>`:""}
       </div>
-      <div class="row-actions">
-        ${isCancelled
-          ? `<button class="btn btn-edit" onclick="restaurerSeance('${s.id}')">↩️ Restaurer</button>`
-          : `<button class="btn btn-refuse" onclick="annulerSeance('${s.id}')">🚫 Annuler</button>
-             <button class="btn btn-edit" onclick="editSeance('${s.id}')">✏️ Modifier</button>`
-        }
-        <button class="btn btn-delete" onclick="supprimerSeance('${s.id}')">🗑 Supprimer</button>
-      </div>
-    </div>`;
+      <div class="meta">${s.room_number||"Salle ?"} · Cap. ${s.capacity}${priceStr?" · "+priceStr:""}${s.info_message?" · ℹ️ "+s.info_message:""}</div>
+    </div>
+    <div class="row-actions">
+      ${isCancelled
+        ? `<button class="btn btn-blue" onclick="restaurerSeance('${s.id}')">↩️</button>`
+        : `<button class="btn btn-red" onclick="annulerSeance('${s.id}')">🚫</button>
+           <button class="btn btn-blue" onclick="editSeance('${s.id}')">✏️</button>`
+      }
+      <button class="btn btn-ghost" onclick="supprimerSeance('${s.id}')">🗑</button>
+    </div>
+  </div>`;
 }
-
-function buildSeanceSection(title, seances, color) {
+function buildSeanceSection(label, seances, color) {
   if (!seances.length) return "";
-  return `
-    <div style="margin-bottom:18px;">
-      <div class="seance-section-header" style="color:${color};">${title} <span style="font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;opacity:0.7;">(${seances.length})</span></div>
-      ${seances.map(buildSeanceRow).join("")}
-    </div>`;
+  return `<div style="margin-bottom:16px;">
+    <div class="seance-group-section-title" style="color:${color};">${label} <span style="font-family:'DM Sans';font-size:0.72rem;font-weight:600;opacity:0.6;">(${seances.length})</span></div>
+    ${seances.map(buildSeanceRow).join("")}
+  </div>`;
 }
-
 function editSeance(id) {
-  const s = seancesCache.find(x => x.id === id);
-  if (!s) return;
+  const s = seancesCache.find(x=>x.id===id); if (!s) return;
   editingSeanceId = id;
   document.getElementById("seance-film").value    = s.film_id;
-  document.getElementById("seance-room").value    = s.room_number || "";
-  document.getElementById("seance-date").value    = s.session_date || "";
-  document.getElementById("seance-time").value    = (s.session_time || "").slice(0,5);
-  document.getElementById("seance-capacity").value = s.capacity || 50;
-  document.getElementById("seance-price").value   = s.price != null ? s.price : "";
-  document.getElementById("seance-info").value    = s.info_message || "";
-  document.getElementById("seance-submit-btn").textContent = "💾 Enregistrer les modifications";
-  document.getElementById("seance-cancel-btn").style.display = "inline-block";
-  document.getElementById("seance-film").scrollIntoView({ behavior: "smooth", block: "center" });
+  document.getElementById("seance-room").value    = s.room_number||"";
+  document.getElementById("seance-date").value    = s.session_date||"";
+  document.getElementById("seance-time").value    = (s.session_time||"").slice(0,5);
+  document.getElementById("seance-capacity").value= s.capacity||50;
+  document.getElementById("seance-price").value   = s.price!=null?s.price:"";
+  document.getElementById("seance-info").value    = s.info_message||"";
+  document.getElementById("seance-submit-btn").textContent = "💾 Enregistrer";
+  document.getElementById("seance-cancel-btn").style.display = "inline-flex";
+  document.getElementById("seance-film").scrollIntoView({ behavior:"smooth", block:"center" });
   setSeanceMode("single");
 }
-
 function setSeanceMode(mode) {
   seanceMode = mode;
-  document.getElementById("mode-single-btn").className = mode === "single" ? "btn btn-validate" : "btn btn-edit";
-  document.getElementById("mode-period-btn").className = mode === "period" ? "btn btn-validate" : "btn btn-edit";
-  document.getElementById("mode-single-btn").style.cssText = "font-size:0.8rem;padding:7px 14px;";
-  document.getElementById("mode-period-btn").style.cssText = "font-size:0.8rem;padding:7px 14px;";
-  document.getElementById("seance-date").style.display      = mode === "single" ? "block" : "none";
-  document.getElementById("seance-date-from").style.display = mode === "period" ? "block" : "none";
-  document.getElementById("seance-date-to").style.display   = mode === "period" ? "block" : "none";
-  if (mode === "period") cancelEditSeance();
+  document.getElementById("mode-single-btn").className = mode==="single" ? "btn btn-gold" : "btn btn-ghost";
+  document.getElementById("mode-period-btn").className = mode==="period" ? "btn btn-gold" : "btn btn-ghost";
+  document.getElementById("mode-single-btn").style.cssText = "font-size:0.78rem;padding:7px 12px;";
+  document.getElementById("mode-period-btn").style.cssText = "font-size:0.78rem;padding:7px 12px;";
+  document.getElementById("seance-date").style.display      = mode==="single"?"block":"none";
+  document.getElementById("seance-date-from").style.display = mode==="period"?"block":"none";
+  document.getElementById("seance-date-to").style.display   = mode==="period"?"block":"none";
+  if (mode==="period") cancelEditSeance();
 }
-
 function cancelEditSeance() {
   editingSeanceId = null;
-  ["seance-room","seance-date","seance-date-from","seance-date-to","seance-time","seance-price","seance-info"].forEach(id => document.getElementById(id).value = "");
+  ["seance-room","seance-date","seance-date-from","seance-date-to","seance-time","seance-price","seance-info"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("seance-capacity").value = 50;
   document.getElementById("seance-submit-btn").textContent = "➕ Ajouter la séance";
   document.getElementById("seance-cancel-btn").style.display = "none";
 }
-
 async function creerSeance() {
   const filmId      = document.getElementById("seance-film").value;
   const sessionTime = document.getElementById("seance-time").value;
-  if (!filmId || !sessionTime) { alert("Film et heure sont obligatoires."); return; }
-
+  if (!filmId||!sessionTime) { alert("Film et heure obligatoires."); return; }
   const isEdit = !!editingSeanceId;
   const price  = document.getElementById("seance-price").value.trim();
-
-  if (seanceMode === "single" || isEdit) {
+  if (seanceMode==="single"||isEdit) {
     const sessionDate = document.getElementById("seance-date").value;
     if (!sessionDate) { alert("La date est obligatoire."); return; }
-    const payload = { filmId, roomNumber: document.getElementById("seance-room").value.trim(), sessionDate, sessionTime, capacity: document.getElementById("seance-capacity").value.trim(), infoMessage: document.getElementById("seance-info").value.trim(), price: price !== "" ? price : null };
+    const payload = { filmId, roomNumber:document.getElementById("seance-room").value.trim(), sessionDate, sessionTime, capacity:document.getElementById("seance-capacity").value.trim(), infoMessage:document.getElementById("seance-info").value.trim(), price:price!==""?price:null };
     if (isEdit) payload.id = editingSeanceId;
     showLoader();
     try {
-      const res = await fetch(isEdit ? `/api/admin/seances/modifier` : `/api/admin/seances/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify(payload) });
+      const res = await fetch(isEdit?"/api/admin/seances/modifier":"/api/admin/seances/creer", { method:"POST", headers:adminHeaders(), body:JSON.stringify(payload) });
       if (!res.ok) { alert(await res.text()); hideLoader(); return; }
       cancelEditSeance();
     } catch { alert("Erreur serveur !"); }
     hideLoader(); await loadSeances(); return;
   }
-
   const from = document.getElementById("seance-date-from").value;
   const to   = document.getElementById("seance-date-to").value;
-  if (!from || !to) { alert("Dates de début et de fin obligatoires."); return; }
-  if (from > to) { alert("La date de début doit être antérieure à la date de fin."); return; }
-
+  if (!from||!to) { alert("Dates de début et de fin obligatoires."); return; }
+  if (from>to) { alert("Date de début antérieure à la date de fin."); return; }
   const dates = [];
-  const cur = new Date(from + "T00:00:00");
-  const end = new Date(to   + "T00:00:00");
-  while (cur <= end) {
-    dates.push(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,"0")}-${String(cur.getDate()).padStart(2,"0")}`);
-    cur.setDate(cur.getDate() + 1);
-  }
-  if (dates.length > 60) { alert("La période ne peut pas dépasser 60 jours."); return; }
-
+  const cur = new Date(from+"T00:00:00"), end = new Date(to+"T00:00:00");
+  while (cur<=end) { dates.push(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,"0")}-${String(cur.getDate()).padStart(2,"0")}`); cur.setDate(cur.getDate()+1); }
+  if (dates.length>60) { alert("Période max 60 jours."); return; }
   showLoader();
   let errors = 0;
   for (const sessionDate of dates) {
     try {
-      const res = await fetch(`/api/admin/seances/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ filmId, roomNumber: document.getElementById("seance-room").value.trim(), sessionDate, sessionTime, capacity: document.getElementById("seance-capacity").value.trim(), infoMessage: document.getElementById("seance-info").value.trim(), price: price !== "" ? price : null }) });
+      const res = await fetch("/api/admin/seances/creer", { method:"POST", headers:adminHeaders(), body:JSON.stringify({ filmId, roomNumber:document.getElementById("seance-room").value.trim(), sessionDate, sessionTime, capacity:document.getElementById("seance-capacity").value.trim(), infoMessage:document.getElementById("seance-info").value.trim(), price:price!==""?price:null }) });
       if (!res.ok) errors++;
     } catch { errors++; }
   }
   hideLoader();
-  alert(errors > 0 ? `${dates.length - errors} séance(s) créée(s), ${errors} erreur(s).` : `✅ ${dates.length} séance(s) créée(s) !`);
+  alert(errors>0 ? `${dates.length-errors} séance(s) créée(s), ${errors} erreur(s).` : `✅ ${dates.length} séance(s) créée(s) !`);
   cancelEditSeance(); await loadSeances();
 }
-
 async function loadSeances() {
-  const res = await fetch(`/api/admin/seances`, { headers: adminHeaders() });
+  const res  = await fetch("/api/admin/seances", { headers: adminHeaders() });
   const data = await res.json();
   seancesCache = data.seances || [];
-
   const nowTs   = new Date();
-  const limit30 = new Date(nowTs.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const limit30 = new Date(nowTs.getTime() - 30*24*60*60*1000);
   const aVenir  = seancesCache.filter(s => new Date(`${s.session_date}T${s.session_time}`) >= nowTs);
-  const termine = seancesCache.filter(s => { const dt = new Date(`${s.session_date}T${s.session_time}`); return dt < nowTs && dt >= limit30; });
+  const termine = seancesCache.filter(s => { const dt=new Date(`${s.session_date}T${s.session_time}`); return dt<nowTs && dt>=limit30; });
   const vieux   = seancesCache.filter(s => new Date(`${s.session_date}T${s.session_time}`) < limit30);
-
-  const html = [
+  document.getElementById("seances-list").innerHTML = [
     buildSeanceSection("🟢 À venir", aVenir, "var(--green)"),
     buildSeanceSection("🟡 Terminé", termine, "var(--gold)"),
-    buildSeanceSection("⚫ Terminé +30 jours", vieux, "var(--text-muted)"),
-  ].join("") || emptyState("🗓", "Aucune séance programmée.");
-
-  document.getElementById("seances-list").innerHTML = html;
+    buildSeanceSection("⚫ +30 jours", vieux, "var(--gris)"),
+  ].join("") || emptyState("🗓","Aucune séance.");
   fillSeanceSelect(document.getElementById("f-seanceId"));
 }
-
 async function supprimerSeance(id) {
   if (!confirm("Supprimer cette séance ?")) return;
   showLoader();
-  try { const res = await fetch(`/api/admin/seances/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
-  catch { alert("Erreur serveur !"); }
+  try { await fetch("/api/admin/seances/supprimer", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) }); }
+  catch { alert("Erreur"); }
   hideLoader(); loadSeances();
 }
-
 async function annulerSeance(id) {
-  if (!confirm("Annuler cette séance ? Les réservations en attente et validées seront refusées.")) return;
+  if (!confirm("Annuler cette séance ?")) return;
   showLoader();
-  try { const res = await fetch(`/api/admin/seances/annuler`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
-  catch { alert("Erreur serveur !"); }
+  try { await fetch("/api/admin/seances/annuler", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) }); }
+  catch { alert("Erreur"); }
   hideLoader(); loadSeances(); load();
 }
-
 async function restaurerSeance(id) {
   showLoader();
-  try { const res = await fetch(`/api/admin/seances/restaurer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
-  catch { alert("Erreur serveur !"); }
+  try { await fetch("/api/admin/seances/restaurer", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) }); }
+  catch { alert("Erreur"); }
   hideLoader(); loadSeances();
 }
+async function loadProgramme() { await loadFilms(); await loadSeances(); }
 
-async function loadProgramme() {
-  await loadFilms();
-  await loadSeances();
-}
-
-/* ══════════════════════════════════
-   BOUTIQUE
-══════════════════════════════════ */
+/* ── BOUTIQUE ── */
 let editingProduitId = null;
-
 function stockBadge(stock) {
-  if (stock <= 0)  return `<span class="stock-badge stock-zero">Rupture</span>`;
-  if (stock <= 5)  return `<span class="stock-badge stock-low">${stock} restants</span>`;
+  if (stock<=0)  return `<span class="stock-badge stock-zero">Rupture</span>`;
+  if (stock<=5)  return `<span class="stock-badge stock-low">${stock} restants</span>`;
   return `<span class="stock-badge stock-ok">${stock} en stock</span>`;
 }
-
 function buildProduitRow(p) {
-  const actifClass = p.actif ? "actif-on" : "actif-off";
-  const actifLabel = p.actif ? "✅ Actif" : "❌ Inactif";
-  return `
-    <div class="produit-row">
-      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
-        ${p.image_url ? `<img src="${p.image_url}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">` : `<div style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🍿</div>`}
-        <div>
-          <div class="title">${p.nom}</div>
-          <div class="meta">${p.description || ""} · <b style="color:var(--teal)">${parseFloat(p.prix).toFixed(2)} €</b></div>
-        </div>
+  return `<div class="produit-row">
+    <div class="produit-img-wrap">
+      ${p.image_url ? `<img src="${p.image_url}" onerror="this.style.display='none'">` : "🍿"}
+    </div>
+    <div class="produit-main">
+      <div class="produit-nom">${p.nom}</div>
+      <div class="produit-desc-prix">${p.description||""} · <b>${parseFloat(p.prix).toFixed(2)} €</b></div>
+    </div>
+    <div class="row-actions">
+      <div class="stock-ctrl">
+        <button class="stock-btn minus" onclick="ajusterStock('${p.id}',-1,this)">−</button>
+        <span class="stock-val" id="stock-val-${p.id}">${p.stock}</span>
+        <button class="stock-btn plus" onclick="ajusterStock('${p.id}',1,this)">+</button>
+        ${stockBadge(p.stock)}
       </div>
-      <div class="row-actions">
-        <div class="stock-controls">
-          <button class="stock-btn minus" onclick="ajusterStock('${p.id}', -1, this)">−</button>
-          <span class="stock-val" id="stock-val-${p.id}">${p.stock}</span>
-          <button class="stock-btn plus" onclick="ajusterStock('${p.id}', 1, this)">+</button>
-          ${stockBadge(p.stock)}
-        </div>
-        <button class="actif-toggle ${actifClass}" onclick="toggleActif('${p.id}', ${!p.actif})">${actifLabel}</button>
-        <button class="btn btn-edit" onclick="editProduit('${p.id}')">✏️</button>
-        <button class="btn btn-delete" onclick="supprimerProduit('${p.id}')">🗑</button>
-      </div>
-    </div>`;
+      <button class="actif-toggle ${p.actif?"actif-on":"actif-off"}" onclick="toggleActif('${p.id}',${!p.actif})">${p.actif?"✅ Actif":"❌ Inactif"}</button>
+      <button class="btn btn-blue" onclick="editProduit('${p.id}')">✏️</button>
+      <button class="btn btn-red" onclick="supprimerProduit('${p.id}')">🗑</button>
+    </div>
+  </div>`;
 }
-
 async function ajusterStock(id, delta, btn) {
   btn.disabled = true;
   try {
-    const res = await fetch(`/api/admin/boutique/produits/stock`, {
-      method: "POST", headers: adminHeaders(), body: JSON.stringify({ id, delta })
-    });
+    const res = await fetch("/api/admin/boutique/produits/stock", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id,delta}) });
     if (!res.ok) { alert(await res.text()); return; }
     const data = await res.json();
-    const valEl = document.getElementById(`stock-val-${id}`);
-    if (valEl) valEl.textContent = data.stock;
-    // Mettre à jour le cache local
-    const prod = produitsCache.find(p => p.id === id);
+    const el = document.getElementById(`stock-val-${id}`);
+    if (el) el.textContent = data.stock;
+    const prod = produitsCache.find(p=>p.id===id);
     if (prod) prod.stock = data.stock;
-  } catch { alert("Erreur serveur !"); }
+  } catch { alert("Erreur"); }
   btn.disabled = false;
 }
-
 function editProduit(id) {
-  const p = produitsCache.find(x => x.id === id);
-  if (!p) return;
+  const p = produitsCache.find(x=>x.id===id); if (!p) return;
   editingProduitId = id;
-  document.getElementById("prod-nom").value   = p.nom || "";
-  document.getElementById("prod-desc").value  = p.description || "";
-  document.getElementById("prod-prix").value  = p.prix || "";
-  document.getElementById("prod-stock").value = p.stock || 0;
-  document.getElementById("prod-image").value = p.image_url || "";
-  document.getElementById("prod-submit-btn").textContent = "💾 Enregistrer les modifications";
-  document.getElementById("prod-cancel-btn").style.display = "inline-block";
-  document.getElementById("prod-nom").scrollIntoView({ behavior: "smooth", block: "center" });
+  document.getElementById("prod-nom").value   = p.nom||"";
+  document.getElementById("prod-desc").value  = p.description||"";
+  document.getElementById("prod-prix").value  = p.prix||"";
+  document.getElementById("prod-stock").value = p.stock||0;
+  document.getElementById("prod-image").value = p.image_url||"";
+  document.getElementById("prod-submit-btn").textContent = "💾 Enregistrer";
+  document.getElementById("prod-cancel-btn").style.display = "inline-flex";
+  document.getElementById("prod-nom").scrollIntoView({ behavior:"smooth", block:"center" });
 }
-
 function cancelEditProduit() {
   editingProduitId = null;
-  ["prod-nom","prod-desc","prod-prix","prod-stock","prod-image"].forEach(id => document.getElementById(id).value = "");
+  ["prod-nom","prod-desc","prod-prix","prod-stock","prod-image"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("prod-submit-btn").textContent = "➕ Ajouter le produit";
   document.getElementById("prod-cancel-btn").style.display = "none";
 }
-
 async function creerProduit() {
   const nom  = document.getElementById("prod-nom").value.trim();
   const prix = document.getElementById("prod-prix").value.trim();
-  if (!nom || prix === "") { alert("Nom et prix sont obligatoires."); return; }
-
-  const payload = {
-    nom,
-    description: document.getElementById("prod-desc").value.trim(),
-    prix,
-    stock: document.getElementById("prod-stock").value.trim() || 0,
-    image_url: document.getElementById("prod-image").value.trim()
-  };
+  if (!nom||prix==="") { alert("Nom et prix obligatoires."); return; }
+  const payload = { nom, description:document.getElementById("prod-desc").value.trim(), prix, stock:document.getElementById("prod-stock").value.trim()||0, image_url:document.getElementById("prod-image").value.trim() };
   const isEdit = !!editingProduitId;
   if (isEdit) payload.id = editingProduitId;
-
   showLoader();
   try {
-    const res = await fetch(isEdit ? `/api/admin/boutique/produits/modifier` : `/api/admin/boutique/produits/creer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify(payload) });
+    const res = await fetch(isEdit?"/api/admin/boutique/produits/modifier":"/api/admin/boutique/produits/creer", { method:"POST", headers:adminHeaders(), body:JSON.stringify(payload) });
     if (!res.ok) { alert(await res.text()); hideLoader(); return; }
     cancelEditProduit();
   } catch { alert("Erreur serveur !"); }
   hideLoader(); loadBoutique();
 }
-
 async function supprimerProduit(id) {
   if (!confirm("Supprimer ce produit ?")) return;
   showLoader();
-  try { const res = await fetch(`/api/admin/boutique/produits/supprimer`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id }) }); if (!res.ok) alert(await res.text()); }
-  catch { alert("Erreur serveur !"); }
+  try { await fetch("/api/admin/boutique/produits/supprimer", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id}) }); }
+  catch { alert("Erreur"); }
   hideLoader(); loadBoutique();
 }
-
 async function toggleActif(id, actif) {
   showLoader();
-  try { await fetch(`/api/admin/boutique/produits/toggle`, { method: "POST", headers: adminHeaders(), body: JSON.stringify({ id, actif }) }); }
-  catch { alert("Erreur serveur !"); }
+  try { await fetch("/api/admin/boutique/produits/toggle", { method:"POST", headers:adminHeaders(), body:JSON.stringify({id,actif}) }); }
+  catch { alert("Erreur"); }
   hideLoader(); loadBoutique();
 }
-
 async function loadBoutique() {
-  const res = await fetch(`/api/admin/boutique/produits`, { headers: adminHeaders() });
+  const res  = await fetch("/api/admin/boutique/produits", { headers: adminHeaders() });
   const data = await res.json();
   produitsCache = data.produits || [];
-  document.getElementById("produits-list").innerHTML = produitsCache.length
-    ? produitsCache.map(buildProduitRow).join("")
-    : emptyState("🍿", "Aucun produit pour le moment.");
+  document.getElementById("produits-list").innerHTML = produitsCache.length ? produitsCache.map(buildProduitRow).join("") : emptyState("🍿","Aucun produit.");
 }
 </script>
 </body>
