@@ -455,12 +455,72 @@
     #loader p { margin-top: 12px; color: var(--gold); font-size: 0.82rem; letter-spacing: 0.5px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── MOBILE BOTTOM TAB BAR ── */
+    .mobile-tabs {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--s1);
+      border-top: 1px solid var(--border);
+      z-index: 200;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .mobile-tabs::-webkit-scrollbar { display: none; }
+    .mobile-tabs-inner {
+      display: flex;
+      min-width: max-content;
+      padding: 0 4px;
+    }
+    .mob-tab {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; padding: 8px 14px; min-width: 64px;
+      cursor: pointer; transition: background 0.15s;
+      border: none; background: none; color: var(--gris);
+      font-family: 'DM Sans', sans-serif; font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.3px; text-transform: uppercase; white-space: nowrap;
+      position: relative;
+    }
+    .mob-tab .mob-icon { font-size: 1.1rem; line-height: 1; }
+    .mob-tab .mob-badge {
+      position: absolute; top: 6px; right: 8px;
+      min-width: 16px; height: 16px; border-radius: 999px;
+      background: var(--red); color: #fff;
+      font-size: 0.56rem; font-weight: 800;
+      display: none; align-items: center; justify-content: center;
+      padding: 0 4px;
+    }
+    .mob-tab .mob-badge.show { display: flex; }
+    .mob-tab.active-attente  { color: var(--gold); }
+    .mob-tab.active-valide   { color: var(--green); }
+    .mob-tab.active-refuse   { color: var(--red); }
+    .mob-tab.active-expire   { color: var(--orange); }
+    .mob-tab.active-programme{ color: var(--blue); }
+    .mob-tab.active-boutique { color: var(--teal); }
+    .mob-tab.active-support  { color: var(--purple); }
+    .mob-tab.active-info     { color: var(--green); }
+    .mob-tab.active-attente::after,
+    .mob-tab.active-valide::after,
+    .mob-tab.active-refuse::after,
+    .mob-tab.active-expire::after,
+    .mob-tab.active-programme::after,
+    .mob-tab.active-boutique::after,
+    .mob-tab.active-support::after,
+    .mob-tab.active-info::after {
+      content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 24px; height: 2px; border-radius: 0 0 3px 3px;
+      background: currentColor;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 760px) {
       .shell { grid-template-columns: 1fr; }
       .sidebar { display: none; }
-      .main { padding: 20px 16px; }
+      .mobile-tabs { display: block; }
+      .main { padding: 16px 14px 80px; }
       .tiles-grid { grid-template-columns: 1fr; }
+      .fab { bottom: 72px; }
+      .fab-panel { bottom: 116px; right: 14px; width: calc(100vw - 28px); }
     }
   </style>
 </head>
@@ -623,6 +683,41 @@
   </div>
 </div>
 
+<!-- ── MOBILE BOTTOM TABS ── -->
+<nav class="mobile-tabs">
+  <div class="mobile-tabs-inner">
+    <button class="mob-tab active-attente" id="mob-attente" onclick="switchTab('attente')">
+      <span class="mob-icon">⏳</span> Attente
+      <span class="mob-badge" id="mob-count-attente"></span>
+    </button>
+    <button class="mob-tab" id="mob-valide" onclick="switchTab('valide')">
+      <span class="mob-icon">✅</span> Validées
+      <span class="mob-badge" id="mob-count-valide"></span>
+    </button>
+    <button class="mob-tab" id="mob-refuse" onclick="switchTab('refuse')">
+      <span class="mob-icon">❌</span> Refusées
+      <span class="mob-badge" id="mob-count-refuse"></span>
+    </button>
+    <button class="mob-tab" id="mob-expire" onclick="switchTab('expire')">
+      <span class="mob-icon">⏱</span> Expirées
+      <span class="mob-badge" id="mob-count-expire"></span>
+    </button>
+    <button class="mob-tab" id="mob-programme" onclick="switchTab('programme')">
+      <span class="mob-icon">🎞</span> Programme
+    </button>
+    <button class="mob-tab" id="mob-boutique" onclick="switchTab('boutique')">
+      <span class="mob-icon">🛒</span> Boutique
+    </button>
+    <button class="mob-tab" id="mob-support" onclick="switchTab('support')">
+      <span class="mob-icon">📩</span> Support
+      <span class="mob-badge" id="mob-count-support"></span>
+    </button>
+    <button class="mob-tab" id="mob-info" onclick="switchTab('info')">
+      <span class="mob-icon">ℹ️</span> Infos
+    </button>
+  </div>
+</nav>
+
 <!-- LOADER -->
 <div id="loader"><div class="spinner"></div><p>Traitement…</p></div>
 
@@ -681,12 +776,18 @@ function switchTab(tab) {
   currentTab = tab;
   ALL_TABS.forEach(t => {
     document.getElementById(`panel-${t}`).classList.toggle("visible", t === tab);
+    // sidebar
     const nav = document.getElementById(`nav-${t}`);
     nav.className = "nav-item";
     if (t === tab) nav.classList.add(`active-${t}`);
+    // mobile
+    const mob = document.getElementById(`mob-${t}`);
+    mob.className = "mob-tab";
+    if (t === tab) mob.classList.add(`active-${t}`);
   });
   document.getElementById("mainTitle").textContent = TAB_TITLES[tab] || "";
-  document.getElementById("fab").style.display = ["programme","boutique","support","info"].includes(tab) ? "none" : "flex";
+  const hideFab = ["programme","boutique","support","info"].includes(tab);
+  document.getElementById("fab").style.display = hideFab ? "none" : "flex";
   if (tab === "programme") loadProgramme();
   if (tab === "boutique")  loadBoutique();
   if (tab === "info")      loadInfo();
@@ -814,6 +915,13 @@ async function load() {
   document.getElementById("count-valide").textContent  = groups["validé"].length;
   document.getElementById("count-refuse").textContent  = groups["refusé"].length;
   document.getElementById("count-expire").textContent  = groups["expiré"].length;
+  // badges mobiles
+  [["attente","en attente"],["valide","validé"],["refuse","refusé"],["expire","expiré"]].forEach(([key,status]) => {
+    const n = groups[status].length;
+    const el = document.getElementById(`mob-count-${key}`);
+    el.textContent = n > 0 ? n : "";
+    el.classList.toggle("show", n > 0);
+  });
   [["attente","en attente","⏳","Aucune réservation en attente"],
    ["refuse","refusé","❌","Aucune réservation refusée"],
    ["expire","expiré","⏱","Aucune réservation expirée"]
@@ -916,7 +1024,11 @@ async function loadSupport() {
   const res = await fetch("/api/admin/support", { headers: adminHeaders() });
   const data = await res.json();
   const msgs = data.messages || [];
-  document.getElementById("count-support").textContent = msgs.filter(m => m.status==="nouveau").length;
+  const nbNew = msgs.filter(m => m.status==="nouveau").length;
+  document.getElementById("count-support").textContent = nbNew;
+  const mobSup = document.getElementById("mob-count-support");
+  mobSup.textContent = nbNew > 0 ? nbNew : "";
+  mobSup.classList.toggle("show", nbNew > 0);
   document.getElementById("panel-support").innerHTML = msgs.length ? msgs.map(buildSupportTile).join("") : emptyState("📩","Aucun message de support.");
 }
 async function marquerTraite(id) {
